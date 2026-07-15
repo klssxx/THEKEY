@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "THEKEY Operator Turn v1.0 (restricted YAML output)",
+  "type": "object",
+  "required": [
+    "phase",
+    "status",
+    "context_binding",
+    "observed",
+    "actions",
+    "files_changed",
+    "evidence",
+    "state_change_requested",
+    "next",
+    "error_code"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "phase": { "type": "string" },
+    "status": {
+      "enum": [
+        "IN_PROGRESS",
+        "PASSED",
+        "FAILED",
+        "BLOCKED",
+        "BLOCKED_UNCERTAIN",
+        "BLOCKED_UNVERIFIED",
+        "NEXT_PHASE_READY"
+      ]
+    },
+    "context_binding": {
+      "type": "object",
+      "required": ["state_version", "state_hash", "phase_contract_hash"],
+      "properties": {
+        "state_version": { "type": "integer" },
+        "state_hash": { "type": "string" },
+        "phase_contract_hash": { "type": "string" }
+      }
+    },
+    "observed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fact", "source", "evidence"],
+        "properties": {
+          "fact": { "type": "string" },
+          "source": {
+            "enum": [
+              "filesystem",
+              "command-result",
+              "state-file",
+              "policy-file",
+              "user-input",
+              "generated-proposal"
+            ]
+          },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_id", "parameters", "reason"],
+        "properties": {
+          "action_id": { "type": "string" },
+          "parameters": { "type": "object" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "object" } },
+    "state_change_requested": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" }
+      }
+    },
+    "next": { "type": "string" },
+    "error_code": { "type": "string" }
+  }
+}

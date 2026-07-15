@@ -1,0 +1,17 @@
+{
+  "active_phase": "",
+  "active_role": "",
+  "approved_plan_hash": "",
+  "blockers": [],
+  "current_state_hash": "0456a860766ca33217e086d81a279d479370d3207f6173307a99568113c4040f",
+  "internal_mode": "NORMAL",
+  "last_completed_action": "PLAN_PROPOSED",
+  "last_verified_command_result": "",
+  "next_action": "",
+  "phase_contract_hash": "",
+  "previous_state_hash": "ec7b8680dc57f8b58319d74472a7a7a42984dc4c94319ba063b7130889148045",
+  "run_id": "TK-20260715-043404-5PQJBW",
+  "run_state": "TESTED",
+  "state_version": 8,
+  "updated_at": "2026-07-15T04:34:05+0000"
+}

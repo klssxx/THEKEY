@@ -1,0 +1,64 @@
+phase_contract:
+  contract_version: "1.0"
+  run_id: "{{RUN_ID}}"
+  phase_id: "phase-02-baseline"
+  phase_type: CONTROL
+  role: PLANNER
+authoritative_state:
+  current: "{{RUN_STATE}}"
+  version: {{STATE_VERSION}}
+  sha256: "{{STATE_HASH}}"
+role_permissions:
+  may_read_source_original: true
+  may_read_workspace: false
+  may_write_workspace: false
+  may_write_run_evidence: false
+  may_write_source_original: false
+  may_modify_framework: false
+  may_modify_policy: false
+  may_approve_plan: false
+  may_approve_transition: false
+  may_emit_release_decision: false
+  may_request_commands: true
+  may_request_transition: true
+flags:
+  dry_run: false
+  require_human_approval: false
+  rollback_on_failure: true
+  allow_network: false
+  allow_new_dependencies: false
+  allow_new_files: false
+required_inputs:
+  - input_id: "APP_SOURCE"
+    path: "examples/demo_app/calculator.py"
+allowed_roots:
+  - "runs/{{RUN_ID}}/"
+  - "workspaces/{{RUN_ID}}/"
+allowed_paths: []
+protected_paths:
+  - "E:/KLSX PROYECTS/KlsxMaker/TheKey/Thekey"
+allowed_operations:
+  - LIST_DECLARED_FILES
+  - READ_DECLARED_FILE
+  - COMPUTE_DECLARED_FILE_HASH
+allowed_command_ids:
+  - LIST_DECLARED_FILES
+  - READ_DECLARED_FILE
+  - COMPUTE_DECLARED_FILE_HASH
+allowed_outputs: []
+allowed_transitions:
+  - BASELINED->ANALYZED
+budgets:
+  kernel_max_tokens: 150
+  state_max_tokens: 250
+  phase_max_tokens: 400
+  total_input_max_tokens: 2200
+rollback: {}
+required_evidence: []
+task: "Capture baseline hash of the original declared source."
+success_conditions:
+  - original source hashed
+  - baseline.json written
+stop_conditions:
+  - baseline hash present
+output_schema: "schemas/operator-turn-v1.yaml"

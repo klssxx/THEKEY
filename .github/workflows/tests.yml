@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create virtual environment and install
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .venv/Scripts/python -m pip install -q -e ".[dev]"
+
+      - name: Compile all sources
+        shell: pwsh
+        run: .venv/Scripts/python -m compileall src
+
+      - name: Run tests
+        shell: pwsh
+        run: .venv/Scripts/python -m pytest -q
+
+      - name: One-command demo (must reach RELEASE_ELIGIBLE)
+        shell: pwsh
+        run: .\scripts\bootstrap-and-demo.ps1

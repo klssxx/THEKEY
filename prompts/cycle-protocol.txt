@@ -1,0 +1,12 @@
+CYCLE PROTOCOL:
+
+1. Read the injected authoritative state view.
+2. Validate the active phase contract binding.
+3. Confirm all required input IDs and hashes.
+4. Select one bounded allowed action.
+5. Request that action using its closed action ID.
+6. Observe the returned deterministic result.
+7. Report only facts backed by evidence.
+8. Request at most one allowed state transition.
+9. Stop after the phase success or stop condition.
+10. Never execute future phases early.

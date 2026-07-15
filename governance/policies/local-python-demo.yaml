@@ -1,0 +1,49 @@
+# THEKEY Core - Policy as Code
+# MVP canonical policy: local-python-demo
+# Validated against governance/schemas/policy.schema.json.
+policy_id: local-python-demo
+policy_version: "1.0"
+description: >-
+  Minimal policy for the canonical deterministic Python demo. Requires a clean
+  build, full unit tests, a limited secret scan, and required documentation.
+  Bounds the size of any accepted change so the governance surface stays small.
+
+# Change-size limits.
+max_files_changed: 3
+max_lines_changed: 50
+max_new_dependencies: 0
+
+# Mandatory gates. A failed mandatory gate cannot be offset by any other score.
+required_gates:
+  - BUILD_PASSED
+  - UNIT_TESTS_PASSED
+  - SECURITY_GATE_PASSED
+  - DOCUMENTATION_GATE_PASSED
+
+# Evidence artifacts that must exist and hash-verify for the run to be eligible.
+required_evidence:
+  - plan.json
+  - approvals.json
+  - changes.diff
+  - gates.json
+  - artifact-hashes.json
+
+# Secret scan scope (honest, limited).
+secret_scan_scope:
+  paths:
+    - "workspaces"
+  patterns:
+    - "(?i)(api[_-]?key|secret|token|password|passwd|credential)\\s*[:=]"
+    - "AKIA[0-9A-Z]{16}"            # AWS access key id
+    - "sk-[A-Za-z0-9]{20,}"         # OpenAI-style key
+    - "[0-9a-f]{32,}"               # Generic long hex secret
+
+# Directories excluded from secret scanning.
+excluded_directories:
+  - ".git"
+  - ".venv"
+  - "__pycache__"
+  - ".pytest_cache"
+  - ".ruff_cache"
+  - "build"
+  - "dist"
