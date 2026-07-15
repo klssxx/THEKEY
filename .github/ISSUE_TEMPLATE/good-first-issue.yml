@@ -13,7 +13,7 @@ body:
     id: context
     attributes:
       label: Context
-      description: Why this matters and where to look in the codebase.
+      description: Why this matters and where to look in the codebase. Link DECISIONS.md / THREAT_MODEL.md if relevant.
     validations:
       required: true
   - type: textarea
@@ -26,11 +26,25 @@ body:
     id: acceptance
     attributes:
       label: Acceptance criteria
-      description: Concrete, checkable definition of done.
+      description: >
+        Concrete, checkable definition of done. Include the test or command
+        that proves it (e.g. `pytest tests/test_xxx.py` or
+        `python scripts/ci/parity_gate.py`).
     validations:
       required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Expected evidence
+      description: >
+        What artifact or log proves the task is done? (CI output, parity/claims
+        gate output, demo RELEASE_ELIGIBLE, etc.)
+    validations:
+      required: false
   - type: textarea
     id: references
     attributes:
       label: Pointers
       description: Files or commands that help start.
+    validations:
+      required: false

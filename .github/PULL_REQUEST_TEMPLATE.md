@@ -44,6 +44,21 @@ assignees: []
 
 - [ ] If I touched README / THREAT_MODEL / CONTRIBUTING, both ES and EN versions were updated.
 
+## Related issue
+
+<!-- Closes #N — link the issue this PR resolves. -->
+
+## Evidence in the event store
+
+<!-- If this touches the transactional core, state:
+     - what event type / artifact is recorded on closure,
+     - how to confirm the chained-hash store stays intact
+       (e.g. `python -m thekey demo` -> evidence_mismatches: []). -->
+
+## Test output
+
+<!-- Paste the relevant output of `pytest -q` so the evidence travels with the PR. -->
+
 ## Validated commands checklist
 
 - [ ] Every command I documented is one I actually ran and verified.

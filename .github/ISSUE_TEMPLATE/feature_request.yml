@@ -1,15 +1,40 @@
-name: Feature request
-description: Propose a practical extension or enhancement to THEKEY.
+name: Feature request / RFC
+description: Propose a practical extension, enhancement, or RFC for THEKEY.
 title: "[enhancement] "
 labels: [enhancement]
 body:
-  - type: textarea
-    id: problem
+  - type: markdown
     attributes:
-      label: Problem or opportunity
-      description: What gap does this fill? Keep it scoped to the small, serious core.
+      value: |
+        THEKEY is a governed system. To keep changes auditable, fill the
+        traceability fields below and link the docs that justify the work.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: >
+        Why does this exist? Which prior decision, requirement, or risk
+        originates it? Link DECISIONS.md / ROADMAP.md / THREAT_MODEL.md /
+        THEKEY_CONTRACT.md where applicable.
     validations:
       required: true
+  - type: textarea
+    id: requirement
+    attributes:
+      label: Requirement or risk it answers
+      description: >
+        - Requirement: [REQ-XXX] or link to a THEKEY_CONTRACT.md section.
+        - Risk covered: [THREAT-XXX] or link to THREAT_MODEL.md.
+    validations:
+      required: false
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact if not resolved
+      description: >
+        Which guarantee fails, which user is affected, which phase is blocked?
+    validations:
+      required: false
   - type: textarea
     id: proposal
     attributes:
@@ -32,4 +57,39 @@ body:
     id: acceptance
     attributes:
       label: Acceptance criteria
-      description: How do we know it is done and verified?
+      description: >
+        How do we know it is done and verified? List objective, checkable
+        conditions and the tests that cover them
+        (e.g. `pytest tests/test_xxx.py`). Include the expected evidence in
+        the event store / demo log.
+    validations:
+      required: true
+  - type: textarea
+    id: verify
+    attributes:
+      label: How to verify
+      description: >
+        Exact commands to verify the fix. Expected output:
+        `python -m thekey demo` -> RELEASE_ELIGIBLE, gates_passed: 4/4.
+      render: bash
+    validations:
+      required: false
+  - type: textarea
+    id: eventstore
+    attributes:
+      label: Expected evidence in the event store
+      description: >
+        THEKEY's core is a chained-hash SQLite event store. State what event
+        type / artifact must be recorded so the closure is traceable, and how
+        to confirm the hash chain stays intact.
+    validations:
+      required: false
+  - type: checkboxes
+    id: docs
+    attributes:
+      label: Docs affected
+      options:
+        - label: README / README.en updated
+        - label: CHANGELOG entry added
+        - label: DECISIONS.md updated (if a design decision)
+        - label: THREAT_MODEL(.en).md updated (if security impact)
