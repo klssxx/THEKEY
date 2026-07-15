@@ -1,0 +1,5 @@
+[build-system]
+requires = ["setuptools"]
+[project]
+name = "generic-proj"
+version = "0.1.0"

@@ -17,6 +17,7 @@ from pathlib import Path
 
 from .config import RUNS_DIR
 from .errors import InvalidArgumentsError, TheKeyError
+from .io_atomic import atomic_write_json
 
 
 def _utcnow() -> str:
@@ -135,10 +136,4 @@ class Run:
 
     @staticmethod
     def _write_payload(path: Path, payload: dict, *, atomic: bool) -> None:
-        text = json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True)
-        if atomic:
-            tmp = path.with_suffix(path.suffix + ".tmp")
-            tmp.write_text(text, encoding="utf-8")
-            tmp.replace(path)
-        else:
-            path.write_text(text, encoding="utf-8")
+        atomic_write_json(path, payload)

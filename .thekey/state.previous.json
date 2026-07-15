@@ -3,15 +3,15 @@
   "active_role": "",
   "approved_plan_hash": "",
   "blockers": [],
-  "current_state_hash": "0456a860766ca33217e086d81a279d479370d3207f6173307a99568113c4040f",
+  "current_state_hash": "76da33730d2f6d31b817f7fb36ef6a4526d17f402ae40dfc15f4a192b2fc0c2e",
   "internal_mode": "NORMAL",
   "last_completed_action": "PLAN_PROPOSED",
   "last_verified_command_result": "",
   "next_action": "",
   "phase_contract_hash": "",
-  "previous_state_hash": "ec7b8680dc57f8b58319d74472a7a7a42984dc4c94319ba063b7130889148045",
-  "run_id": "TK-20260715-043404-5PQJBW",
+  "previous_state_hash": "ff91a6e98aa083874a4de9073c0c0991b666fbf36a64e574ee9765d2df457447",
+  "run_id": "TK-20260715-083235-K95X5T",
   "run_state": "TESTED",
   "state_version": 8,
-  "updated_at": "2026-07-15T04:34:05+0000"
+  "updated_at": "2026-07-15T08:32:37+0000"
 }

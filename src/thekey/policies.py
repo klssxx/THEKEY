@@ -22,6 +22,7 @@ from .config import (
     RUNS_DIR,
 )
 from .errors import InvalidPolicyError, TheKeyError
+from .io_atomic import atomic_write_text
 
 
 @dataclass
@@ -123,9 +124,9 @@ class PolicyEngine:
         run_policy_dir = Path(run_policy_dir)
         run_policy_dir.mkdir(parents=True, exist_ok=True)
         dest = run_policy_dir / f"{policy.policy_id}.yaml"
-        dest.write_text(
+        atomic_write_text(
+            dest,
             yaml.safe_dump(policy.raw, sort_keys=True, allow_unicode=True),
-            encoding="utf-8",
         )
         return dest
 

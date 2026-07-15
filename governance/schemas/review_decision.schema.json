@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "THEKEY ReviewDecision v1.0",
+  "description": "The gated release decision. Carries a review_token that must be present and valid for RELEASE_ELIGIBLE.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "decision", "policy_id", "gates_passed", "gates_total", "review_token", "approver_identity"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["RELEASE_ELIGIBLE", "BLOCKED"] },
+    "policy_id": { "type": "string" },
+    "gates_passed": { "type": "integer", "minimum": 0 },
+    "gates_total": { "type": "integer", "minimum": 0 },
+    "reason": { "type": "string" },
+    "review_token": { "type": "string", "minLength": 16 },
+    "approver_identity": { "type": "string" },
+    "issued_at": { "type": "string" }
+  }
+}

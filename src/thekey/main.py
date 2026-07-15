@@ -35,6 +35,8 @@ from .errors import (
 )
 from .evidence import EvidenceManager, sha256_file
 from .gates import GateResult
+from .history import index_run as _history_index_run
+from .event_store import EventStore
 from .policies import Policy, PolicyEngine
 from .roles.approver import Approval, Approver
 from .roles.executor import Executor
@@ -73,8 +75,15 @@ class RunCoordinator:
         self.evidence = EvidenceManager(self.run.evidence_dir)
         self.approver = Approver()
         self._plan: Plan | None = None
+        # Append-only audit event store (SQLite, hash-chained).
+        from .config import THEKEY_DIR
+        self._events = EventStore(THEKEY_DIR / "events.db")
 
-    # ---- helpers -------------------------------------------------------
+    def close(self) -> None:
+        try:
+            self._events.close()
+        except Exception:
+            pass
     def _snapshot_policy(self) -> None:
         self.policy_engine.snapshot(self.policy, self.run.policy_snapshot_dir)
 
@@ -101,6 +110,7 @@ class RunCoordinator:
     def _transition(self, to_state: str, role: str, reason: str,
                     related_evidence: list[str] | None = None,
                     extra: dict | None = None) -> None:
+        from_state = self.sm.load().run_state
         self.sm.apply_transition(
             to_state,
             run_id=self.run.run_id,
@@ -109,6 +119,28 @@ class RunCoordinator:
             related_evidence=related_evidence,
             extra=extra,
         )
+        # Append-only audit event (hash-chained SQLite). Best-effort: a failure
+        # here must never break the deterministic transition above.
+        try:
+            self._events.append(
+                "transition", self.run.run_id, role,
+                {
+                    "from": from_state,
+                    "to": to_state,
+                    "reason": reason,
+                    "related_evidence": related_evidence or [],
+                },
+            )
+        except Exception:
+            pass
+
+    def _index(self) -> None:
+        """Index the current run in the derived run-history (section 40)."""
+        try:
+            _history_index_run(self.run.run_id)
+        except Exception:
+            # History indexing is best-effort and never blocks the run.
+            pass
 
     # ---- lifecycle steps ----------------------------------------------
     def create(self, title: str, description: str = "") -> "RunCoordinator":
@@ -155,22 +187,27 @@ class RunCoordinator:
             "plan.json", f"Plan with {len(self._plan.operations)} operation(s)",
         )
         self._transition("PLAN_PROPOSED", "planner", "Plan proposed", ["EVID-PLAN"], extra={"approved_plan_hash": plan_hash})
+        self._index()
         return self._plan
 
     def approve_plan(self) -> Approval:
         if self._plan is None:
             raise TheKeyError("No plan to approve", code="NO_PLAN")
         self._snapshot_policy()
+        # 100% AUTOMATED approval (default): the governed run does not pause
+        # for human input. The approver is a deterministic local identity bound
+        # to the plan hash; a human-in-the-loop mode MAY later route through
+        # WAITING_FOR_HUMAN_APPROVAL, but that is not the default flow.
         approval = self.approver.approve_plan(self.run.run_id, self._plan.to_dict(), self.policy)
         self._write_artifact("approvals.json", approval.to_dict())
         self._record_evidence(
             "EVID-APPROVAL", "state-file", "approver",
-            "approvals.json", f"Plan approved by {approval.approved_by}",
+            "approvals.json", f"Plan auto-approved by {approval.approved_by}",
         )
-        self._transition("PLAN_APPROVED", "approver", "Plan approved", ["EVID-APPROVAL"])
-        # Mark plan approved for the executor.
+        self._transition("PLAN_APPROVED", "approver", "Plan approved (automated)", ["EVID-APPROVAL"])
         self._plan.approved = True
         self._write_artifact("plan.json", self._plan.to_dict())
+        self._index()
         return approval
 
     def execute(self) -> dict:
@@ -191,6 +228,7 @@ class RunCoordinator:
             "changes.diff", f"Applied {len(results)} operation(s) in workspace",
         )
         self._transition("IMPLEMENTED", "executor", "Plan executed in workspace", ["EVID-EXEC"])
+        self._index()
         return {"prep": prep, "results": results, "diff": diff}
 
     def verify(self) -> list[GateResult]:
@@ -203,6 +241,7 @@ class RunCoordinator:
             "gates.json", f"{sum(r.passed for r in results)}/{len(results)} gates passed",
         )
         self._transition("TESTED", "verifier", "Gates executed", ["EVID-GATES"])
+        self._index()
         return results
 
     def decide(self) -> ReleaseDecision:
@@ -232,7 +271,8 @@ class RunCoordinator:
         self._write_artifact_hashes()
         # Required evidence: the artifact files must exist.
         decision = self.approver.decide(
-            self.run.run_id, gates, self.run.dir, self.policy
+            self.run.run_id, gates, self.run.dir, self.policy,
+            approved_plan_hash=self.sm.load().approved_plan_hash,
         )
         self._write_artifact("decision.json", decision.to_dict())
         # Recompute hashes to include decision.json, then assert all present.
@@ -248,6 +288,7 @@ class RunCoordinator:
             f"Release decision: {decision.decision}",
             ["EVID-DECISION"],
         )
+        self._index()
         return decision
 
     def _detect_tampered_evidence(self) -> list[str]:

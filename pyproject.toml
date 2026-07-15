@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thekey-core-governed-run"
-version = "0.1.0"
+version = "0.2.0"
 description = "THEKEY Core Governed Run - a lightweight engine for governed software changes with versioned policy, isolated workspaces, and verifiable evidence."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,6 +34,9 @@ dev = [
 
 [project.scripts]
 thekey = "thekey.cli:main"
+# MiMo autonomous launcher: runs the governed pipeline end-to-end with
+# automatic (non-interactive) approval and the MiMo actor profile.
+thekey-mimo = "thekey.launchers.mimo_launcher:main"
 
 [project.urls]
 Homepage = "https://example.org/thekey-core-governed-run"
@@ -46,6 +49,9 @@ where = ["src"]
 testpaths = ["tests"]
 addopts = "-ra"
 pythonpath = ["src"]
+# tests/fixtures holds sample PROJECTS to be inspected by THEKEY (data), not
+# THEKEY test modules. Their own test_*.py files must not be collected.
+norecursedirs = ["tests/fixtures"]
 
 [tool.ruff]
 line-length = 100

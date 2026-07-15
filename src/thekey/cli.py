@@ -42,6 +42,7 @@ from .errors import (
 from .main import RunCoordinator
 from .policies import PolicyEngine
 from .runs import RunManager
+from .history import RunHistory, history_verify, history_rebuild
 from .state_machine import StateMachine, is_legal
 
 EXIT_CODES = {
@@ -219,6 +220,41 @@ def cmd_demo(args) -> int:
     return 0
 
 
+def cmd_history(args) -> int:
+    rh = RunHistory()
+    if args.history_cmd == "verify":
+        res = history_verify()
+        _print(res, args.json)
+        return 0 if res["integrity_status"] == "VALID" else EXIT_CODES["INVALID_EVIDENCE"]
+    if args.history_cmd == "rebuild":
+        res = history_rebuild()
+        _print(res, args.json)
+        return 0 if res["integrity_status"] == "VALID" else EXIT_CODES["INVALID_EVIDENCE"]
+    if args.history_cmd == "show":
+        detail = rh.show(args.run_id)
+        if detail is None:
+            sys.stderr.write(f"error: run not found in history: {args.run_id}\n")
+            return EXIT_CODES["INVALID_ARGUMENTS"]
+        _print(detail, args.json)
+        return 0
+    # default list
+    entries = rh.list_entries(
+        project=args.project, profile=args.profile, state=args.state,
+        decision=args.decision, since=args.since, limit=args.limit,
+    )
+    if args.json:
+        _print([e.to_dict() for e in entries], True)
+    else:
+        print(f"{'DATE':<21} {'RUN ID':<26} {'PROJECT':<16} {'PROFILE':<14} "
+              f"{'POLICY':<14} {'STATE':<22} {'DECISION':<16} {'GATES':<8} {'INTEGRITY':<10}")
+        for e in entries:
+            gates = f"{e.gates_passed}/{e.gates_passed + e.gates_failed}"
+            print(f"{e.created_at:<21} {e.run_id:<26} {e.project_name[:15]:<16} "
+                  f"{e.project_profile:<14} {e.policy_id:<14} {e.final_state:<22} "
+                  f"{str(e.decision):<16} {gates:<8} {e.integrity_status:<10}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="thekey", description="THEKEY Core Governed Run (MVP 0.1.0)")
     p.add_argument("--version", action="version", version=f"thekey {__version__}")
@@ -268,6 +304,26 @@ def build_parser() -> argparse.ArgumentParser:
                     choices=["invalid_policy", "failed_gate", "tampered_evidence", "missing_input"])
     dm.add_argument("--json", action="store_true")
     dm.set_defaults(func=cmd_demo)
+
+    # history
+    hist = sub.add_parser("history", help="Run-history index and queries")
+    hist.add_argument("--limit", type=int, default=None)
+    hist.add_argument("--project", default=None)
+    hist.add_argument("--profile", default=None)
+    hist.add_argument("--state", default=None)
+    hist.add_argument("--decision", default=None)
+    hist.add_argument("--since", default=None)
+    hist.add_argument("--json", action="store_true")
+    hist_sub = hist.add_subparsers(dest="history_cmd")
+    hl = hist_sub.add_parser("list", help="List runs (default)")
+    hs = hist_sub.add_parser("show", help="Show one run")
+    hs.add_argument("--run-id", required=True)
+    hs.add_argument("--json", action="store_true")
+    hv = hist_sub.add_parser("verify", help="Verify index against run artifacts")
+    hv.add_argument("--json", action="store_true")
+    hr = hist_sub.add_parser("rebuild", help="Rescan and rewrite the index")
+    hr.add_argument("--json", action="store_true")
+    hist.set_defaults(func=cmd_history, history_cmd="list")
 
     return p
 

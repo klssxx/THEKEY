@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "THEKEY ActorContext v1.0",
+  "description": "Per-actor, read-only derived context. NEVER carries secrets or arbitrary shell. Produced from a Mission + artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["actor", "mission_id", "role", "allowed_actions", "constraints", "evidence_scope"],
+  "properties": {
+    "actor": { "type": "string", "enum": ["MiMo", "THEKEY", "HY3", "planner", "executor", "verifier", "approver"] },
+    "mission_id": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "allowed_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "boolean", "array", "object"] }
+    },
+    "evidence_scope": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "read_only": { "type": "boolean", "default": true },
+    "generated_at": { "type": "string" }
+  }
+}

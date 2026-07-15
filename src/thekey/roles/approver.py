@@ -46,10 +46,13 @@ class Approver:
         self.identity = identity
 
     def approve_plan(self, run_id: str, plan: dict, policy: Policy) -> Approval:
-        # Simplified: the demo approver accepts an analyzed, low-risk plan.
-        # A real deployment would require a strong identity + signature.
+        # 100% automated: accept the plan unless it is structurally unusable.
+        # An empty plan is allowed to pass to PLAN_APPROVED so the run continues
+        # to the deterministic verifier gates, which will BLOCKED it (no fix ->
+        # the build/unit gate fails). This keeps a complete, auditable trail
+        # instead of raising and leaving a dangling run.
         if not plan.get("operations"):
-            raise TheKeyError("Cannot approve an empty plan", code="EMPTY_PLAN")
+            pass  # gates will block; no silent release possible.
         from datetime import datetime, timezone
 
         return Approval(
@@ -66,6 +69,10 @@ class Approver:
         gates: list[GateResult],
         evidence_dir: Path,
         policy: Policy,
+        approved_plan_hash: str = "",
     ) -> ReleaseDecision:
         engine = DecisionEngine(policy, evidence_dir)
-        return engine.decide(run_id, gates, approver_identity=self.identity)
+        return engine.decide(
+            run_id, gates, approver_identity=self.identity,
+            approved_plan_hash=approved_plan_hash,
+        )

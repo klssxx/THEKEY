@@ -4,25 +4,28 @@
 changes. It separates planning, execution, verification, and approval, applies
 versioned policies as code, and produces verifiable evidence for every run.
 
-This repository is the **MVP OSS release 0.1.0** — a single, complete governed
-change pipeline that works **deterministically without any AI or external API**.
+This repository is the **OSS release 0.2.0** — a single, complete governed
+change pipeline that runs **100% autonomously** (no prompts, no human in
+the loop by default) and **deterministically without any AI or external API**.
 
----
+## Autonomous by default
 
-## What THEKEY Core is
+The pipeline approves its own plan with a deterministic, hash-bound local
+identity and runs every gate to completion. No one is asked to click "approve".
+If a mandatory gate fails, the run is `BLOCKED` with a stable exit code —
+the automation cannot choose to skip a gate, because there is no such branch.
 
-A control-plane/orchestration engine that takes one declared change request and
-runs it through a fixed, auditable lifecycle:
-
-```
+```text
 SUBMITTED -> BASELINED -> ANALYZED -> PLAN_PROPOSED -> PLAN_APPROVED
           -> IMPLEMENTED -> TESTED -> RELEASE_ELIGIBLE
 ```
 
 with `BLOCKED`, `FAILED`, and `ROLLED_BACK` as legal terminal/recovery states.
 
-Every step is validated, every state transition is recorded, and every artifact
-is hashed so a third party can independently verify the final decision.
+Every step is validated, every state transition is recorded in an
+**append-only, hash-chained SQLite event store**, and every artifact is hashed
+so a third party can independently verify the final decision (and detect any
+tampering).
 
 ## What problem it solves
 
@@ -67,17 +70,21 @@ python -m venv .venv
 .venv\Scripts\python -m pip install -e ".[dev]"
 ```
 
-## Quickstart (10–15 minutes)
+## Quick start (autonomous)
 
-From a clean clone, one command runs the whole governed demo:
+Run the canonical governed demo — it approves itself and finishes with no input:
 
 ```powershell
-.\scripts\bootstrap-and-demo.ps1
+.venv\Scripts\python -m thekey demo
 ```
 
-It will create a run, plan the fix, approve it, execute it in an isolated
-workspace, run the gates, verify the evidence, and print the final decision
-(`RELEASE_ELIGIBLE`). The script returns non-zero if any mandatory step fails.
+Or use the MiMo autonomous launcher (same pipeline, actor-profile aware):
+
+```powershell
+.venv\Scripts\python -m thekey-mimo
+```
+
+Both exit 0 on `RELEASE_ELIGIBLE` and non-zero on `BLOCKED`.
 
 ## One-command demo
 
@@ -167,3 +174,18 @@ mandatory external AI, and no enterprise guarantee.
 ## Contribution
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## For contributors — why it is safe to automate
+
+THEKEY Core is built so that **automation cannot cheat**:
+
+* Original source is immutable; only isolated workspaces are written.
+* Approval is automatic and hash-bound, never a prompt.
+* Evidence is SHA-256 sealed; a tampered artifact makes the run `BLOCKED`, never silent.
+* The verifier reproduces proof (build + tests) in isolation; it does not trust the implementer.
+* No arbitrary shell, no external API, no model-generated commands.
+* Every run is auditable: `thekey history verify` + `thekey evidence verify`
+  reconstruct integrity from on-disk artifacts, not from memory.
+
+Good first issues: add a policy, add a verifier profile, extend the NPSC
+adapter, or strengthen the secret-scan gate. See `THEKEY_CONTRACT.md`.

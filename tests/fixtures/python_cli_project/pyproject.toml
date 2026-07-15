@@ -1,0 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+[project]
+name = "cli-proj"
+version = "0.1.0"
+[project.scripts]
+cli-proj = "cli_proj.main:main"

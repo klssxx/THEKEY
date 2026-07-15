@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "THEKEY ExecutionEvidence v1.0",
+  "description": "Immutable, hash-chained evidence of one executed operation. Sealed after recording; tamper = BLOCKED.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "run_id", "actor", "operation", "artifact_path", "artifact_hash", "verified"],
+  "properties": {
+    "evidence_id": { "type": "string", "minLength": 3 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 },
+    "operation": { "type": "string", "minLength": 1 },
+    "artifact_path": { "type": "string" },
+    "artifact_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "summary": { "type": "string" },
+    "verified": { "type": "boolean" },
+    "prev_evidence_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

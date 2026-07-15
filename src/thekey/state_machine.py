@@ -17,16 +17,17 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import REPO_ROOT
+from .config import THEKEY_DIR
 from .errors import (
     InvalidTransitionError,
     TheKeyError,
 )
+from .io_atomic import atomic_write_text
 
-STATE_FILE = REPO_ROOT / ".thekey" / "state.json"
-STATE_PREV_FILE = REPO_ROOT / ".thekey" / "state.previous.json"
-TRANSITIONS_FILE = REPO_ROOT / ".thekey" / "state-transitions.jsonl"
-HISTORY_FILE = REPO_ROOT / ".thekey" / "state-history.jsonl"
+STATE_FILE = THEKEY_DIR / "state.json"
+STATE_PREV_FILE = THEKEY_DIR / "state.previous.json"
+TRANSITIONS_FILE = THEKEY_DIR / "state-transitions.jsonl"
+HISTORY_FILE = THEKEY_DIR / "state-history.jsonl"
 
 # MVP run states (section 15).
 STATES = {
@@ -34,7 +35,9 @@ STATES = {
     "BASELINED",
     "ANALYZED",
     "PLAN_PROPOSED",
+    "WAITING_FOR_HUMAN_APPROVAL",
     "PLAN_APPROVED",
+    "PLAN_REJECTED",
     "IMPLEMENTED",
     "TESTED",
     "RELEASE_ELIGIBLE",
@@ -48,8 +51,10 @@ LEGAL_TRANSITIONS: dict[str, set[str]] = {
     "SUBMITTED": {"BASELINED", "BLOCKED", "FAILED"},
     "BASELINED": {"ANALYZED", "BLOCKED", "FAILED"},
     "ANALYZED": {"PLAN_PROPOSED", "BLOCKED", "FAILED"},
-    "PLAN_PROPOSED": {"PLAN_APPROVED", "BLOCKED", "FAILED"},
-    "PLAN_APPROVED": {"IMPLEMENTED", "TESTED", "BLOCKED", "FAILED"},
+    "PLAN_PROPOSED": {"WAITING_FOR_HUMAN_APPROVAL", "PLAN_APPROVED", "BLOCKED", "FAILED"},
+    "WAITING_FOR_HUMAN_APPROVAL": {"PLAN_APPROVED", "PLAN_REJECTED", "BLOCKED", "FAILED"},
+    "PLAN_REJECTED": {"WAITING_FOR_HUMAN_APPROVAL", "BLOCKED", "FAILED"},
+    "PLAN_APPROVED": {"IMPLEMENTED", "TESTED", "WAITING_FOR_HUMAN_APPROVAL", "BLOCKED", "FAILED"},
     "IMPLEMENTED": {"TESTED", "BLOCKED", "FAILED"},
     "TESTED": {"RELEASE_ELIGIBLE", "BLOCKED", "FAILED"},
     "RELEASE_ELIGIBLE": {"ROLLED_BACK", "BLOCKED"},
@@ -156,14 +161,12 @@ class StateMachine:
             updated_at=_utcnow(),
         )
         snap.current_state_hash = snap.recompute_hash()
-        tmp = self.state_file.with_suffix(".tmp")
-        tmp.write_text(
-            json.dumps(snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
-            encoding="utf-8",
-        )
         if self.state_file.exists():
             self.state_file.replace(STATE_PREV_FILE)
-        tmp.replace(self.state_file)
+        atomic_write_text(
+            self.state_file,
+            json.dumps(snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
+        )
         # Reset transition log for the new run id binding.
         TRANSITIONS_FILE.write_text("", encoding="utf-8")
         HISTORY_FILE.write_text("", encoding="utf-8")
@@ -263,16 +266,13 @@ class StateMachine:
                     setattr(next_snap, k, extra[k])
         next_snap.current_state_hash = next_snap.recompute_hash()
 
-        # Atomic write: tmp -> validate -> rename.
-        tmp = self.state_file.with_suffix(".tmp")
-        tmp.write_text(
-            json.dumps(next_snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
-            encoding="utf-8",
-        )
-        # Preserve previous copy.
+        # Preserve previous copy, then atomic write.
         if self.state_file.exists():
             self.state_file.replace(STATE_PREV_FILE)
-        tmp.replace(self.state_file)
+        atomic_write_text(
+            self.state_file,
+            json.dumps(next_snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
+        )
 
         # Append transition record (jsonl).
         record = {
@@ -313,14 +313,12 @@ class StateMachine:
         current.previous_state_hash = current.current_state_hash
         current.current_state_hash = current.recompute_hash()
         current.updated_at = _utcnow()
-        tmp = self.state_file.with_suffix(".tmp")
-        tmp.write_text(
-            json.dumps(current.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
-            encoding="utf-8",
-        )
         if self.state_file.exists():
             self.state_file.replace(STATE_PREV_FILE)
-        tmp.replace(self.state_file)
+        atomic_write_text(
+            self.state_file,
+            json.dumps(current.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
+        )
         return current
 
     def recent_events(self, limit: int = 3) -> list[dict]:

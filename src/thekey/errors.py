@@ -72,6 +72,16 @@ class StaleModelOutputError(TheKeyError):
     exit_code = 9
 
 
+class UnsupportedProjectProfileError(TheKeyError):
+    code = "UNSUPPORTED_PROJECT_PROFILE"
+    exit_code = 6
+
+
+class BaselineRegressionError(TheKeyError):
+    code = "BASELINE_REGRESSION"
+    exit_code = 7
+
+
 class RecoveryBlockedError(TheKeyError):
     code = "RECOVERY_BLOCKED"
     exit_code = 10

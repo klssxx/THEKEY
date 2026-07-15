@@ -73,7 +73,7 @@ WORK_PROFILE = BudgetProfile(
     kernel_max_tokens=150, state_max_tokens=250, phase_max_tokens=400,
     recent_events_max_tokens=150, evidence_index_max_tokens=200,
     project_data_max_tokens=800, output_schema_max_tokens=150,
-    total_input_max_tokens=2200, max_output_tokens_per_turn=700,
+    total_input_max_tokens=2200, max_output_tokens_per_turn=500,
     max_turns=3, max_cumulative_output_tokens=1500, max_invalid_outputs=1,
 )
 

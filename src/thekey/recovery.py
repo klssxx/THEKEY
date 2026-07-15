@@ -16,7 +16,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import REPO_ROOT
+from .config import RUNS_DIR
 from .errors import RecoveryBlockedError, TheKeyError
 from .state_machine import STATE_FILE, TRANSITIONS_FILE, StateMachine
 from .workspaces import WorkspaceManager
@@ -57,7 +57,7 @@ class RecoveryController:
         last_tx = self.last_valid_transition()
 
         # Inspect command-result files in the run evidence/logs dir.
-        run_dir = REPO_ROOT / "runs" / run_id
+        run_dir = RUNS_DIR / run_id
         cmd_results = {}
         logs_dir = run_dir / "logs"
         if logs_dir.exists():

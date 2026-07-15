@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from .errors import InvalidEvidenceError, TheKeyError
+from .io_atomic import atomic_write_json
 
 
 def sha256_text(text: str) -> str:
@@ -60,12 +61,7 @@ class EvidenceManager:
         self.dir.mkdir(parents=True, exist_ok=True)
 
     def write_atomic(self, name: str, payload: dict) -> Path:
-        path = self.dir / name
-        text = json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True)
-        tmp = path.with_suffix(path.suffix + ".tmp")
-        tmp.write_text(text, encoding="utf-8")
-        tmp.replace(path)
-        return path
+        return atomic_write_json(self.dir / name, payload)
 
     def record(self, rec: EvidenceRecord) -> Path:
         return self.write_atomic(f"{rec.evidence_id}.json", rec.to_dict())

@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .config import DEMO_APP_DIR, REPO_ROOT, WORKSPACES_DIR
+from .config import DEMO_APP_DIR, REAL_ROOT, WORKSPACES_DIR
 from .errors import TheKeyError
 from .workspaces import WorkspaceManager
 
