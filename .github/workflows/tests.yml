@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -17,20 +17,59 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Create virtual environment and install
+      - name: Create virtual environment and install (editable, no dev extras)
         shell: pwsh
         run: |
           python -m venv .venv
-          .venv/Scripts/python -m pip install -q -e ".[dev]"
+          .venv/Scripts/python -m pip install -q -e .
 
       - name: Compile all sources
         shell: pwsh
         run: .venv/Scripts/python -m compileall src
 
-      - name: Run tests
+      - name: Run core tests
         shell: pwsh
         run: .venv/Scripts/python -m pytest -q
 
-      - name: One-command demo (must reach RELEASE_ELIGIBLE)
+      - name: Demo must reach RELEASE_ELIGIBLE (contract entry point)
         shell: pwsh
-        run: .\scripts\bootstrap-and-demo.ps1
+        run: .\scripts\demo.ps1
+
+  docs-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: ES/EN parity gate
+        run: python scripts/ci/parity_gate.py
+
+      - name: Forbidden-language / disallowed-claims gate
+        run: python scripts/ci/docs_claims.py
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Limited regex secret scan (verifiable equivalent)
+        # NOTE: enable GitHub Secret Scanning / Push Protection in the private
+        # repo settings for a real, maintained control. See SECURITY.md.
+        run: |
+          set -euo pipefail
+          # Limited regex scan. PCRE (-P) for the lookbehind; filter our own
+          # review_token infrastructure (deterministic evidence, not a secret).
+          if grep -rniP '(?<!review_)(api[_-]?key|secret|password|token)\s*[=:]\s*["'\''][A-Za-z0-9_\-]{16,}["'\'']' \
+             --include='*.py' --include='*.ps1' --include='*.md' --include='*.toml' \
+             --exclude-dir=.git --exclude-dir=.venv . \
+             | grep -vi review_token ; then
+            echo "Potential secret-like string found. Review before publishing."
+            exit 1
+          fi
+          echo "Regex secret scan: no candidate secrets found."

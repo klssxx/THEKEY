@@ -1,191 +1,185 @@
-# THEKEY Core Governed Run
+# THEKEY
 
-**THEKEY Core Governed Run** is a lightweight engine for governed software
-changes. It separates planning, execution, verification, and approval, applies
-versioned policies as code, and produces verifiable evidence for every run.
+## Transacciones Git gobernadas para agentes de programación.
 
-This repository is the **OSS release 0.2.0** — a single, complete governed
-change pipeline that runs **100% autonomously** (no prompts, no human in
-the loop by default) and **deterministically without any AI or external API**.
+> **THEKEY** · *Governed Git transactions for coding agents.*
+> Versión completa en inglés: [README.en.md](README.en.md)
 
-## Autonomous by default
+**THEKEY 0.2.0 — Public Preview.** Pequeño núcleo serio para transacciones Git
+gobernadas orientadas a agentes de programación, con **aislamiento de flujo de
+trabajo**, **puertas deterministas** y **evidencia auditable**.
 
-The pipeline approves its own plan with a deterministic, hash-bound local
-identity and runs every gate to completion. No one is asked to click "approve".
-If a mandatory gate fails, the run is `BLOCKED` with a stable exit code —
-the automation cannot choose to skip a gate, because there is no such branch.
-
-```text
-SUBMITTED -> BASELINED -> ANALYZED -> PLAN_PROPOSED -> PLAN_APPROVED
-          -> IMPLEMENTED -> TESTED -> RELEASE_ELIGIBLE
-```
-
-with `BLOCKED`, `FAILED`, and `ROLLED_BACK` as legal terminal/recovery states.
-
-Every step is validated, every state transition is recorded in an
-**append-only, hash-chained SQLite event store**, and every artifact is hashed
-so a third party can independently verify the final decision (and detect any
-tampering).
-
-## What problem it solves
-
-Software changes are usually a blur of "someone edited something, tests ran, we
-shipped." THEKEY Core makes the change **governed**:
-
-* Planning, execution, verification, and approval are separate roles.
-* Changes happen only in an **isolated workspace** — the original is never touched.
-* A **policy** defines the mandatory gates (build, tests, secret scan, docs).
-* The **decision** (RELEASE_ELIGIBLE / BLOCKED) is derived deterministically from
-  gates + evidence, never from a global score or a "VERIFIED" stamp.
-
-## What it does NOT do
-
-THEKEY Core is **not**:
-
-* A generic application generator.
-* Only a collection of prompts.
-* An enterprise authorization platform.
-* A complete security sandbox.
-* A guarantee that software is fully secure.
-* A replacement for human review in critical projects.
-* A system that approves through a global score.
-* A system that uses `VERIFIED` as a universal status.
+THEKEY es un núcleo pequeño y serio para transacciones Git gobernadas destinadas
+a agentes de programación. Ofrece aislamiento de flujo de trabajo, puertas
+deterministas y evidencia auditable. No proporciona sandboxing a nivel de
+sistema operativo.
 
 ---
 
-## Installation
+## Qué es
 
-Requires **Windows 11**, **PowerShell 7**, and **Python 3.11+**. No Docker, no
-WSL, no GPU, no paid service, no external API after dependencies install.
+THEKEY resuelve un problema concreto: los cambios de software impulsados por
+agentes suelen ser una mezcla opaca de «alguien editó algo, corrieron tests,
+enviamos». THEKEY hace que el cambio sea **gobernado**.
 
-```powershell
-cd TheKeyCore_Governed_OSS
-.\scripts\bootstrap.ps1        # creates .venv and installs the package + dev deps
-```
+- **Para quién es:** agentes de programación, pipelines de CI y equipos que
+  quieren automatizar cambios de código con trazabilidad y sin tocar la fuente
+  original.
+- **Qué hace realmente:** separa planificación, ejecución, verificación y
+  autorización de política en roles distintos; aplica las puertas definidas por
+  una política como código; y produce evidencia verificable para cada ejecución.
+- **Qué NO promete:** no es un sandbox de sistema operativo, no garantiza
+  seguridad total, no sustituye la revisión humana en proyectos críticos, y no
+  integra NPSC en el núcleo.
 
-Or manually:
+La autorización de planes se realiza mediante **autorización de política
+determinista**: la política define las puertas obligatorias y la decisión
+(`RELEASE_ELIGIBLE` / `BLOCKED`) se deriva de forma determinista a partir de las
+puertas y la evidencia, nunca de una puntuación global ni de un sello
+«VERIFIED». No hay un paso de «aprobación humana» interactivo por defecto; la
+autorización es una consecuencia de la política y del hash del plan.
 
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -e ".[dev]"
-```
+## Estado del proyecto
 
-## Quick start (autonomous)
+- **THEKEY 0.2.0 — Public Preview.**
+- Esta es una *public preview*, no un trabajo en curso (WIP).
+- El núcleo se mantiene intencionalmente pequeño.
+- La **Fase C no comienza antes del lanzamiento público**.
 
-Run the canonical governed demo — it approves itself and finishes with no input:
-
-```powershell
-.venv\Scripts\python -m thekey demo
-```
-
-Or use the MiMo autonomous launcher (same pipeline, actor-profile aware):
-
-```powershell
-.venv\Scripts\python -m thekey-mimo
-```
-
-Both exit 0 on `RELEASE_ELIGIBLE` and non-zero on `BLOCKED`.
-
-## One-command demo
+## Inicio rápido (Windows 11)
 
 ```powershell
-.\scripts\bootstrap-and-demo.ps1
+git clone <URL_DEL_REPOSITORIO>
+cd THEKEY
+pwsh -NoProfile -File .\scripts\demo.ps1
 ```
 
-## Manual workflow
+## Requisitos mínimos
+
+Solamente lo necesario para ejecutar la demo:
+
+- **Windows 11**
+- **PowerShell 7** (`pwsh`) — ya instalado en Windows 11; el script no modifica
+  la política de ejecución.
+- **Python 3.11+** en el `PATH`.
+- Sin Docker, sin WSL, sin GPU, sin servicios de pago, sin API externa tras
+  instalar dependencias.
+
+El script `scripts/demo.ps1` crea o reutiliza `.venv`, instala el proyecto con
+`pip install -e .` y ejecuta `python -m thekey demo`. Es idempotente, no
+requiere permisos de administrador y devuelve el código de salida real de la
+demo.
+
+## Qué hace la demo
+
+La demo canónica crea una ejecución gobernada sobre un proyecto de ejemplo
+(`examples/demo_app`), la planifica, la autoriza por política, la ejecuta en un
+espacio de trabajo aislado, verifica las puertas y emite la decisión. Termina
+con `decision: RELEASE_ELIGIBLE` y `gates_passed: 4` cuando todo es correcto.
+Salida real de una ejecución verificada:
+
+```text
+run_id: TK-20260715-...-XXXXXX
+state: RELEASE_ELIGIBLE
+decision: RELEASE_ELIGIBLE
+gates_passed: 4
+gates_total: 4
+evidence_mismatches: []
+workspace: ...\workspaces\TK-20260715-...-XXXXXX
+run_path: ...\runs\TK-20260715-...-XXXXXX
+```
+
+La demo no requiere entrada del usuario y no necesita red ni modelos.
+
+## Arquitectura en 5 minutos
+
+- **Transacción gobernada:** una unidad de cambio de software que atraviesa
+  estados explícitos (SUBMITTED → BASELINED → ANALYZED → PLAN_PROPOSED →
+  PLAN_APPROVED → IMPLEMENTED → TESTED → RELEASE_ELIGIBLE) con estados de
+  recuperación (`BLOCKED`, `FAILED`, `ROLLED_BACK`).
+- **Espacio de trabajo aislado:** los cambios solo se aplican en un workspace
+  controlado; la fuente original no se toca.
+- **Puertas deterministas:** una política declara puertas obligatorias (build,
+  tests, escaneo de secretos, documentación). Una puerta obligatoria fallida
+  no puede compensarse con otra métrica.
+- **Autorización de política determinista:** el plan se autoriza a partir de la
+  política y del hash del plan; no hay aprobación interactiva ni puntuación
+  global.
+- **Evidencia auditable:** cada transición de estado se registra en un event
+  store SQLite de solo-adición y encadenado por hash; cada artefacto se
+  hashea (SHA-256) para que un tercero pueda verificar la decisión y detectar
+  manipulación.
+- **Adaptadores de solo lectura opcionales:** NPSC es un ejemplo de adaptador
+  externo de solo lectura. El núcleo no depende conceptualmente de NPSC para
+  existir.
+
+## Garantías y límites
+
+THEKEY ofrece **aislamiento de flujo de trabajo**, no sandboxing a nivel de
+sistema operativo. El repositorio **no promete seguridad total**. Las garantías
+dependen de la configuración, del entorno anfitrión y de las puertas
+implementadas. NPSC es opcional y no forma parte del núcleo.
+
+Limitaciones actuales (honestas): identidad de autorización local simplificada,
+escaneo de secretos limitado, sin sandbox de procesos fuerte, sin identidades
+humanas criptográficas, sin concurrencia multi-desarrollador, sin IA externa
+obligatoria y sin garantía empresarial. Ver [THREAT_MODEL.md](THREAT_MODEL.md)
+y [SECURITY.md](SECURITY.md).
+
+## Comandos
+
+Todos los comandos siguientes están validados en esta versión.
 
 ```powershell
-# 1. Create a run
-.venv\Scripts\python -m thekey run create --title "Fix calculator.add"
-# Capture the run id from the output, e.g. TK-20260715-...-ABC123
+# Demo canónica (autorización de política determinista, sin entrada)
+python -m thekey demo
 
-# 2. Baseline + plan
-.venv\Scripts\python -m thekey run plan --run-id <RUN_ID>
+# Launcher autónomo MiMo (mismo pipeline, con perfil de actor)
+python -m thekey-mimo
 
-# 3. Approve
-.venv\Scripts\python -m thekey run approve-plan --run-id <RUN_ID>
+# Flujo manual
+python -m thekey run create --title "Fix calculator.add"
+python -m thekey run plan --run-id <RUN_ID>
+python -m thekey run approve-plan --run-id <RUN_ID>
+python -m thekey run execute --run-id <RUN_ID>
+python -m thekey run verify --run-id <RUN_ID>
+python -m thekey run status --run-id <RUN_ID>
+python -m thekey evidence verify --run-id <RUN_ID>
 
-# 4. Execute in the isolated workspace
-.venv\Scripts\python -m thekey run execute --run-id <RUN_ID>
-
-# 5. Verify gates
-.venv\Scripts\python -m thekey run verify --run-id <RUN_ID>
-
-# 6. Status + evidence
-.venv\Scripts\python -m thekey run status --run-id <RUN_ID>
-.venv\Scripts\python -m thekey evidence verify --run-id <RUN_ID>
+# Tests del núcleo
+python -m pytest -q
 ```
 
-## Run lifecycle
+Ambos `python -m thekey demo` y `python -m thekey-mimo` salen con código 0 en
+`RELEASE_ELIGIBLE` y con código distinto de cero en `BLOCKED`.
 
-| State | Meaning |
-|-------|---------|
-| SUBMITTED | Run created, no work yet. |
-| BASELINED | Original source hashed and captured. |
-| ANALYZED | Defect detected, analysis recorded. |
-| PLAN_PROPOSED | Planner proposed exactly one operation. |
-| PLAN_APPROVED | Approver accepted the plan (local identity). |
-| IMPLEMENTED | Operation applied in the isolated workspace. |
-| TESTED | All gates executed. |
-| RELEASE_ELIGIBLE | Policy + evidence satisfied. |
-| BLOCKED | A gate failed, evidence missing, or policy invalid. |
-| FAILED | Execution error not recoverable inline. |
-| ROLLED_BACK | Changes reverted. |
+## Desarrollo
 
-## Artifacts (per run, under `runs/<RUN_ID>/`)
+Lee [CONTRIBUTING.md](CONTRIBUTING.md) para preparar el entorno, ejecutar los
+tests y proponer cambios. Para el modelo de seguridad, consulta
+[SECURITY.md](SECURITY.md).
 
-* `manifest.json`, `request.json`
-* `plan.json`, `approvals.json`
-* `changes.diff`
-* `gates.json`, `decision.json`
-* `artifact-hashes.json` (SHA-256 of principal artifacts)
-* `evidence/` (per-evidence records with hashes)
-* `.thekey/state-transitions.jsonl` (repo-level, append-only)
+## Modelo de amenazas
 
-## Gates (from `governance/policies/local-python-demo.yaml`)
+El análisis de seguridad realista está en [THREAT_MODEL.md](THREAT_MODEL.md).
+Cubre objetivos, activos protegidos, fronteras de confianza, superficie de
+ataque, mitigaciones presentes y ausentes, y límites explícitos.
 
-* `BUILD_PASSED` — `compileall` over the workspace sources.
-* `UNIT_TESTS_PASSED` — full `pytest` over the workspace tests.
-* `SECURITY_GATE_PASSED` — limited, honest secret scan (see SECURITY.md).
-* `DOCUMENTATION_GATE_PASSED` — workspace ships README + a test module.
+## Roadmap / backlog inicial
 
-A failed **mandatory** gate cannot be offset by any other score.
+El backlog inicial se organiza en tres categorías (sin empezar la Fase C en
+código):
 
-## Decision
+- **Onboarding / good first issue:** tareas accesibles para nuevas
+  contribuciones (por ejemplo, la comprobación de paridad ES/EN del README,
+  mejora de mensajes de error en `scripts/demo.ps1`, y la comprobación de
+  lenguaje prohibido en la documentación normativa).
+- **Extensiones prácticas / help wanted:** adaptadores de solo lectura
+  adicionales, formato de evidencia exportable mejorado, y endurecimiento de
+  la tooling auxiliar en Windows 11 y rutas con espacios.
+- **RFC / arquitectura futura:** contrato formal para adaptadores de solo
+  lectura de proveedores externos, y diseño preliminar de Fase C/D.
 
-The Release Decision Engine evaluates the mandatory gates against the policy.
-If all gates pass and all required evidence is present → `RELEASE_ELIGIBLE`;
-otherwise → `BLOCKED` (with the concrete reason: failed gate, missing evidence,
-or tampered evidence).
+## Licencia
 
-## Limitations
-
-See [SECURITY.md](SECURITY.md) and [GOVERNANCE.md](GOVERNANCE.md). In short:
-simplified local approval identity, basic secret scanning, no strong process
-sandbox, no cryptographic human identities, no multi-developer concurrency, no
-mandatory external AI, and no enterprise guarantee.
-
-## Tests
-
-```powershell
-.venv\Scripts\python -m pytest -q
-```
-
-## Contribution
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## For contributors — why it is safe to automate
-
-THEKEY Core is built so that **automation cannot cheat**:
-
-* Original source is immutable; only isolated workspaces are written.
-* Approval is automatic and hash-bound, never a prompt.
-* Evidence is SHA-256 sealed; a tampered artifact makes the run `BLOCKED`, never silent.
-* The verifier reproduces proof (build + tests) in isolation; it does not trust the implementer.
-* No arbitrary shell, no external API, no model-generated commands.
-* Every run is auditable: `thekey history verify` + `thekey evidence verify`
-  reconstruct integrity from on-disk artifacts, not from memory.
-
-Good first issues: add a policy, add a verifier profile, extend the NPSC
-adapter, or strengthen the secret-scan gate. See `THEKEY_CONTRACT.md`.
+Distribuido bajo la licencia MIT. Ver [LICENSE](LICENSE).

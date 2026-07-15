@@ -1,0 +1,36 @@
+name: Good first issue
+description: Maintainer-curated, approachable task for new contributors.
+title: "[good first issue] "
+labels: [good first issue]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is used by maintainers to curate onboarding tasks. It is
+        intentionally small and verifiable. New contributors: pick one, comment,
+        and open a PR that passes the CI gates (tests, parity, claims).
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this matters and where to look in the codebase.
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, checkable definition of done.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Pointers
+      description: Files or commands that help start.

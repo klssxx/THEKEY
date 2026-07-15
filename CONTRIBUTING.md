@@ -1,65 +1,98 @@
-# Contributing to THEKEY Core Governed Run
+# Guía de contribución — THEKEY 0.2.0
 
-## Environment setup
+> Versión en inglés: [CONTRIBUTING.en.md](CONTRIBUTING.en.md)
 
-* Windows 11, PowerShell 7, Python 3.11+.
-* No Docker / WSL / GPU / paid service required.
+Gracias por tu interés en THEKEY. Esta guía es corta y seria.
+
+THEKEY aplica aislamiento de flujo de trabajo y autorización de política
+determinista; no proporciona sandboxing a nivel de sistema operativo.
+
+## Preparar el entorno de desarrollo
 
 ```powershell
-.\scripts\bootstrap.ps1
+git clone <URL_DEL_REPOSITORIO>
+cd THEKEY
+pwsh -NoProfile -File .\scripts\demo.ps1
+```
+
+El script crea `.venv`, instala con `pip install -e .` y ejecuta la demo. Para
+trabajo de desarrollo adicional puedes instalar las dependencias de desarrollo:
+
+```powershell
+.venv\Scripts\python -m pip install -e ".[dev]"
+```
+
+## Ejecutar los tests
+
+```powershell
 .venv\Scripts\python -m pytest -q
 ```
 
-## Tests
+## Ejecutar la demo
 
-* Unit, integration, and end-to-end tests live under `tests/`.
-* The end-to-end suite runs the real canonical demo and the blocked scenarios.
-* New behavior requires a test. Do not weaken tests or remove failing gates to
-  obtain a PASS.
+```powershell
+.venv\Scripts\python -m thekey demo
+```
 
-## Code style
+## Cambios pequeños vs. cambios de arquitectura
 
-* `ruff` is configured in `pyproject.toml` (line-length 100).
-* Run `ruff check src tests`.
-* Type hints and docstrings on every public module/function.
+- **Cambio pequeño:** corrección de bug, mejora de mensaje, nueva política,
+  nuevo perfil de verificador, adaptador de solo lectura externo.
+- **Cambio de arquitectura:** modificación del núcleo de transacciones, del
+  estado de la máquina, del event store o de las puertas obligatorias. Requiere
+  RFC.
 
-## PR requirements
+## Proponer RFCs
 
-* Clear description of the governed change.
-* All tests green.
-* No modification of the protected historical THEKEY path.
-* No arbitrary shell exposure; only closed action IDs.
-* Evidence/hash verification still passes.
+Los RFC describen diseños futuros (p. ej. Fase C/D, contrato de adaptadores).
+Se documentan como issues etiquetados `rfc`. Un RFC puede existir como diseño
+sin obligar a su implementación en esta versión.
 
-## How to add an action
+## Reportar bugs
 
-1. Add the action id to `command_registry.py` with its `ActionKind` and
-   `allowed_roles`, plus a handler in `actions.py`.
-2. Never expose shell strings or arbitrary paths. Use declared input/output IDs.
-3. Add a unit test in `tests/unit/test_roles.py` or `test_path_security.py`.
+Usa la plantilla de bug en GitHub. Incluye pasos de reproducción, entorno
+(Windows 11, Python, pwsh) y salida relevante. Para vulnerabilidades, sigue
+[SECURITY.md](SECURITY.md), no abras un issue público.
 
-## How to add a gate
+## Elegir issues por etiqueta
 
-1. Add a `GateResult`-producing runner in `gates.py` and register it in
-   `GATE_RUNNERS`.
-2. Add the gate code to the allowed set in `governance/schemas/policy.schema.json`.
-3. Add a test in `tests/unit/test_verifier.py`.
+- `good first issue`: aptos para quienes se inician.
+- `help wanted`: extensiones prácticas.
+- `enhancement` / `documentation` / `bug` / `security`: mejoras dirigidas.
+- `rfc` / `phase-c` / `phase-d`: diseño futuro.
+- `adapter`: adaptadores externos de solo lectura.
+- `windows` / `ci`: específicos de plataforma o automatización.
 
-## How to add a policy
+## Etiquetas esperadas
 
-1. Create `governance/policies/<id>.yaml`.
-2. It must validate against `governance/schemas/policy.schema.json` (required
-   gates, limits, evidence, secret-scan scope, excluded directories).
-3. An invalid policy must stop the run and never execute the plan.
+`good first issue`, `help wanted`, `enhancement`, `documentation`, `bug`,
+`security`, `rfc`, `phase-c`, `phase-d`, `adapter`, `windows`, `ci`.
 
-## Windows compatibility
+## Criterios de aceptación para PRs
 
-* All paths resolved via `pathlib.Path.resolve()`; no POSIX-only assumptions in
-  runtime code. PowerShell 7 is the supported shell for scripts.
+- Los tests pasan (`pytest -q`).
+- La demo alcanza `RELEASE_ELIGIBLE` (o el cambio no la rompe).
+- No se agregan afirmaciones de seguridad o marketing no verificadas.
+- Se mantiene la paridad ES/EN al tocar documentación normativa.
+- El núcleo no crece innecesariamente en este release.
 
-## Security requirements
+## Paridad ES/EN
 
-* No arbitrary shell from model action IDs.
-* Path traversal, sibling-prefix, protected-path, and reparse-point checks are
-  mandatory.
-* Model output never updates authoritative state or evidence directly.
+Al modificar documentación normativa (README, THREAT_MODEL, CONTRIBUTING) debes
+actualizar la versión en inglés correspondiente. El gate de paridad lo verifica
+en CI.
+
+## Prohibiciones
+
+- No añadas afirmaciones de seguridad o marketing no verificadas.
+- No expandas el núcleo innecesariamente en este release.
+- No integres NPSC en el núcleo; NPSC es un adaptador de solo lectura opcional.
+- No uses el término «auto-approval»; usa «autorización de política
+  determinista».
+
+## Cuándo un aporte toca el núcleo y cuándo debe ser un adaptador externo
+
+Si el aporte cambia el flujo de transacción gobernada, la máquina de estados, el
+event store o las puertas obligatorias, toca el núcleo y requiere RFC. Si aporta
+un proveedor externo (p. ej. otro compilador como NPSC), debe vivir como
+adaptador de solo lectura externo, sin acoplarse al núcleo.

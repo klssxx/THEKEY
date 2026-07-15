@@ -1,26 +1,49 @@
 name: Pull Request
+about: Propose a change to THEKEY
+title: "[type] short summary"
+labels: [enhancement]
+assignees: []
+---
 
-description: Contribute a change to THEKEY Core Governed Run
-title: "[PR] "
-labels: []
+## Summary of the change
 
-body: |
-  ## Summary
-  <!-- What governed change does this PR implement? -->
+<!-- What changes and why. Link the issue/RFC if any. -->
 
-  ## Run lifecycle impact
-  <!-- Which states, transitions, gates, or roles are affected? -->
+## Type of change
 
-  ## Evidence & tests
-  - [ ] `pytest` passes locally.
-  - [ ] `.\scripts\bootstrap-and-demo.ps1` reaches RELEASE_ELIGIBLE.
-  - [ ] Evidence/hash verification still passes.
-  - [ ] No modification of the protected historical THEKEY path.
+- [ ] Bug fix
+- [ ] Small improvement (docs, message, policy, profile)
+- [ ] New read-only adapter (external, optional)
+- [ ] Architectural change (requires RFC)
+- [ ] Documentation
 
-  ## Guardrails (non-negotiable)
-  - [ ] The model still cannot write authoritative state or evidence directly.
-  - [ ] No arbitrary shell exposed via action IDs.
-  - [ ] JSON Schemas and tests updated for any contract change.
+## Impact on demo
 
-  ## Related issues
-  <!-- e.g. Closes #12 -->
+- [ ] `python -m thekey demo` still reaches RELEASE_ELIGIBLE
+- [ ] Not run / N/A
+
+## Impact on documentation
+
+- [ ] Normative docs updated (README / THREAT_MODEL / CONTRIBUTING)
+- [ ] ES/EN parity maintained
+- [ ] N/A
+
+## Impact on security / threat model
+
+- [ ] No security impact
+- [ ] Threat model updated (THREAT_MODEL.md / .en.md)
+- [ ] SECURITY.md updated
+
+## Test checklist
+
+- [ ] `python -m pytest -q` passes
+- [ ] `scripts/ci/parity_gate.py` passes
+- [ ] `scripts/ci/docs_claims.py` passes
+
+## ES/EN parity checklist
+
+- [ ] If I touched README / THREAT_MODEL / CONTRIBUTING, both ES and EN versions were updated.
+
+## Validated commands checklist
+
+- [ ] Every command I documented is one I actually ran and verified.

@@ -1,45 +1,67 @@
-# Security
+# Security Policy — THEKEY 0.2.0
 
-THEKEY Core is a governance engine, not a security sandbox.
+THEKEY is a governance engine for coding agents. It provides **workflow
+isolation**, not an OS-level sandbox. Read [THREAT_MODEL.md](THREAT_MODEL.md)
+for the full analysis.
 
-## Vulnerability reporting
+## How to report a vulnerability
 
-Open a GitHub issue marked `security` with a minimal reproduction. Do not
-include live secrets. For sensitive reports, contact the maintainers via the
-repository's security policy.
+Use GitHub **private security advisories** if available in the repository, or
+open a GitHub issue labeled `security` with a minimal reproduction. Do not
+include live secrets, credentials, or exploit code in public issues.
 
-## Secret scan scope
+There is no separate email or bug-bounty program. The repository's security
+advisory / `security` issue is the real, safest available channel.
 
-The `SCAN_SECRETS` gate runs a **limited, honest** regex scan over the isolated
-workspace (paths + patterns defined in `governance/policies/local-python-demo.yaml`).
-It flags common secret shapes (AWS keys, OpenAI-style keys, long hex, and
-assignment patterns like `api_key = ...`).
+## What kinds of reports are accepted
 
-## Secret scan limitations
+- Bypasses of workflow isolation (writes outside the controlled workspace).
+- Evidence tampering that escapes `thekey evidence verify`.
+- Secret leakage through the demo, the gates, or the adapters.
+- Determinism breaks in the policy authorization or gate evaluation.
+- Injection through the optional read-only adapters (e.g. NPSC).
 
-* It is a **regex** scan — it will miss obfuscated, encoded, or novel secret
-  formats. Absence of a finding is **not** proof of absence of secrets.
-* It cannot inspect encrypted stores, external vaults, or environment variables
-  outside the scanned workspace.
-* It is not a substitute for a dedicated secret-management platform.
+## Responsible disclosure
 
-## No strong sandbox
+Please give the maintainers a reasonable time to triage and release a fix before
+public disclosure. For a public preview with a single maintainer, a window of
+**at least 7 days** is appreciated, but this is a request, not a contractual
+SLA.
 
-The MVP does not provide OS-level isolation (no container, no seccomp, no MAC).
-Execution happens in a normal process with filesystem isolation limited to the
-workspace root. Do **not** run untrusted code through the executor on a
-sensitive host.
+## Response times
 
-## No arbitrary shell
+No fixed response-time SLA is promised for this public preview. Reports are
+reviewed on a best-effort basis.
 
-Model action IDs are a **closed set** (`REPLACE_EXACT_TEXT`, `RUN_UNIT_TESTS`,
-etc.). There is no free-form shell string, no arbitrary command parameters, and
-no path outside the allowed roots. Arbitrary command execution through the model
-is impossible by construction.
+## Limitations of the security model
 
-## Do not use on sensitive repositories without review
+- **No OS-level sandbox.** Code runs as a normal process; workspace isolation
+  bounds *where* changes are written, not what the process can do on the host.
+- **Simplified local authorization identity.** Plan authorization is
+  deterministic and hash-bound, not backed by cryptographic human identities.
+- **Limited secret scanning.** The `SCAN_SECRETS` gate is a regex scan over the
+  workspace. It will miss obfuscated, encoded, or novel secret formats. Absence
+  of a finding is not proof of absence of secrets.
+- **No strong process isolation**, no container, no seccomp, no MAC by default.
+- **External adapters are optional and read-only**; a poorly written adapter can
+  still feed untrusted input into the core.
 
-Because there is no strong sandbox and the approval identity is simplified
-(local, not cryptographic), do not point THEKEY Core at repositories containing
-real credentials or production code without human review and additional
-isolation.
+## Secret scanning in this repository
+
+This repo ships a lightweight regex secret scan as a CI step (verifiable
+equivalent). For a maintained control, **enable GitHub Secret Scanning and Push
+Protection** in the private repository settings before switching to public.
+That is the recommended real mechanism; it is not active until enabled by the
+repository owner. See the publication audit for the exact enablement checklist.
+
+## Do not run untrusted code on a sensitive host
+
+Because there is no strong sandbox and the authorization identity is simplified,
+do not point THEKEY at repositories containing real credentials or production
+code without additional isolation (container, VM, restricted account) and human
+review.
+
+## References
+
+- [THREAT_MODEL.md](THREAT_MODEL.md) / [THREAT_MODEL.en.md](THREAT_MODEL.en.md)
+- [README.md](README.md) / [README.en.md](README.en.md)

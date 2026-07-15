@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a practical extension or enhancement to THEKEY.
+title: "[enhancement] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What gap does this fill? Keep it scoped to the small, serious core.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: How would it work? Note if it belongs in the core or as an external adapter.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Where should this live?
+      options:
+        - External read-only adapter (optional)
+        - Core policy / gate
+        - Documentation
+        - RFC / future architecture (Phase C/D)
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know it is done and verified?

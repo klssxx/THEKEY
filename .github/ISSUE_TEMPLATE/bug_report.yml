@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a defect in THEKEY core behavior, gates, or demo.
+title: "[bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please fill this honestly; do not include live
+        secrets or credentials.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows 11 build, Python version, pwsh version, commit/clone state.
+      placeholder: Windows 11 23H2, Python 3.12.10, pwsh 7.x, clean clone.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands, in order.
+      placeholder: |
+        1. git clone ...
+        2. cd THEKEY
+        3. pwsh -NoProfile -File .\scripts\demo.ps1
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Paste the relevant output (decision, gates_passed, errors).
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Paths under runs/<RUN_ID>/ or .thekey/ that show the problem.
