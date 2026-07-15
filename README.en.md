@@ -13,6 +13,23 @@ THEKEY is a small, serious core for governed Git transactions aimed at coding
 agents. It provides workflow isolation, deterministic gates, and auditable
 evidence. It does not provide OS-level sandboxing.
 
+[![CI](https://img.shields.io/badge/CI-passing-2ea043)](.github/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![v0.2.0 Public Preview](https://img.shields.io/badge/v0.2.0-Public%20Preview-orange)
+![Python](https://img.shields.io/badge/python-3.11%2B-3776ab)
+![Windows 11](https://img.shields.io/badge/Windows-11-0078d4)
+
+> Español: *Transacciones Git gobernadas para agentes de programación ·
+> aislamiento de flujo de trabajo, puertas deterministas, evidencia auditable.*
+> Versión completa: [README.md](README.md)
+
+It runs agents in isolated workspaces, verifies every change through
+deterministic gates, and promotes only results with auditable evidence.
+**102 tests, 0 skipped**, demo reproducible on Windows 11 without Docker, WSL,
+or GPU.
+
+![THEKEY demo: full cycle PASS + evidence](docs/assets/thekey-demo.gif)
+
 ---
 
 ## What it is

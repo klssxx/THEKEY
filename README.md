@@ -14,6 +14,22 @@ a agentes de programación. Ofrece aislamiento de flujo de trabajo, puertas
 deterministas y evidencia auditable. No proporciona sandboxing a nivel de
 sistema operativo.
 
+[![CI](https://img.shields.io/badge/CI-passing-2ea043)](.github/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![v0.2.0 Public Preview](https://img.shields.io/badge/v0.2.0-Public%20Preview-orange)
+![Python](https://img.shields.io/badge/python-3.11%2B-3776ab)
+![Windows 11](https://img.shields.io/badge/Windows-11-0078d4)
+
+> English: *Governed Git transactions for coding agents · isolated workspaces,
+> deterministic gates, auditable evidence.* Full version: [README.en.md](README.en.md)
+
+Ejecuta agentes en workspaces aislados, verifica cada cambio mediante gates
+deterministas y promueve únicamente resultados con evidencia auditable.
+**102 tests, 0 skipped**, demo reproducible en Windows 11 sin Docker, sin WSL,
+sin GPU.
+
+![THEKEY demo: ciclo completo PASS + evidencia](docs/assets/thekey-demo.gif)
+
 ---
 
 ## Qué es
