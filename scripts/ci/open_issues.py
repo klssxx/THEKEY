@@ -35,11 +35,16 @@ def parse(path: pathlib.Path):
     title = title.group(1) if title else path.stem
     typ = re.search(r"type:\s*(\S+)", fm)
     typ = typ.group(1) if typ else "enhancement"
-    labels = LABELS_BY_TYPE.get(typ, ["enhancement"])
-    # ensure type label present
-    if typ not in labels and typ not in ("rfc",):
-        labels = [typ] + labels
-    return title.strip(), labels, body.strip()
+    labels = list(LABELS_BY_TYPE.get(typ, ["enhancement"]))
+    # de-dupe preserving order; do NOT inject the raw `typ` value as a label
+    # (GitHub labels use spaces, e.g. "good first issue", not "good-first-issue")
+    seen = set()
+    out = []
+    for lb in labels:
+        if lb and lb not in seen:
+            seen.add(lb)
+            out.append(lb)
+    return title.strip(), out, body.strip()
 
 
 def main():
