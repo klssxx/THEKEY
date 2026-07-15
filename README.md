@@ -23,12 +23,12 @@ sistema operativo.
 > English: *Governed Git transactions for coding agents · isolated workspaces,
 > deterministic gates, auditable evidence.* Full version: [README.en.md](README.en.md)
 
+![THEKEY demo: ciclo completo PASS + evidencia](docs/assets/thekey-demo.gif)
+
 Ejecuta agentes en workspaces aislados, verifica cada cambio mediante gates
 deterministas y promueve únicamente resultados con evidencia auditable.
 **102 tests, 0 skipped**, demo reproducible en Windows 11 sin Docker, sin WSL,
 sin GPU.
-
-![THEKEY demo: ciclo completo PASS + evidencia](docs/assets/thekey-demo.gif)
 
 ---
 
