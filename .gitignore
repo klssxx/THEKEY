@@ -21,6 +21,10 @@ htmlcov/
 # Run artifacts (generated at runtime, not source)
 runs/
 workspaces/
+.thekey/
+
+# Frozen baseline working dir (local audit artifact, not shipped)
+development-audit/
 
 # Editor / OS
 .vscode/
