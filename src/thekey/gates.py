@@ -86,6 +86,23 @@ GATE_RUNNERS = {
     "DOCUMENTATION_GATE_PASSED": _gate_documentation,
 }
 
+# Gates considered "fast" for the LAUNCH_SMOKE_TEST profile: build + unit tests
+# only. Security (secret scan) and documentation gates are slower / heavier and
+# are skipped under smoke mode for fast iteration.
+FAST_GATES = {"BUILD_PASSED", "UNIT_TESTS_PASSED"}
+
+
+def _active_gates(policy: Policy) -> list[str]:
+    """Resolve which gates to run, honoring the LAUNCH_SMOKE_TEST profile."""
+    import os
+
+    if os.environ.get("LAUNCH_SMOKE_TEST"):
+        selected = [g for g in policy.required_gates if g in FAST_GATES]
+        # If the policy declares no fast gates at all, fall back to the full set
+        # so smoke mode never silently passes an empty gate list.
+        return selected if selected else list(policy.required_gates)
+    return list(policy.required_gates)
+
 
 class GateRunner:
     """Runs the mandatory gates declared by the policy and records results."""
@@ -95,7 +112,7 @@ class GateRunner:
 
     def run(self, run_id: str, ctx: dict | None = None) -> list[GateResult]:
         results: list[GateResult] = []
-        for gate in self.policy.required_gates:
+        for gate in _active_gates(self.policy):
             runner = GATE_RUNNERS.get(gate)
             if runner is None:
                 results.append(

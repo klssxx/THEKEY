@@ -65,9 +65,13 @@ class RunCoordinator:
         self.run = run or self.runs.create_run(
             RunRequest(title="Untitled governed run")
         )
-        # Authoritative state is repo-level; for a fresh run we reset it to the
-        # initial SUBMITTED binding so each run starts deterministically.
-        self.sm = state_machine or StateMachine()
+        # Authoritative state is per-run: lives in runs/<RUN_ID>/state.json so
+        # multiple runs can execute concurrently (improvement D). For a fresh
+        # run we reset it to the initial SUBMITTED binding so each run starts
+        # deterministically.
+        self.sm = state_machine or StateMachine(
+            state_file=self.run.dir / "state.json"
+        )
         if run is None:
             self.sm.reset_to_submitted(self.run.run_id)
         self.policy_engine = PolicyEngine()

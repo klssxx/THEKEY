@@ -3,6 +3,22 @@
 All notable changes to THEKEY Core Governed Run are documented here. The format
 is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] - 2026-07-18
+
+Public Preview. Governance, workspace isolation, deterministic gates, and
+verifiable evidence are unchanged from the 0.1.0 core; this release adds the
+public-preview surface (docs, badges, demo assets, issue/PR templates) and the
+CI documentation gates.
+
+### Added
+* ES/EN parity gate and forbidden-claims gate in CI (`scripts/ci/`).
+* Public-preview documentation, badges, demo GIF/video.
+* Issue/PR templates and launch/backlog evidence artifacts.
+
+### Changed
+* Version aligned across `src/thekey/__init__.py`, `pyproject.toml`,
+  `STATUS.md`, and `CHANGELOG.md` (added this entry).
+
 ## [0.1.0] - 2026-07-15
 
 First public MVP OSS release.

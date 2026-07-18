@@ -22,6 +22,9 @@ htmlcov/
 runs/
 workspaces/
 .thekey/
+# Local evidence-signing key (repo-local, derived from machine; not shipped)
+.thekey/evidence.key
+evidence.key
 
 # Frozen baseline working dir (local audit artifact, not shipped)
 development-audit/

@@ -115,3 +115,58 @@ def npsc_artifact_hash(artifact: dict | Path | str) -> str:
     else:
         data = json.dumps(artifact, sort_keys=True, ensure_ascii=False).encode("utf-8")
     return hashlib.sha256(data).hexdigest()
+
+
+def build_hy3_turn(
+    context: Any,
+    *,
+    state_version: int,
+    state_hash: str,
+    phase_contract_hash: str,
+    phase: str,
+    allowed_transitions: list[str] | None = None,
+    evidence_index: list[str] | None = None,
+) -> str:
+    """Package a governed BuiltContext into a restricted operator-turn YAML.
+
+    The produced string is exactly what ``output_validator.parse_operator_turn``
+    expects: the 10 required keys in the exact required order, terminated by
+    ``---END_TURN---``. This closes the loop ContextBuilder -> adapter ->
+    OutputValidator without touching the deterministic control plane.
+
+    The HY3 operator receives this as the *template* it must fill; the function
+    itself emits a NEXT_PHASE_READY turn with no file writes, so it is safe to
+    produce without an actual model call (useful for offline verification).
+    """
+    from ..output_validator import TERMINATOR
+
+    evidence_refs = evidence_index or []
+    turn = {
+        "phase": phase,
+        "status": "NEXT_PHASE_READY",
+        "context_binding": {
+            "state_version": int(state_version),
+            "state_hash": state_hash,
+            "phase_contract_hash": phase_contract_hash,
+        },
+        "observed": [
+            {
+                "fact": "Context built from minified authoritative state (no chat history).",
+                "source": "state-file",
+                "evidence": evidence_refs[0] if evidence_refs else "EVID-BASELINE",
+            }
+        ],
+        "actions": [],
+        "files_changed": [],
+        "evidence": [{"evidence": r} for r in evidence_refs] or [],
+        "state_change_requested": {"from": "", "to": ""},
+        "next": "await_operator_input",
+        "error_code": "",
+    }
+    # Ensure exact key order required by the operator-turn contract.
+    ordered = {k: turn[k] for k in (
+        "phase", "status", "context_binding", "observed", "actions",
+        "files_changed", "evidence", "state_change_requested", "next", "error_code",
+    )}
+    body = json.dumps(ordered, ensure_ascii=False, indent=2)
+    return body + "\n" + TERMINATOR + "\n"
