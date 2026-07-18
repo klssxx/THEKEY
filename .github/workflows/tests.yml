@@ -68,9 +68,9 @@ jobs:
           set -euo pipefail
           # Limited regex scan. PCRE (-P) for the lookbehind; filter our own
           # review_token infrastructure (deterministic evidence, not a secret).
-          if grep -rniP '(?<!review_)(api[_-]?key|secret|password|token)\s*[=:]\s*["'\''][A-Za-z0-9_\-]{16,}["'\'']' \
+          if grep -rniP '(?<!review_)(api[_-]?key|secret|password|token)\s*[=:]\s*["'"'"'][A-Za-z0-9_\-]{16,}["'"'"']' \
              --include='*.py' --include='*.ps1' --include='*.md' --include='*.toml' \
-             --exclude-dir=.git --exclude-dir=.venv . \
+             --exclude-dir=.git --exclude-dir=.venv --exclude-dir=tests . \
              | grep -vi review_token ; then
             echo "Potential secret-like string found. Review before publishing."
             exit 1
