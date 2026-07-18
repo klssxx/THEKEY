@@ -31,6 +31,8 @@ THEKEY resuelve un problema concreto: **los cambios de software impulsados por a
 
 Separa planificación, ejecución, verificación y autorización de política en **roles distintos**, aplica puertas definidas por política-como-código, y produce **evidencia verificable** para cada ejecución.
 
+THEKEY proporciona **aislamiento de flujo de trabajo**, no sandboxing a nivel de sistema operativo: cada cambio se ejecuta en un workspace controlado y aislado, con autorización de política determinista y evidencia auditable.
+
 ## ¿Para quién es?
 
 | Perfil | Caso de uso |
