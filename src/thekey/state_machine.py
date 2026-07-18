@@ -132,18 +132,31 @@ class StateSnapshot:
 
 
 class StateMachine:
-    """Owns the authoritative state file and transition log."""
+    """Owns the authoritative state file and transition log.
 
-    def __init__(self, state_file: Path = STATE_FILE):
+    State is per-run: pass a ``state_file`` inside the run directory
+    (improvement D) so multiple RunCoordinators can execute concurrently
+    without sharing a single repo-level state file. The default keeps the
+    historical repo-level location for backward compatibility with scripts
+    that construct a StateMachine without arguments.
+    """
+
+    def __init__(self, state_file: Path = STATE_FILE, *, transitions_file: Path | None = None,
+                 history_file: Path | None = None, prev_file: Path | None = None):
         self.state_file = Path(state_file)
-        self.state_file.parent.mkdir(parents=True, exist_ok=True)
+        self.dir = self.state_file.parent
+        self.dir.mkdir(parents=True, exist_ok=True)
+        # Per-run log locations derived from the state file's directory.
+        self.prev_file = Path(prev_file) if prev_file else self.dir / "state.previous.json"
+        self.transitions_file = Path(transitions_file) if transitions_file else self.dir / "state-transitions.jsonl"
+        self.history_file = Path(history_file) if history_file else self.dir / "state-history.jsonl"
         self._seq = 0
         self._load_seq()
 
     def reset_to_submitted(self, run_id: str) -> StateSnapshot:
         """Reset the authoritative state to a fresh SUBMITTED binding for a new
-        run. Used by the coordinator when it creates a new run (single active
-        run at a time in the MVP). Preserves previous copy."""
+        run. Used by the coordinator when it creates a new run. Preserves
+        previous copy within the run directory (no cross-run leakage)."""
         self._seq = 0
         snap = StateSnapshot(
             state_version=1,
@@ -162,14 +175,14 @@ class StateMachine:
         )
         snap.current_state_hash = snap.recompute_hash()
         if self.state_file.exists():
-            self.state_file.replace(STATE_PREV_FILE)
+            self.state_file.replace(self.prev_file)
         atomic_write_text(
             self.state_file,
             json.dumps(snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
         )
-        # Reset transition log for the new run id binding.
-        TRANSITIONS_FILE.write_text("", encoding="utf-8")
-        HISTORY_FILE.write_text("", encoding="utf-8")
+        # Reset transition + history logs for this run's directory.
+        self.transitions_file.write_text("", encoding="utf-8")
+        self.history_file.write_text("", encoding="utf-8")
         return snap
 
     # ---- read ----------------------------------------------------------
@@ -183,9 +196,9 @@ class StateMachine:
         return StateSnapshot.from_dict(data)
 
     def _load_seq(self) -> None:
-        if TRANSITIONS_FILE.exists():
+        if self.transitions_file.exists():
             last = None
-            for line in TRANSITIONS_FILE.read_text(encoding="utf-8").splitlines():
+            for line in self.transitions_file.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
                 if not line:
                     continue
@@ -268,7 +281,7 @@ class StateMachine:
 
         # Preserve previous copy, then atomic write.
         if self.state_file.exists():
-            self.state_file.replace(STATE_PREV_FILE)
+            self.state_file.replace(self.prev_file)
         atomic_write_text(
             self.state_file,
             json.dumps(next_snap.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
@@ -286,11 +299,11 @@ class StateMachine:
             "reason": reason,
             "related_evidence": related_evidence or [],
         }
-        with TRANSITIONS_FILE.open("a", encoding="utf-8") as fh:
+        with self.transitions_file.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
         # Append validated event to history.
-        with HISTORY_FILE.open("a", encoding="utf-8") as fh:
+        with self.history_file.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({
                 "kind": "transition",
                 "sequence": self._seq,
@@ -314,7 +327,7 @@ class StateMachine:
         current.current_state_hash = current.recompute_hash()
         current.updated_at = _utcnow()
         if self.state_file.exists():
-            self.state_file.replace(STATE_PREV_FILE)
+            self.state_file.replace(self.prev_file)
         atomic_write_text(
             self.state_file,
             json.dumps(current.canonical(), indent=2, sort_keys=True, ensure_ascii=False),
@@ -324,9 +337,9 @@ class StateMachine:
     def recent_events(self, limit: int = 3) -> list[dict]:
         """Deterministically derive recent validated events from the history
         log (NOT from chat history)."""
-        if not HISTORY_FILE.exists():
+        if not self.history_file.exists():
             return []
         lines = [
-            json.loads(l) for l in HISTORY_FILE.read_text(encoding="utf-8").splitlines() if l.strip()
+            json.loads(l) for l in self.history_file.read_text(encoding="utf-8").splitlines() if l.strip()
         ]
         return lines[-limit:]

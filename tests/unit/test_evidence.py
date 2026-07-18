@@ -4,7 +4,14 @@ import json
 
 import pytest
 
-from thekey.evidence import EvidenceManager, sha256_file, sha256_text
+from thekey.evidence import (
+    EvidenceManager,
+    EvidenceRecord,
+    sha256_file,
+    sha256_text,
+    verify_record_signature,
+)
+from thekey.errors import InvalidEvidenceError
 from thekey.config import RUNS_DIR
 from thekey.runs import RunManager
 
@@ -42,6 +49,28 @@ def test_missing_artifact():
         em.load_record("E1")
 
 
-def test_sha256_text_stable():
-    assert sha256_text("abc") == sha256_text("abc")
-    assert sha256_text("abc") != sha256_text("abd")
+def test_record_signature_valid_and_tamper_detected():
+    em = EvidenceManager(RUNS_DIR / "sigtest-run" / "evidence")
+    rec = EvidenceRecord(
+        evidence_id="S1", kind="state-file", producer="x",
+        artifact_path="a.txt", artifact_hash="deadbeef", summary="s",
+    )
+    p = em.record(rec)
+    # Loaded record verifies its own signature.
+    loaded = em.load_record("S1")
+    assert loaded["evidence_id"] == "S1"
+    assert "signature" in loaded
+    # Tamper with the on-disk record (edit a field, keep old signature).
+    tampered = json.loads(p.read_text(encoding="utf-8"))
+    tampered["summary"] = "TAMPERED"
+    p.write_text(json.dumps(tampered), encoding="utf-8")
+    with pytest.raises(InvalidEvidenceError):
+        em.load_record("S1")
+
+
+def test_signature_depends_on_payload():
+    r1 = EvidenceRecord("A", "state-file", "x", "a", "h1", "s1").to_dict()
+    r2 = EvidenceRecord("A", "state-file", "x", "a", "h2", "s1").to_dict()
+    assert r1["signature"] != r2["signature"]
+    assert verify_record_signature(r1)
+    assert verify_record_signature(r2)

@@ -2,7 +2,7 @@
 
 | Item | Status |
 |------|--------|
-| Release version | 0.1.0 |
+| Release version | 0.2.0 |
 | Canonical demo | PASS (RELEASE_ELIGIBLE) |
 | Blocked demos | PASS (invalid_policy / failed_gate / tampered_evidence / missing_input) |
 | Tests | 63 passed |

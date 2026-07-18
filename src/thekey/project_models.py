@@ -18,6 +18,7 @@ SUPPORTED_PROFILES = {
     "python-cli",
     "python-desktop",
     "python-web",
+    "single-file-python",
 }
 
 # Packaging / framework signal tables used by the profiler (section 11).

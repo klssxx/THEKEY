@@ -121,6 +121,48 @@ def profile_project(
     )
     non_python = [m for m in _UNSUPPORTED_MARKERS
                   if any(Path(rel).name == m for rel in inspection.canonical_hashes)]
+    # Single-file / loose Python: one or more .py files with NO packaging
+    # metadata and NO specialized framework signals => single-file-python.
+    # Detected early so it is not misclassified as generic-python.
+    has_packaging = any(
+        Path(rel).name in ("pyproject.toml", "setup.py", "setup.cfg")
+        for rel in inspection.canonical_hashes
+    )
+    specialized_signal = any(
+        any(imp in _read_text_safe(root / rel)
+            for table in _PROFILE_SIGNALS.values()
+            for imp in table.get("imports", []))
+        for rel in inspection.canonical_hashes
+        if str(rel).endswith(".py")
+    ) or any(
+        any(mk in _read_text_safe(root / rel)
+            for table in _PROFILE_SIGNALS.values()
+            for mk in table.get("markers", []))
+        for rel in inspection.canonical_hashes
+        if str(rel).endswith(".py")
+    )
+    if has_python and not has_packaging and not specialized_signal and not non_python:
+        return ProjectProfile(
+            project_id=_project_id(root),
+            project_name=root.name,
+            source_root=str(root),
+            detected_profile="single-file-python",
+            profile_confidence=0.90,
+            profile_evidence=[
+                f"{n} python file(s) without packaging metadata"
+                for n in [str(sum(1 for r in inspection.canonical_hashes if str(r).endswith('.py')))]
+            ][:1],
+            entrypoints=inspection.detected_entrypoints,
+            test_configuration={"test_roots": inspection.test_roots},
+            git={
+                "detected": inspection.git_detected,
+                "head": inspection.git_head,
+                "dirty": inspection.git_dirty,
+            },
+            warnings=list(inspection.warnings),
+            packaging={},
+        )
+
     if non_python and not has_python:
         prof = ProjectProfile(
             project_id=_project_id(root),

@@ -51,6 +51,9 @@ jobs:
       - name: Forbidden-language / disallowed-claims gate
         run: python scripts/ci/docs_claims.py
 
+      - name: Version parity gate
+        run: python scripts/ci/version_parity.py
+
   secret-scan:
     runs-on: ubuntu-latest
     steps:
@@ -73,3 +76,6 @@ jobs:
             exit 1
           fi
           echo "Regex secret scan: no candidate secrets found."
+
+      - name: Entropy secret scan (high-entropy token detection)
+        run: python scripts/ci/secret_entropy.py --root .

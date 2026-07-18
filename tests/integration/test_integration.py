@@ -40,9 +40,6 @@ def test_integration_full_run_artifacts_present():
     c.verify()
     c.decide()
     for name in ("manifest.json", "request.json", "plan.json", "approvals.json",
-                 "changes.diff", "gates.json", "decision.json", "artifact-hashes.json"):
+                 "changes.diff", "gates.json", "decision.json", "artifact-hashes.json",
+                 "state.json", "state-transitions.jsonl"):
         assert (c.run.dir / name).exists(), f"missing {name}"
-    # The transition log lives at the repo-level .thekey directory.
-    from thekey.config import THEKEY_DIR
-
-    assert (THEKEY_DIR / "state-transitions.jsonl").exists()
