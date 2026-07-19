@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "pyyaml>=6.0",
     "jsonschema>=4.20",
+    "pydantic>=2.0,<3.0",
     # Required by THEKEY's deterministic demo, which runs a unit-test gate as
     # part of its verification. Keeping pytest in the runtime deps lets the
     # mandated `pip install -e .` (no dev extras) reproduce a green demo from

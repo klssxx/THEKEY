@@ -6,8 +6,8 @@ code, and never executes the plan (section 26).
 
 from __future__ import annotations
 
-import copy
-import shutil
+import hashlib
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -19,10 +19,10 @@ from .config import (
     DEFAULT_POLICY_FILE,
     DEFAULT_POLICY_ID,
     POLICY_SCHEMA_FILE,
-    RUNS_DIR,
 )
-from .errors import InvalidPolicyError, TheKeyError
+from .errors import InvalidPolicyError
 from .io_atomic import atomic_write_text
+from .models import ActionContext, AuthorizationDecision, Role
 
 
 @dataclass
@@ -135,3 +135,76 @@ class PolicyEngine:
 
     def policy_id(self) -> str:
         return DEFAULT_POLICY_ID
+
+    @staticmethod
+    def bundle_hash(policy: Policy) -> str:
+        """Hash the complete validated policy using canonical JSON."""
+        body = json.dumps(
+            policy.to_dict(),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        return hashlib.sha256(body).hexdigest()
+
+    def authorize_action(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Evaluate a bound physical-action request deterministically.
+
+        Invalid inputs never raise into the handler path: every branch returns
+        an explicit denial carrying the currently loaded policy bundle hash.
+        """
+        policy = self.load_default()
+        bundle_hash = self.bundle_hash(policy)
+
+        def deny(reason: str) -> dict[str, Any]:
+            return AuthorizationDecision(
+                allowed=False,
+                reason_code=reason,
+                policy_bundle_hash=bundle_hash,
+            ).model_dump(mode="json")
+
+        if not isinstance(request, dict):
+            return deny("POLICY_REQUEST_INVALID")
+        expected = set(ActionContext.model_fields) | {"action_id", "parameters_sha256"}
+        if set(request) != expected:
+            return deny("POLICY_REQUEST_FIELDS_INVALID")
+        try:
+            context = ActionContext.model_validate(
+                {key: request[key] for key in ActionContext.model_fields}
+            )
+        except Exception:
+            return deny("POLICY_CONTEXT_INVALID")
+        if context.role is not Role.EXECUTOR:
+            return deny("POLICY_ROLE_DENIED")
+        if context.policy_version != policy.policy_version:
+            return deny("POLICY_VERSION_MISMATCH")
+        if context.policy_bundle_hash != bundle_hash:
+            return deny("POLICY_BUNDLE_HASH_MISMATCH")
+        if context.sovereign_receipt.sovereign_identity_id != "moli":
+            return deny("SOVEREIGN_IDENTITY_MISMATCH")
+        if (
+            context.sovereign_receipt.authorization_scope != "JUDGE_MODE_DEMO_ONLY"
+            or context.sovereign_receipt.output_scope != "ISOLATED_RUN_WORKSPACE_ONLY"
+            or context.sovereign_receipt.production_reuse is not False
+        ):
+            return deny("SOVEREIGN_SCOPE_DENIED")
+        if request["action_id"] not in context.sovereign_receipt.allowed_action_ids:
+            return deny("ACTION_NOT_SOVEREIGN_AUTHORIZED")
+        parameters_hash = request.get("parameters_sha256")
+        if not isinstance(parameters_hash, str) or len(parameters_hash) != 64:
+            return deny("PARAMETERS_HASH_INVALID")
+        decision_material = json.dumps(
+            request,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        decision_id = "policy-decision-" + hashlib.sha256(decision_material).hexdigest()[:32]
+        return AuthorizationDecision(
+            allowed=True,
+            reason_code="AUTHORIZED_BY_BOUND_RECEIPTS",
+            decision_id=decision_id,
+            policy_bundle_hash=bundle_hash,
+        ).model_dump(mode="json")

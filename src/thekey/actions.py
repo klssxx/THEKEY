@@ -10,12 +10,10 @@ from __future__ import annotations
 
 import ast
 import hashlib
-import json
 import subprocess
 import sys
 from pathlib import Path
 
-from .config import DEMO_APP_DIR, REAL_ROOT, WORKSPACES_DIR
 from .errors import TheKeyError
 from .workspaces import WorkspaceManager
 
@@ -132,7 +130,7 @@ def replace_exact_text(run_id: str, parameters: dict) -> dict:
     return {
         "status": "APPLIED",
         "path": str(target),
-        "sha256_before": sha256_file(target) if False else hashlib.sha256(before.encode()).hexdigest(),
+        "sha256_before": hashlib.sha256(before.encode()).hexdigest(),
         "sha256_after": sha256_file(target),
     }
 
@@ -207,7 +205,6 @@ def scan_secrets(run_id: str, parameters: dict) -> dict:
         policy = PolicyEngine().load_default()
     patterns = [__import__("re").compile(p) for p in policy.secret_scan_scope["patterns"]]
     excluded = set(policy.excluded_directories)
-    import re
 
     findings = []
     for p in ws.rglob("*"):
@@ -264,14 +261,39 @@ HANDLERS = {
     "check_required_documentation": check_required_documentation,
 }
 
+_HANDLER_CALL_COUNTS: dict[tuple[str, str], int] = {}
 
-def dispatch(action_id: str, run_id: str, parameters: dict) -> dict:
-    """Execute a model-requested action. Caller must have already validated the
-    role permission and the action id via command_registry."""
+
+def handler_call_count(transaction_id: str, action_id: str) -> int:
+    return _HANDLER_CALL_COUNTS.get((transaction_id, action_id), 0)
+
+
+def dispatch(
+    action_id: str,
+    run_id: str,
+    parameters: dict,
+    *,
+    context,
+) -> dict:
+    """Authorize, then resolve and execute exactly one declared handler."""
+    from .rbac_guard import enforce_action_context
+
+    authorized = enforce_action_context(
+        raw_context=context,
+        action_id=action_id,
+        run_id=run_id,
+        parameters=parameters,
+    )
     from .command_registry import get_spec
 
     spec = get_spec(action_id)
     if spec is None:
         raise TheKeyError(f"Unknown action: {action_id!r}", code="UNAUTHORIZED_ACTION")
     handler = HANDLERS[spec.handler]
-    return handler(run_id, parameters)
+    key = (authorized.context.transaction_id, action_id)
+    _HANDLER_CALL_COUNTS[key] = _HANDLER_CALL_COUNTS.get(key, 0) + 1
+    result = handler(run_id, parameters)
+    result = dict(result)
+    result["authorization"] = authorized.decision.model_dump(mode="json")
+    result["transaction_id"] = authorized.context.transaction_id
+    return result

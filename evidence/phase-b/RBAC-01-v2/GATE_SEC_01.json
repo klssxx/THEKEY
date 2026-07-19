@@ -1,0 +1,34 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T14:36:16.059Z",
+  "gate": "GATE-SEC-01",
+  "status": "PASS",
+  "before_fix": {
+    "status": "FAIL",
+    "reason_code": "REUSABLE_DEMO_GRANT",
+    "same_grant_authorized_distinct_sources": true,
+    "source_hashes": [
+      "ca3d99f787cb349aa2acff2c31ac6cad9ef9a8c68152e48ace7d4c32dafda7b7",
+      "6a6a890b9da745f57a588e351b9c2da21bb3e39568bf3e3788b3953df9a5e4f8"
+    ],
+    "physical_handler_counts": [1, 1]
+  },
+  "after_fix": {
+    "canonical_demo": {
+      "authorization_scope": "JUDGE_MODE_DEMO_ONLY",
+      "subject_relative_path": "examples/demo_app/calculator.py",
+      "subject_sha256_normalized_text": "ca3d99f787cb349aa2acff2c31ac6cad9ef9a8c68152e48ace7d4c32dafda7b7",
+      "output_scope": "ISOLATED_RUN_WORKSPACE_ONLY",
+      "production_reuse": false,
+      "handler_call_count": 1
+    },
+    "distinct_source": {
+      "reason_code": "DEMO_AUTHORIZATION_SUBJECT_MISMATCH",
+      "authorization_receipt_created": false,
+      "workspace_created": false,
+      "handler_call_delta": 0
+    }
+  },
+  "production_authorization_reusable": false,
+  "fail_closed_before_handler": true
+}

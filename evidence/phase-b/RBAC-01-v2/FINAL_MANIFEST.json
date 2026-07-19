@@ -1,0 +1,53 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T14:36:16.059Z",
+  "operation_id": "FASE-B-v2",
+  "branch": "implementation/phase-b-rbac-v2",
+  "parent_commit": "3a8456416ed9ae9183840585b488cec04e9a069d",
+  "parent_tree": "06ff07e3482ff8443d4cbebddb270aed15da1712",
+  "status": "VERIFIED_FOR_LOCAL_COMMIT",
+  "gate_sec_01": "PASS",
+  "pack_verify": "PASS",
+  "pack_tests": "44 passed, 1 skipped",
+  "pack_coverage_percent": 100,
+  "focused_tests": "47 passed",
+  "regression": "148 passed, 1 skipped",
+  "clean_clone_regression": "148 passed, 1 skipped",
+  "clean_clone_judge_mode": "PASS",
+  "rollback": "PASS",
+  "secret_scan": "PASS_WITH_INTENTIONAL_TEST_FIXTURE",
+  "modified_python_ruff": "PASS",
+  "index_was_empty_at_checkpoint": true,
+  "write_set_expansions": [
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "tests/unit/test_roles.py",
+      "reason": "Existing regression invoked physical execution without persisted ActionContext; the test now obtains real receipts instead of requiring a production bypass."
+    },
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "tests/unit/test_verifier.py",
+      "reason": "Existing verifier regression invoked physical gates without persisted ActionContext; the test now uses a real authorized transaction."
+    },
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "governance/demo-authorizations/build-week-judge-mode-v1.json",
+      "reason": "Judge Mode needs an explicit persisted grant; it is now hard-bound to the canonical demo and isolated output with production reuse denied."
+    }
+  ],
+  "outside_write_set": [
+    {
+      "path": "scripts/make_thelkey_guide_pdf.py",
+      "status": "PREEXISTING_UNTRACKED_UNCHANGED_EXCLUDED",
+      "sha256": "b7929d27b3b717cfb3bca1ef46400a360fc8c97f176262dd2e21603291bae2aa"
+    }
+  ],
+  "canonical_source_status": "PROVENANCE_UNRESOLVED",
+  "full_checkmate": false,
+  "macro_pack_2": "NOT_STARTED",
+  "live_e_modified": false,
+  "push_performed": false,
+  "merge_performed": false,
+  "tag_or_release_performed": false,
+  "devpost_submitted": false
+}

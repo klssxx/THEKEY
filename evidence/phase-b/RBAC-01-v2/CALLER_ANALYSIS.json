@@ -1,0 +1,24 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T14:36:16.059Z",
+  "method": "Python AST inspection plus executable regression",
+  "targets": [
+    {
+      "path": "src/thekey/gates.py",
+      "dispatch_calls_expected": 4,
+      "dispatch_calls_found": 4,
+      "calls_with_explicit_context": 4
+    },
+    {
+      "path": "src/thekey/roles/executor.py",
+      "dispatch_calls_expected": 1,
+      "dispatch_calls_found": 1,
+      "calls_with_explicit_context": 1
+    }
+  ],
+  "total_calls_expected": 5,
+  "total_calls_found": 5,
+  "calls_without_context": 0,
+  "all_callers_governed": true,
+  "verification_test": "tests/test_phase_b_rbac_v2_integration.py::test_all_five_live_callers_pass_explicit_context_keyword"
+}

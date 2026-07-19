@@ -8,15 +8,10 @@ never PASS.
 
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Callable
+from dataclasses import dataclass
 
 from .actions import dispatch
-from .config import DEFAULT_POLICY_FILE
-from .errors import GateFailureError, TheKeyError
-from .policies import Policy, PolicyEngine
+from .policies import Policy
 
 
 @dataclass
@@ -36,7 +31,7 @@ class GateResult:
 
 
 def _gate_build(run_id: str, policy: Policy, ctx: dict) -> GateResult:
-    res = dispatch("RUN_BUILD", run_id, {})
+    res = dispatch("RUN_BUILD", run_id, {}, context=ctx["action_context"])
     ok = res.get("status") == "OK"
     return GateResult(
         "BUILD_PASSED",
@@ -47,7 +42,7 @@ def _gate_build(run_id: str, policy: Policy, ctx: dict) -> GateResult:
 
 
 def _gate_unit_tests(run_id: str, policy: Policy, ctx: dict) -> GateResult:
-    res = dispatch("RUN_UNIT_TESTS", run_id, {})
+    res = dispatch("RUN_UNIT_TESTS", run_id, {}, context=ctx["action_context"])
     ok = res.get("status") == "OK"
     return GateResult(
         "UNIT_TESTS_PASSED",
@@ -58,7 +53,9 @@ def _gate_unit_tests(run_id: str, policy: Policy, ctx: dict) -> GateResult:
 
 
 def _gate_security(run_id: str, policy: Policy, ctx: dict) -> GateResult:
-    res = dispatch("SCAN_SECRETS", run_id, {"policy": policy})
+    res = dispatch(
+        "SCAN_SECRETS", run_id, {}, context=ctx["action_context"]
+    )
     clean = res.get("status") == "CLEAN"
     return GateResult(
         "SECURITY_GATE_PASSED",
@@ -69,7 +66,9 @@ def _gate_security(run_id: str, policy: Policy, ctx: dict) -> GateResult:
 
 
 def _gate_documentation(run_id: str, policy: Policy, ctx: dict) -> GateResult:
-    res = dispatch("CHECK_REQUIRED_DOCUMENTATION", run_id, {})
+    res = dispatch(
+        "CHECK_REQUIRED_DOCUMENTATION", run_id, {}, context=ctx["action_context"]
+    )
     ok = res.get("status") == "DOC_OK"
     return GateResult(
         "DOCUMENTATION_GATE_PASSED",

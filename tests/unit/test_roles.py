@@ -7,12 +7,29 @@ and permission matrices reject out-of-role actions.
 
 import pytest
 
-from thekey.actions import dispatch
 from thekey.command_registry import assert_role_allowed, get_spec
-from thekey.errors import UnauthorizedActionError
-from thekey.roles.planner import build_demo_plan, detect_demo_defect
-from thekey.roles.executor import Executor
 from thekey.config import DEMO_APP_SOURCE, WORKSPACES_DIR
+from thekey.errors import UnauthorizedActionError
+from thekey.roles.executor import Executor
+from thekey.roles.planner import build_demo_plan, detect_demo_defect
+
+
+def _authorized_executor():
+    from thekey.main import RunCoordinator
+
+    coordinator = RunCoordinator()
+    coordinator.create("executor unit test")
+    coordinator.baseline()
+    plan = coordinator.plan()
+    coordinator.approve_plan()
+    return (
+        Executor(
+            coordinator.run.run_id,
+            WORKSPACES_DIR,
+            action_context=coordinator.load_action_context(),
+        ),
+        plan,
+    )
 
 
 def test_planner_detects_defect():
@@ -44,9 +61,8 @@ def test_executor_rejects_unapproved_plan():
 
 
 def test_executor_modifies_only_workspace():
-    ex = Executor("R1", WORKSPACES_DIR)
+    ex, plan = _authorized_executor()
     ex.prepare_workspace()
-    plan = build_demo_plan("R1")
     plan.approved = True
     ex.apply_operation(plan.operations[0], plan.to_dict())
     # Original untouched.
@@ -69,9 +85,8 @@ def test_executor_rejects_operation_not_in_plan():
 
 
 def test_executor_rejects_ambiguous_replacement():
-    ex = Executor("R1", WORKSPACES_DIR)
+    ex, plan = _authorized_executor()
     ex.prepare_workspace()
-    plan = build_demo_plan("R1")
     plan.approved = True
     op = dict(plan.operations[0])
     op["expected"] = "def"  # appears multiple times -> ambiguous

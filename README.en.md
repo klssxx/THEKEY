@@ -1,199 +1,168 @@
 # THEKEY
 
-## Governed Git transactions for coding agents.
+Governed software transactions for coding agents.
 
-> **THEKEY** · *Transacciones Git gobernadas para agentes de programación.*
-> Versión completa en español: [README.md](README.md)
+> **One-sentence value:** THEKEY lets a coding agent change an isolated
+> workspace only after the plan, review, human authority, policy decision, and
+> evidence all agree on the same transaction.
 
-**THEKEY 0.2.0 — Public Preview.** A small, serious core for governed Git
-transactions aimed at coding agents, with **workflow isolation**,
-**deterministic gates**, and **auditable evidence**.
+[Spanish README](README.md) · [Build Week contribution](BUILD_WEEK_CONTRIBUTION.md) · [Security](SECURITY.md) · [MIT License](LICENSE)
 
-THEKEY is a small, serious core for governed Git transactions aimed at coding
-agents. It provides workflow isolation, deterministic gates, and auditable
-evidence. It does not provide OS-level sandboxing.
+THEKEY addresses a concrete developer-tools problem: agentic changes are fast,
+but it is often difficult to prove which plan was authorized, what crossed the
+physical execution boundary, and why the result was eligible for release. It
+is intended for coding-agent builders, CI/CD maintainers, and teams that need a
+small, inspectable governance layer.
 
-[![CI](https://img.shields.io/badge/CI-passing-2ea043)](.github/workflows/tests.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-![v0.2.0 Public Preview](https://img.shields.io/badge/v0.2.0-Public%20Preview-orange)
-![Python](https://img.shields.io/badge/python-3.11%2B-3776ab)
-![Windows 11](https://img.shields.io/badge/Windows-11-0078d4)
+THEKEY provides workflow isolation, deterministic gates, and tamper-evident
+evidence within documented limits. It is not an operating-system sandbox.
 
-> Español: *Transacciones Git gobernadas para agentes de programación ·
-> aislamiento de flujo de trabajo, puertas deterministas, evidencia auditable.*
-> Versión completa: [README.md](README.md)
+## OpenAI Build Week Judge Mode
 
-It runs agents in isolated workspaces, verifies every change through
-deterministic gates, and promotes only results with auditable evidence.
-**102 tests, 0 skipped**, demo reproducible on Windows 11 without Docker, WSL,
-or GPU.
-
-![THEKEY demo: full cycle PASS + evidence](docs/assets/thekey-demo.gif)
-
----
-
-## What it is
-
-THEKEY solves a concrete problem: agent-driven software changes are usually a
-blurry mix of "someone edited something, tests ran, we shipped." THEKEY makes
-the change **governed**.
-
-- **Who it is for:** coding agents, CI pipelines, and teams that want to
-  automate code changes with traceability and without touching the original
-  source.
-- **What it actually does:** it separates planning, execution, verification,
-  and policy authorization into distinct roles; it applies the gates defined
-  by a policy-as-code; and it produces verifiable evidence for every run.
-- **What it does NOT promise:** it is not an OS-level sandbox, it does not
-  guarantee total security, it does not replace human review in critical
-  projects, and it does not integrate NPSC into the core.
-
-Plan authorization is performed through **deterministic policy authorization**:
-the policy defines the mandatory gates and the decision (`RELEASE_ELIGIBLE` /
-`BLOCKED`) is derived deterministically from gates and evidence, never from a
-global score or a "VERIFIED" stamp. There is no interactive "human approval"
-step by default; authorization is a consequence of the policy and the plan
-hash.
-
-## Project status
-
-- **THEKEY 0.2.0 — Public Preview.**
-- This is a *public preview*, not a work in progress (WIP).
-- The core is kept intentionally small.
-- **Phase C does not begin before the public launch.**
-
-## Quick start (Windows 11)
+The fastest way to evaluate the Build Week addition on Windows 11 is:
 
 ```powershell
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/klssxx/THEKEY.git
 cd THEKEY
-pwsh -NoProfile -File .\scripts\demo.ps1
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e .
+pwsh -NoProfile -File .\scripts\build-week-demo.ps1
 ```
 
-## Minimal prerequisites
+Judge Mode creates a small temporary Git repository, starts a real governed
+transaction, copies the target into a workflow-isolated runtime, applies one
+controlled repair, executes four gates, demonstrates an authorized ALLOW and
+an adversarial DENY, and writes JSON evidence. It requires no secret, paid
+service, Docker, WSL, or GPU.
 
-Only what is necessary to run the demo:
-
-- **Windows 11**
-- **PowerShell 7** (`pwsh`) — already present on Windows 11; the script does
-  not modify the execution policy.
-- **Python 3.11+** on `PATH`.
-- No Docker, no WSL, no GPU, no paid service, no external API after installing
-  dependencies.
-
-The script `scripts/demo.ps1` creates or reuses `.venv`, installs the project
-with `pip install -e .`, and runs `python -m thekey demo`. It is idempotent,
-does not require administrator privileges, and returns the real exit code from
-the demo.
-
-## What the demo does
-
-The canonical demo creates a governed run over a sample project
-(`examples/demo_app`), plans it, authorizes it by policy, executes it in an
-isolated workspace, verifies the gates, and emits the decision. It ends with
-`decision: RELEASE_ELIGIBLE` and `gates_passed: 4` when everything is correct.
-Real output from a verified run:
+Verified output shape:
 
 ```text
-run_id: TK-20260715-...-XXXXXX
-state: RELEASE_ELIGIBLE
-decision: RELEASE_ELIGIBLE
-gates_passed: 4
-gates_total: 4
-evidence_mismatches: []
-workspace: ...\workspaces\TK-20260715-...-XXXXXX
-run_path: ...\runs\TK-20260715-...-XXXXXX
+THEKEY BUILD WEEK JUDGE MODE
+ALLOW: APPLIED, handlers=1
+DENY: ROLE_NOT_ALLOWED, handlers=0
+GATES: 4/4 PASS
+DECISION: RELEASE_ELIGIBLE
+EVIDENCE: ...\judge-mode-evidence.json
+Isolation: workflow workspace only; this is not an OS sandbox.
 ```
 
-The demo requires no user input and needs no network or models.
+The verified local run completed in under ten seconds and included paths with
+spaces. Runtime varies with hardware and dependency state.
 
-## Architecture in 5 minutes
+## How authorization works
 
-- **Governed transaction:** a unit of software change that traverses explicit
-  states (SUBMITTED → BASELINED → ANALYZED → PLAN_PROPOSED → PLAN_APPROVED →
-  IMPLEMENTED → TESTED → RELEASE_ELIGIBLE) with recovery states (`BLOCKED`,
-  `FAILED`, `ROLLED_BACK`).
-- **Workflow-isolated workspace:** changes are only applied in a controlled
-  workspace; the original source is never touched.
-- **Deterministic gates:** a policy declares mandatory gates (build, tests,
-  secret scan, documentation). A failed mandatory gate cannot be offset by any
-  other metric.
-- **Deterministic policy authorization:** the plan is authorized from the
-  policy and the plan hash; there is no interactive approval and no global
-  score.
-- **Auditable evidence:** every state transition is recorded in an
-  append-only, hash-chained SQLite event store; every artifact is hashed
-  (SHA-256) so a third party can verify the decision and detect tampering.
-- **Optional read-only adapters:** NPSC is an example of an external
-  read-only adapter. The core does not conceptually depend on NPSC in order to
-  exist.
+```text
+Mission plan
+  → CHECKMATE pre-action review receipt
+  → explicit scoped moli authorization receipt
+  → deterministic PolicyEngine decision
+  → THEKEY physical dispatch guard
+  → exactly one declared handler
+  → build, tests, secret scan, documentation gates
+  → release decision and evidence
+```
 
-## Guarantees and limits
+Before a physical handler is even resolved, THEKEY validates a strict Pydantic
+`ActionContext`. Both persisted receipts must agree on the run ID, transaction
+ID and plan SHA-256. The authorization ID, policy version, policy bundle hash,
+role, verdict, and action scope must also match. Only `Role.EXECUTOR` can cross
+the boundary. Missing fields, extra fields, mismatches, `SYSTEM`, `PENDING`,
+`DEFER`, `FAIL`, policy exceptions, invalid responses, or an ALLOW without a
+decision ID all fail closed.
 
-THEKEY provides **workflow isolation**, not OS-level sandboxing. The repository
-**does not promise total security**. Guarantees depend on configuration, the
-host environment, and the implemented gates. NPSC is optional and not part of
-the core.
+`ActionReviewVerdict` is a pre-execution CHECKMATE result. `ReleaseDecision` is
+created after gates. A later release decision is never reused retroactively as
+authorization.
 
-Current (honest) limitations: simplified local authorization identity, limited
-secret scanning, no strong process sandbox, no cryptographic human identities,
-no multi-developer concurrency, no mandatory external AI, and no enterprise
-guarantee. See [THREAT_MODEL.en.md](THREAT_MODEL.en.md) and
-[SECURITY.md](SECURITY.md).
+## Architecture
+
+- **Coordinator:** persists run artifacts and rehydrates a transaction across
+  CLI processes.
+- **CHECKMATE reviewer:** emits the pre-action review receipt for the bounded
+  plan.
+- **Sovereign grant binder:** binds moli's explicit, repository-visible grant
+  to one real run and transaction.
+- **PolicyEngine:** validates the complete context and emits `allowed`, a reason
+  code, a decision ID, and the preserved policy bundle hash.
+- **Physical dispatch guard:** authorizes before handler lookup; no arbitrary
+  shell command or path is exposed.
+- **Workspace manager:** confines declared changes to a workflow workspace.
+- **Verifier:** runs build, unit-test, limited secret-scan, and documentation
+  gates.
+- **Evidence/state:** hashes artifacts, records transitions, and verifies the
+  persisted state projection on load.
+
+## Requirements and supported platform
+
+- Windows 11 — verified
+- PowerShell 7 (`pwsh`) — verified
+- Python 3.11 or newer
+- Git
+
+The core is Python. Judge Mode is currently verified only on Windows 11. The
+project does not describe workflow isolation as an OS sandbox.
 
 ## Commands
 
-All commands below are validated in this release.
-
 ```powershell
-# Canonical demo (deterministic policy authorization, no input)
+# Build Week judge path
+pwsh -NoProfile -File .\scripts\build-week-demo.ps1
+
+# Canonical demo
 python -m thekey demo
 
-# MiMo autonomous launcher (same pipeline, actor-profile aware)
-python -m thekey-mimo
+# Focused and full tests
+python -m pytest -q tests\test_phase_b_rbac_v2_models.py `
+  tests\test_phase_b_rbac_v2_guard.py `
+  tests\test_phase_b_rbac_v2_integration.py
+python -m pytest -q
 
-# Manual flow
+# Separate-process lifecycle
 python -m thekey run create --title "Fix calculator.add"
 python -m thekey run plan --run-id <RUN_ID>
 python -m thekey run approve-plan --run-id <RUN_ID>
 python -m thekey run execute --run-id <RUN_ID>
 python -m thekey run verify --run-id <RUN_ID>
-python -m thekey run status --run-id <RUN_ID>
 python -m thekey evidence verify --run-id <RUN_ID>
-
-# Core tests
-python -m pytest -q
 ```
 
-Both `python -m thekey demo` and `python -m thekey-mimo` exit 0 on
-`RELEASE_ELIGIBLE` and non-zero on `BLOCKED`.
+## Build Week provenance and use of Codex
 
-## Development
+The public repository begins after the event cutoff even though the owner says
+the project existed earlier. [BUILD_WEEK_CONTRIBUTION.md](BUILD_WEEK_CONTRIBUTION.md)
+therefore separates verified work in this Codex thread from unresolved earlier
+provenance instead of presenting the first public commit as entirely new.
 
-Read [CONTRIBUTING.en.md](CONTRIBUTING.en.md) to set up the environment, run
-the tests, and propose changes. For the security model, see
-[SECURITY.md](SECURITY.md).
+Codex was used for codebase inspection, architecture and adversarial analysis,
+implementation, AST caller verification, RED→GREEN testing, regression,
+rollback preparation, and documentation. moli retained the decisions about
+authority, scope, LIVE_E, push, merge, release, video publication, and final
+submission.
 
-## Threat model
+- GPT-5.6 development evidence: `PENDING_SESSION_METADATA_VERIFICATION`
+- Primary Codex `/feedback` Session ID: `PENDING_REAL_FEEDBACK_SESSION_ID`
+- Public YouTube video: `PENDING_PUBLIC_YOUTUBE_URL`
 
-The realistic security analysis is in [THREAT_MODEL.en.md](THREAT_MODEL.en.md).
-It covers objectives, protected assets, trust boundaries, attack surface,
-present and missing mitigations, and explicit limitations.
+These placeholders must be replaced with real evidence. THEKEY does not claim
+a GPT-5.6 runtime integration.
 
-## Roadmap / initial backlog
+## Security boundaries and limitations
 
-The initial backlog is organized into three categories (without starting Phase
-C in code):
+- Workflow isolation is not process or OS isolation.
+- The included sovereign grant is not production authorization: the binder
+  requires `JUDGE_MODE_DEMO_ONLY`, the canonical demo's exact path and normalized-text SHA-256,
+  isolated-workspace-only output, and `production_reuse=false`. It remains a
+  transparent local grant, not a cryptographic human signature.
+- SHA-256 evidence is tamper-evident within the implemented chain; it is not
+  invulnerable or a substitute for external attestation.
+- The built-in secret scan is deliberately limited.
+- The action registry and Judge Mode cover a bounded demonstration, not
+  arbitrary repository repair.
+- `CANONICAL_SOURCE_STATUS` remains `UNRESOLVED`; `FULL_CHECKMATE` is `FALSE`.
 
-- **Onboarding / good first issue:** approachable tasks for new contributors
-  (for example, the ES/EN README parity gate, improved error messages in
-  `scripts/demo.ps1`, and the forbidden-language check in normative docs).
-- **Practical extensions / help wanted:** additional read-only adapters,
-  improved exportable evidence format, and Windows 11 / path-with-spaces
-  hardening for auxiliary tooling.
-- **RFC / future architecture:** a formal contract for read-only adapters for
-  external providers, and a preliminary design for Phase C/D.
+See [THREAT_MODEL.en.md](THREAT_MODEL.en.md) and [SECURITY.md](SECURITY.md).
 
 ## License
 
-Distributed under the MIT license. See [LICENSE](LICENSE).
+THEKEY is distributed under the [MIT License](LICENSE).

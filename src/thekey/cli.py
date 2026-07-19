@@ -23,27 +23,21 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .actions import dispatch, handler_call_count
+from .actions import sha256_file as action_sha256_file
 from .config import (
-    DEFAULT_POLICY_FILE,
-    DEMO_APP_SOURCE,
     RUNS_DIR,
     WORKSPACES_DIR,
 )
 from .errors import (
-    BudgetExceededError,
-    GateFailureError,
     InvalidEvidenceError,
-    InvalidPolicyError,
-    RecoveryBlockedError,
-    StaleModelOutputError,
     TheKeyError,
-    UnauthorizedPathError,
 )
+from .history import RunHistory, history_rebuild, history_verify
 from .main import RunCoordinator
-from .policies import PolicyEngine
+from .models import Role
+from .rbac_guard import AuthorizationDeniedError
 from .runs import RunManager
-from .history import RunHistory, history_verify, history_rebuild
-from .state_machine import StateMachine, is_legal
 
 EXIT_CODES = {
     "GENERAL_ERROR": 1,
@@ -101,7 +95,7 @@ def cmd_run_create(args) -> int:
 
 def cmd_run_plan(args) -> int:
     coord = _coordinator_for(args.run_id)
-    if coord.sm.load().run_state == "SUBMITTED":
+    if coord.sm.load().run_state in {"SUBMITTED", "BASELINED"}:
         coord.baseline()
     plan = coord.plan()
     _print({"run_id": coord.run.run_id, "plan": plan.to_dict()}, args.json)
@@ -220,6 +214,82 @@ def cmd_demo(args) -> int:
     return 0
 
 
+def cmd_judge_mode(args) -> int:
+    """Run the Build Week positive and adversarial paths over a temp source."""
+    source = Path(args.source).resolve()
+    coord = RunCoordinator(demo_source=source)
+    coord.create("THEKEY Build Week Judge Mode", "Governed change with explicit denial")
+    coord.baseline()
+    coord.plan()
+    coord.approve_plan()
+    execution = coord.execute()
+    gates = coord.verify()
+    decision = coord.decide()
+    context = coord.load_action_context()
+    allowed_handlers = handler_call_count(
+        context.transaction_id, "REPLACE_EXACT_TEXT"
+    )
+
+    workspace_file = WORKSPACES_DIR / coord.run.run_id / "src/demo_app/calculator.py"
+    before_deny = action_sha256_file(workspace_file)
+    denied_context = context.model_copy(update={"role": Role.SYSTEM})
+    deny_reason = "DENY_NOT_OBSERVED"
+    before_count = handler_call_count(context.transaction_id, "REPLACE_EXACT_TEXT")
+    try:
+        dispatch(
+            "REPLACE_EXACT_TEXT",
+            coord.run.run_id,
+            {
+                "target_id": "src/demo_app/calculator.py",
+                "expected": "def add(a: int, b: int) -> int:\n    return a + b",
+                "replacement": "def add(a: int, b: int) -> int:\n    raise RuntimeError('denied')",
+            },
+            context=denied_context,
+        )
+    except AuthorizationDeniedError as exc:
+        deny_reason = exc.reason_code
+    denied_handlers = (
+        handler_call_count(context.transaction_id, "REPLACE_EXACT_TEXT")
+        - before_count
+    )
+    after_deny = action_sha256_file(workspace_file)
+    result = {
+        "judge_mode": "THEKEY Build Week Judge Mode",
+        "run_id": coord.run.run_id,
+        "transaction_id": context.transaction_id,
+        "plan_sha256": context.plan_sha256,
+        "authorization_id": context.authorization_id,
+        "policy_bundle_hash": context.policy_bundle_hash,
+        "allow": {
+            "status": execution["results"][0]["status"],
+            "handler_call_count": allowed_handlers,
+            "decision_id": execution["results"][0]["authorization"]["decision_id"],
+        },
+        "deny": {
+            "reason_code": deny_reason,
+            "handler_call_count": denied_handlers,
+            "workspace_hash_unchanged": before_deny == after_deny,
+        },
+        "gates": [gate.to_dict() for gate in gates],
+        "release_decision": decision.decision,
+        "run_path": str(coord.run.dir),
+        "workspace_path": str(workspace_file.parent.parent.parent),
+    }
+    output = Path(args.output).resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+    _print(result, args.json)
+    success = (
+        allowed_handlers == 1
+        and denied_handlers == 0
+        and deny_reason == "ROLE_NOT_ALLOWED"
+        and before_deny == after_deny
+        and all(gate.passed for gate in gates)
+        and decision.decision == "RELEASE_ELIGIBLE"
+    )
+    return 0 if success else EXIT_CODES["GATE_FAILURE"]
+
+
 def cmd_history(args) -> int:
     rh = RunHistory()
     if args.history_cmd == "verify":
@@ -305,6 +375,12 @@ def build_parser() -> argparse.ArgumentParser:
     dm.add_argument("--json", action="store_true")
     dm.set_defaults(func=cmd_demo)
 
+    judge = sub.add_parser("judge-mode", help="Run the reproducible Build Week demo")
+    judge.add_argument("--source", required=True)
+    judge.add_argument("--output", required=True)
+    judge.add_argument("--json", action="store_true")
+    judge.set_defaults(func=cmd_judge_mode)
+
     # history
     hist = sub.add_parser("history", help="Run-history index and queries")
     hist.add_argument("--limit", type=int, default=None)
@@ -315,7 +391,7 @@ def build_parser() -> argparse.ArgumentParser:
     hist.add_argument("--since", default=None)
     hist.add_argument("--json", action="store_true")
     hist_sub = hist.add_subparsers(dest="history_cmd")
-    hl = hist_sub.add_parser("list", help="List runs (default)")
+    hist_sub.add_parser("list", help="List runs (default)")
     hs = hist_sub.add_parser("show", help="Show one run")
     hs.add_argument("--run-id", required=True)
     hs.add_argument("--json", action="store_true")

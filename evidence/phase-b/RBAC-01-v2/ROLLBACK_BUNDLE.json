@@ -1,0 +1,127 @@
+{
+  "schema_version": "v1",
+  "protocol_version": "v1",
+  "created_at_utc": "2026-07-19T10:56:26.298Z",
+  "run_id": "PHASE-B-RBAC-01-V2-20260719",
+  "operation_id": "FASE-B-v2",
+  "plan_sha256": "9945add1e646096bd73f071f620d906170c329474d279041c87cf52ae99cb6f4",
+  "workspace_root": "E:/PROYECTS/.worktrees/TheKey-PhaseB-v2/THEKEY",
+  "source_commit": "3a8456416ed9ae9183840585b488cec04e9a069d",
+  "source_tree_hash": "06ff07e3482ff8443d4cbebddb270aed15da1712",
+  "branch": "implementation/phase-b-rbac-v2",
+  "preexisting_git_diff": [],
+  "protected_untracked": {
+    "path": "scripts/make_thelkey_guide_pdf.py",
+    "sha256": "b7929d27b3b717cfb3bca1ef46400a360fc8c97f176262dd2e21603291bae2aa",
+    "disposition": "PRESERVE_UNCHANGED_AND_EXCLUDE_FROM_COMMITS"
+  },
+  "write_set": [
+    "pyproject.toml",
+    "README.md",
+    "README.en.md",
+    "BUILD_WEEK_CONTRIBUTION.md",
+    "BUILD_WEEK_CONTRIBUTION.es.md",
+    "src/thekey/actions.py",
+    "src/thekey/gates.py",
+    "src/thekey/roles/executor.py",
+    "src/thekey/models.py",
+    "src/thekey/rbac_guard.py",
+    "src/thekey/production_backend.py",
+    "src/thekey/policies.py",
+    "src/thekey/main.py",
+    "src/thekey/cli.py",
+    "src/thekey/state_machine.py",
+    "src/thekey/roles/approver.py",
+    "src/thekey/roles/verifier.py",
+    "governance/schemas/action-context.schema.json",
+    "governance/schemas/checkmate-review-receipt.schema.json",
+    "governance/schemas/sovereign-authorization-receipt.schema.json",
+    "governance/schemas/governed-transaction.schema.json",
+    "governance/demo-authorizations/build-week-judge-mode-v1.json",
+    "tests/test_phase_b_rbac_v2_models.py",
+    "tests/test_phase_b_rbac_v2_guard.py",
+    "tests/test_phase_b_rbac_v2_integration.py",
+    "tests/unit/test_roles.py",
+    "tests/unit/test_verifier.py",
+    "scripts/build-week-demo.ps1",
+    "docs/build-week/DEVPOST_DRAFT.md",
+    "docs/build-week/VIDEO_SCRIPT.md",
+    "evidence/phase-b/RBAC-01-v2/ROLLBACK_BUNDLE.json",
+    "evidence/phase-b/RBAC-01-v2/BASELINE.json",
+    "evidence/phase-b/RBAC-01-v2/TDD_RED.md",
+    "evidence/phase-b/RBAC-01-v2/TDD_GREEN.md",
+    "evidence/phase-b/RBAC-01-v2/CALLER_ANALYSIS.json",
+    "evidence/phase-b/RBAC-01-v2/GATE_SEC_01.json",
+    "evidence/phase-b/RBAC-01-v2/REGRESSION.md",
+    "evidence/phase-b/RBAC-01-v2/ROLLBACK_COMPLETE.json",
+    "evidence/phase-b/RBAC-01-v2/CLEAN_CLONE_DEMO.md",
+    "evidence/phase-b/RBAC-01-v2/SECRET_SCAN.md",
+    "evidence/phase-b/RBAC-01-v2/FINAL_MANIFEST.json"
+  ],
+  "write_set_expansions": [
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "tests/unit/test_roles.py",
+      "reason": "Truthful regression requires a real persisted ActionContext instead of a test-only physical bypass.",
+      "authorization_status": "RATIFIED_BY_USER_2026-07-19"
+    },
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "tests/unit/test_verifier.py",
+      "reason": "Truthful gate regression requires a real persisted ActionContext instead of a test-only physical bypass.",
+      "authorization_status": "RATIFIED_BY_USER_2026-07-19"
+    },
+    {
+      "classification": "WRITE_SET_EXPANSION_REQUIRED",
+      "path": "governance/demo-authorizations/build-week-judge-mode-v1.json",
+      "reason": "Judge Mode requires a visible explicit grant; productive reuse is denied by fixed demo path/hash and isolated-output checks.",
+      "authorization_status": "RATIFIED_BY_USER_2026-07-19"
+    }
+  ],
+  "tracked_file_backups": {
+    "pyproject.toml": "git-blob:5819f50dcdd3870cdbc752f9a9d520344ec41e90",
+    "README.md": "git-blob:4182b6ab435485150f55324b73186870710e2274",
+    "README.en.md": "git-blob:20e733a14d3c3c1093a5cd0e2506045f796b667f",
+    "src/thekey/actions.py": "git-blob:1d536aebce1cd6f941fa8fbc0607de1e773c16e7",
+    "src/thekey/gates.py": "git-blob:d629cbce1e7e8185aa4e589cb57ffb08f8a0f0e7",
+    "src/thekey/roles/executor.py": "git-blob:211fb6d747f68856868631395046529fc186d7c3",
+    "src/thekey/policies.py": "git-blob:9144cdc40a10a57879f39c706365a63479793d8e",
+    "src/thekey/main.py": "git-blob:3fc7dee2cc22e798b8699c4db31033db1dae4508",
+    "src/thekey/cli.py": "git-blob:e3826a672d1eedad40f6e5a775dd21b688f529b2",
+    "src/thekey/state_machine.py": "git-blob:8ae8e2626c4ca044f7c92d1635ec0d88628b0735",
+    "src/thekey/roles/approver.py": "git-blob:d7ad7e5e91fb68d6d2fd67f8ad4e94a8ef3fcde3",
+    "src/thekey/roles/verifier.py": "git-blob:1440af8efe870d3b20576fbc25995a9a6918e4f6"
+    ,"tests/unit/test_roles.py": "git-blob:fb19d63b762bf6852e6fcb91d19a5525eecd227b"
+    ,"tests/unit/test_verifier.py": "git-blob:d9c168e7aa3603525af266b0bd39d9827a7f22a9"
+  },
+  "new_files_at_baseline": [
+    "BUILD_WEEK_CONTRIBUTION.md",
+    "BUILD_WEEK_CONTRIBUTION.es.md",
+    "src/thekey/models.py",
+    "src/thekey/rbac_guard.py",
+    "src/thekey/production_backend.py",
+    "governance/schemas/action-context.schema.json",
+    "governance/schemas/checkmate-review-receipt.schema.json",
+    "governance/schemas/sovereign-authorization-receipt.schema.json",
+    "governance/schemas/governed-transaction.schema.json",
+    "governance/demo-authorizations/build-week-judge-mode-v1.json",
+    "tests/test_phase_b_rbac_v2_models.py",
+    "tests/test_phase_b_rbac_v2_guard.py",
+    "tests/test_phase_b_rbac_v2_integration.py",
+    "scripts/build-week-demo.ps1",
+    "docs/build-week/DEVPOST_DRAFT.md",
+    "docs/build-week/VIDEO_SCRIPT.md"
+  ],
+  "rollback_strategy": {
+    "tracked_files": "Restore each listed blob from source_commit after verifying the target is in this write_set.",
+    "new_files": "Remove only new_files_at_baseline plus generated evidence files except the preserved rollback proof.",
+    "git_command_reference": "git restore --source=3a8456416ed9ae9183840585b488cec04e9a069d -- <explicit tracked paths>",
+    "destructive_command_executed": false,
+    "protected_untracked_touched": false
+  },
+  "dependency_snapshot": {
+    "pyproject_sha256": "23c395babf19141ced6e45a44d4759f4f49c6464ee03f0306e98e80a60afe9e5",
+    "python_runtime": "UNAVAILABLE_BROKEN_VENV",
+    "venv_expected_base": "C:/Users/KLSX/AppData/Local/Programs/Python/Python312/python.exe"
+  }
+}

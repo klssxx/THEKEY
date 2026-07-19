@@ -89,6 +89,9 @@ class StateSnapshot:
     active_role: str = ""
     phase_contract_hash: str = ""
     approved_plan_hash: str = ""
+    active_transaction_id: str = ""
+    active_authorization_id: str = ""
+    action_context_path: str = ""
     internal_mode: str = "NORMAL"  # orchestrator-only, never exposed to HY3
     last_completed_action: str = ""
     last_verified_command_result: str = ""
@@ -107,6 +110,9 @@ class StateSnapshot:
             "active_role": self.active_role,
             "phase_contract_hash": self.phase_contract_hash,
             "approved_plan_hash": self.approved_plan_hash,
+            "active_transaction_id": self.active_transaction_id,
+            "active_authorization_id": self.active_authorization_id,
+            "action_context_path": self.action_context_path,
             "internal_mode": self.internal_mode,
             "last_completed_action": self.last_completed_action,
             "last_verified_command_result": self.last_verified_command_result,
@@ -148,8 +154,14 @@ class StateMachine:
         self.dir.mkdir(parents=True, exist_ok=True)
         # Per-run log locations derived from the state file's directory.
         self.prev_file = Path(prev_file) if prev_file else self.dir / "state.previous.json"
-        self.transitions_file = Path(transitions_file) if transitions_file else self.dir / "state-transitions.jsonl"
-        self.history_file = Path(history_file) if history_file else self.dir / "state-history.jsonl"
+        self.transitions_file = (
+            Path(transitions_file)
+            if transitions_file
+            else self.dir / "state-transitions.jsonl"
+        )
+        self.history_file = (
+            Path(history_file) if history_file else self.dir / "state-history.jsonl"
+        )
         self._seq = 0
         self._load_seq()
 
@@ -193,7 +205,15 @@ class StateMachine:
             snap.current_state_hash = snap.recompute_hash()
             return snap
         data = json.loads(self.state_file.read_text(encoding="utf-8"))
-        return StateSnapshot.from_dict(data)
+        snapshot = StateSnapshot.from_dict(data)
+        if snapshot.run_state not in STATES:
+            raise TheKeyError("Unknown persisted run state", code="STATE_INTEGRITY_FAILURE")
+        if (
+            not snapshot.current_state_hash
+            or snapshot.recompute_hash() != snapshot.current_state_hash
+        ):
+            raise TheKeyError("Persisted state hash mismatch", code="STATE_INTEGRITY_FAILURE")
+        return snapshot
 
     def _load_seq(self) -> None:
         if self.transitions_file.exists():
@@ -264,6 +284,10 @@ class StateMachine:
             active_phase=current.active_phase,
             active_role=current.active_role,
             phase_contract_hash=current.phase_contract_hash,
+            approved_plan_hash=current.approved_plan_hash,
+            active_transaction_id=current.active_transaction_id,
+            active_authorization_id=current.active_authorization_id,
+            action_context_path=current.action_context_path,
             internal_mode=current.internal_mode,
             last_completed_action=current.last_completed_action,
             last_verified_command_result=(extra or {}).get(
@@ -274,7 +298,16 @@ class StateMachine:
             updated_at=_utcnow(),
         )
         if extra:
-            for k in ("active_phase", "active_role", "phase_contract_hash", "last_completed_action"):
+            for k in (
+                "active_phase",
+                "active_role",
+                "phase_contract_hash",
+                "last_completed_action",
+                "approved_plan_hash",
+                "active_transaction_id",
+                "active_authorization_id",
+                "action_context_path",
+            ):
                 if k in extra:
                     setattr(next_snap, k, extra[k])
         next_snap.current_state_hash = next_snap.recompute_hash()
@@ -324,8 +357,8 @@ class StateMachine:
             setattr(current, k, v)
         current.state_version += 1
         current.previous_state_hash = current.current_state_hash
-        current.current_state_hash = current.recompute_hash()
         current.updated_at = _utcnow()
+        current.current_state_hash = current.recompute_hash()
         if self.state_file.exists():
             self.state_file.replace(self.prev_file)
         atomic_write_text(
@@ -340,6 +373,8 @@ class StateMachine:
         if not self.history_file.exists():
             return []
         lines = [
-            json.loads(l) for l in self.history_file.read_text(encoding="utf-8").splitlines() if l.strip()
+            json.loads(line)
+            for line in self.history_file.read_text(encoding="utf-8").splitlines()
+            if line.strip()
         ]
         return lines[-limit:]

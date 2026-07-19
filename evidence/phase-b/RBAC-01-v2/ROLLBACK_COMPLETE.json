@@ -1,0 +1,38 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T14:36:16.059Z",
+  "environment": "disposable clean clone",
+  "clone_path": ".thekey/checkpoint-clean-clone-v2/Clone With Spaces",
+  "source_commit": "3a8456416ed9ae9183840585b488cec04e9a069d",
+  "rollback": {
+    "tracked_files_restored_from_head": true,
+    "new_candidate_files_remaining": 0,
+    "git_status": "CLEAN",
+    "protected_pdf_present": false
+  },
+  "critical_blob_checks": [
+    {
+      "path": "src/thekey/actions.py",
+      "expected": "1d536aebce1cd6f941fa8fbc0607de1e773c16e7",
+      "actual": "1d536aebce1cd6f941fa8fbc0607de1e773c16e7",
+      "match": true
+    },
+    {
+      "path": "src/thekey/gates.py",
+      "expected": "d629cbce1e7e8185aa4e589cb57ffb08f8a0f0e7",
+      "actual": "d629cbce1e7e8185aa4e589cb57ffb08f8a0f0e7",
+      "match": true
+    },
+    {
+      "path": "src/thekey/roles/executor.py",
+      "expected": "211fb6d747f68856868631395046529fc186d7c3",
+      "actual": "211fb6d747f68856868631395046529fc186d7c3",
+      "match": true
+    }
+  ],
+  "reapply": {
+    "status": "PASS",
+    "patch_bytes_at_verification": 81723,
+    "new_files_reapplied": 19
+  }
+}

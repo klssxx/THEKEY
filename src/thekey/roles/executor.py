@@ -19,10 +19,11 @@ from ..workspaces import WorkspaceManager
 
 
 class Executor:
-    def __init__(self, run_id: str, workspace_root: Path = WORKSPACES_DIR):
+    def __init__(self, run_id: str, workspace_root: Path = WORKSPACES_DIR, action_context=None):
         self.run_id = run_id
         self.wm = WorkspaceManager(workspace_root)
         self.ws = self.wm.create(run_id)
+        self.action_context = action_context
 
     def _assert_approved(self, plan: dict) -> None:
         if not plan.get("approved"):
@@ -87,8 +88,19 @@ class Executor:
             params["target_id"] = ws_relative
             params["expected"] = operation["expected"]
             params["replacement"] = operation["replacement"]
-        result = dispatch(action_id, self.run_id, params)
-        return {"status": result.get("status"), "action_id": action_id, "result": result}
+        result = dispatch(
+            action_id,
+            self.run_id,
+            params,
+            context=self.action_context,
+        )
+        return {
+            "status": result.get("status"),
+            "action_id": action_id,
+            "result": result,
+            "authorization": result["authorization"],
+            "transaction_id": result["transaction_id"],
+        }
 
     def generate_diff(self, demo_source: Path = DEMO_APP_SOURCE) -> str:
         original = demo_source.read_text(encoding="utf-8").splitlines()
