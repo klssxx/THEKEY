@@ -1,0 +1,78 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T20:55:29.082Z",
+  "project": {
+    "name": "THEKEY",
+    "classification": "PREEXISTING_PROJECT",
+    "classification_status": "CLAIM_RECORDED"
+  },
+  "submission_period": {
+    "starts_at": "2026-07-13T09:00:00-07:00",
+    "source": "https://openai.devpost.com/rules",
+    "status": "VERIFIED_PUBLIC_RULE"
+  },
+  "public_git_history": {
+    "remote": "https://github.com/klssxx/THEKEY.git",
+    "inspected_ref": "origin/main",
+    "earliest_reachable_commit": "b7b6c32cf3a2621d29ef2c5856db50d116d8dff6",
+    "earliest_commit_authored_at": "2026-07-15T06:34:40+02:00",
+    "earliest_commit_tree": "9d4146833c7429ffee85ffd337a7796acc095f62",
+    "status": "VERIFIED_GIT_OBJECT",
+    "interpretation": "The accessible public Git graph begins after the submission cutoff; it is not presented as pre-cutoff history."
+  },
+  "pre_public_history": [
+    {
+      "record_id": "owner-preexisting-project-declaration",
+      "status": "CLAIM_RECORDED",
+      "public_record": "docs/build-week/PRE_PUBLIC_PROVENANCE.md"
+    },
+    {
+      "record_id": "historical-chat-exports-and-snapshots",
+      "status": "PENDING_EVIDENCE_IMPORT",
+      "private_destination": "evidence-private/build-week/chat-exports/",
+      "published": false
+    }
+  ],
+  "candidate_boundaries": {
+    "session_baseline": {
+      "commit": "3a8456416ed9ae9183840585b488cec04e9a069d",
+      "tree": "06ff07e3482ff8443d4cbebddb270aed15da1712",
+      "status": "VERIFIED_GIT_OBJECT"
+    },
+    "phase_b_commit": {
+      "commit": "c0410feaf869e0ac08c9e637b70e30ebac8085c8",
+      "tree": "5d9ac9693c1f58ae80314e114e291b0738c70255",
+      "status": "VERIFIED_GIT_OBJECT"
+    },
+    "final_candidate": {
+      "ref": "HEAD",
+      "expected_parent": "c0410feaf869e0ac08c9e637b70e30ebac8085c8",
+      "resolution_command": "git rev-parse HEAD",
+      "tree_resolution_command": "git show -s --format=%T HEAD",
+      "status": "BOUND_TO_FINAL_HEAD"
+    }
+  },
+  "codex_session": {
+    "feedback_session_id": "019f79f2-6a7e-74f0-b1fa-d65335b29a7c",
+    "observed_local_model_labels": [
+      "gpt-5.6-luna",
+      "gpt-5.6-sol"
+    ],
+    "status": "VERIFIED_SESSION_METADATA",
+    "public_record": "docs/build-week/CODEX_SESSION_EVIDENCE.md",
+    "raw_logs_published": false,
+    "runtime_integration_claimed": false
+  },
+  "evaluation_scope": {
+    "from_exclusive": "3a8456416ed9ae9183840585b488cec04e9a069d",
+    "through_inclusive_ref": "HEAD",
+    "statement": "Only the verifiable post-baseline delta is presented for Build Week evaluation."
+  },
+  "operations": {
+    "push_performed": false,
+    "merge_performed": false,
+    "live_e_modified": false,
+    "tag_or_release_performed": false,
+    "devpost_submitted": false
+  }
+}

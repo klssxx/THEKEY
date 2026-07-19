@@ -25,8 +25,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 # File types to scan.
 SCAN_GLOBS = ["*.py", "*.ps1", "*.toml", "*.md", "*.json", "*.yaml", "*.yml"]
-EXCLUDE_DIRS = {".git", ".venv", "runs", "workspaces", "node_modules", "__pycache__",
-                "tests/fixtures", "development-audit", "release_evidence"}
+EXCLUDE_DIRS = {".git", ".thekey", ".venv", "runs", "workspaces", "node_modules",
+                "__pycache__", "tests/fixtures", "development-audit",
+                "release_evidence"}
 
 # Files whose entire purpose is storing hashes / digests (never secrets).
 HASH_FILE_MARKERS = ("hashes.json", "hashes.sha256", "file_hashes", "pytest_count")

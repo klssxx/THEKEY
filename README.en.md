@@ -1,41 +1,55 @@
-# THEKEY
+# THEKEY — Governed Transactions for Coding Agents
 
-Governed software transactions for coding agents.
+> Every agentic change gets a plan identity, explicit authorization,
+> deterministic gates, and reviewable evidence.
 
-> **One-sentence value:** THEKEY lets a coding agent change an isolated
-> workspace only after the plan, review, human authority, policy decision, and
-> evidence all agree on the same transaction.
+[Español](README.md) · [Judge quickstart](docs/build-week/JUDGE_QUICKSTART.md) ·
+[Build Week contribution](BUILD_WEEK_CONTRIBUTION.md) ·
+[Build Week delta](docs/build-week/BUILD_WEEK_DELTA.md) ·
+[Security](SECURITY.md) · [MIT License](LICENSE)
 
-[Spanish README](README.md) · [Build Week contribution](BUILD_WEEK_CONTRIBUTION.md) · [Security](SECURITY.md) · [MIT License](LICENSE)
+Current release: `0.2.0`.
 
-THEKEY addresses a concrete developer-tools problem: agentic changes are fast,
-but it is often difficult to prove which plan was authorized, what crossed the
-physical execution boundary, and why the result was eligible for release. It
-is intended for coding-agent builders, CI/CD maintainers, and teams that need a
-small, inspectable governance layer.
+## The problem
 
-THEKEY provides workflow isolation, deterministic gates, and tamper-evident
-evidence within documented limits. It is not an operating-system sandbox.
+Coding agents can change a repository quickly, but a team may still be unable
+to answer four basic questions: which plan was approved, who authorized its
+physical execution, what actually ran, and why the result was eligible for
+release. THEKEY makes those questions part of the transaction instead of an
+after-the-fact narrative.
 
-## OpenAI Build Week Judge Mode
+## What THEKEY is — and is not
 
-The fastest way to evaluate the Build Week addition on Windows 11 is:
+THEKEY is a small Python governance layer for coding-agent changes. It binds a
+plan, a CHECKMATE pre-action review, explicit human authority, a deterministic
+policy decision, physical handlers, four verification gates, and persisted
+evidence to one run and transaction.
+
+It provides workflow isolation, deterministic policy authorization, and
+fail-closed dispatch. It is not an operating-system sandbox. It is not a
+general-purpose repair agent, a cryptographic human-signature system, or an
+external attestation service.
+
+## Judge Mode in about three minutes
+
+Verified platform: Windows 11, PowerShell 7, Python 3.11 or newer, and Git.
 
 ```powershell
 git clone https://github.com/klssxx/THEKEY.git
 cd THEKEY
 python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -e .
 pwsh -NoProfile -File .\scripts\build-week-demo.ps1
+pwsh -NoProfile -File .\scripts\verify-build-week-evidence.ps1
 ```
 
-Judge Mode creates a small temporary Git repository, starts a real governed
-transaction, copies the target into a workflow-isolated runtime, applies one
-controlled repair, executes four gates, demonstrates an authorized ALLOW and
-an adversarial DENY, and writes JSON evidence. It requires no secret, paid
-service, Docker, WSL, or GPU.
+No API key, paid service, Docker, WSL, GPU, private dependency, or test account
+is required. Judge Mode creates a temporary Git repository under the ignored
+`.thekey` directory, repairs one controlled defect only in an isolated runtime,
+executes the real governance path, and leaves the source repository unchanged.
 
-Verified output shape:
+Expected summary:
 
 ```text
 THEKEY BUILD WEEK JUDGE MODE
@@ -43,126 +57,136 @@ ALLOW: APPLIED, handlers=1
 DENY: ROLE_NOT_ALLOWED, handlers=0
 GATES: 4/4 PASS
 DECISION: RELEASE_ELIGIBLE
-EVIDENCE: ...\judge-mode-evidence.json
-Isolation: workflow workspace only; this is not an OS sandbox.
+SOURCE: unchanged=True
+RECEIPTS: bound=True
+PRODUCTION REUSE: False
 ```
 
-The verified local run completed in under ten seconds and included paths with
-spaces. Runtime varies with hardware and dependency state.
+The verifier parses the JSON and persisted receipts; it does not accept the
+printed summary as proof. It checks one ALLOW handler, zero DENY handlers, an
+unchanged source and denied-workspace hash, four passing gates, receipt binding,
+`production_reuse=false`, and the persisted release decision. See the
+[judge quickstart](docs/build-week/JUDGE_QUICKSTART.md) for troubleshooting and
+cleanup.
 
-## How authorization works
+## Transaction flow
 
 ```text
 Mission plan
-  → CHECKMATE pre-action review receipt
-  → explicit scoped moli authorization receipt
-  → deterministic PolicyEngine decision
-  → THEKEY physical dispatch guard
-  → exactly one declared handler
-  → build, tests, secret scan, documentation gates
-  → release decision and evidence
+  → CHECKMATE pre-action receipt
+  → scoped sovereign authorization receipt
+  → PolicyEngine decision
+  → physical dispatch guard
+  → one declared handler
+  → build, unit-test, secret-scan, documentation gates
+  → release decision and reviewable evidence
 ```
 
-Before a physical handler is even resolved, THEKEY validates a strict Pydantic
-`ActionContext`. Both persisted receipts must agree on the run ID, transaction
-ID and plan SHA-256. The authorization ID, policy version, policy bundle hash,
-role, verdict, and action scope must also match. Only `Role.EXECUTOR` can cross
-the boundary. Missing fields, extra fields, mismatches, `SYSTEM`, `PENDING`,
-`DEFER`, `FAIL`, policy exceptions, invalid responses, or an ALLOW without a
-decision ID all fail closed.
+The physical guard validates a strict Pydantic `ActionContext` before handler
+lookup. Both persisted receipts must agree on run ID, transaction ID, and plan
+SHA-256. Authorization ID, policy version, policy-bundle hash, role, verdict,
+and action scope must also agree. Only `Role.EXECUTOR` may cross the boundary.
+Missing or extra fields, mismatches, non-executor roles, `PENDING`, `DEFER`,
+`FAIL`, policy exceptions, malformed decisions, or ALLOW without a decision ID
+all fail closed.
 
 `ActionReviewVerdict` is a pre-execution CHECKMATE result. `ReleaseDecision` is
-created after gates. A later release decision is never reused retroactively as
-authorization.
+created only after the gates and is never reused retroactively as authority.
 
 ## Architecture
 
 - **Coordinator:** persists run artifacts and rehydrates a transaction across
-  CLI processes.
-- **CHECKMATE reviewer:** emits the pre-action review receipt for the bounded
-  plan.
-- **Sovereign grant binder:** binds moli's explicit, repository-visible grant
-  to one real run and transaction.
-- **PolicyEngine:** validates the complete context and emits `allowed`, a reason
-  code, a decision ID, and the preserved policy bundle hash.
-- **Physical dispatch guard:** authorizes before handler lookup; no arbitrary
-  shell command or path is exposed.
+  separate CLI processes.
+- **CHECKMATE reviewer:** emits a pre-action receipt for the bounded plan.
+- **Sovereign grant binder:** binds moli's explicit, repository-visible Judge
+  Mode grant to one source, run, transaction, and isolated output scope.
+- **PolicyEngine:** returns `allowed`, a reason code, a decision ID, and the
+  preserved policy-bundle hash.
+- **Physical dispatch guard:** authorizes before handler lookup and exposes no
+  arbitrary shell or path resolution.
 - **Workspace manager:** confines declared changes to a workflow workspace.
 - **Verifier:** runs build, unit-test, limited secret-scan, and documentation
   gates.
 - **Evidence/state:** hashes artifacts, records transitions, and verifies the
-  persisted state projection on load.
+  persisted state projection when it is loaded.
 
-## Requirements and supported platform
-
-- Windows 11 — verified
-- PowerShell 7 (`pwsh`) — verified
-- Python 3.11 or newer
-- Git
-
-The core is Python. Judge Mode is currently verified only on Windows 11. The
-project does not describe workflow isolation as an OS sandbox.
-
-## Commands
+## Other commands
 
 ```powershell
-# Build Week judge path
-pwsh -NoProfile -File .\scripts\build-week-demo.ps1
+# Full regression
+.\.venv\Scripts\python.exe -m pytest -q
 
-# Canonical demo
+# Canonical lifecycle demo
+.\.venv\Scripts\python.exe -m thekey demo
+
+# Equivalent after activating the environment
 python -m thekey demo
 
-# Focused and full tests
-python -m pytest -q tests\test_phase_b_rbac_v2_models.py `
-  tests\test_phase_b_rbac_v2_guard.py `
-  tests\test_phase_b_rbac_v2_integration.py
-python -m pytest -q
-
 # Separate-process lifecycle
-python -m thekey run create --title "Fix calculator.add"
-python -m thekey run plan --run-id <RUN_ID>
-python -m thekey run approve-plan --run-id <RUN_ID>
-python -m thekey run execute --run-id <RUN_ID>
-python -m thekey run verify --run-id <RUN_ID>
-python -m thekey evidence verify --run-id <RUN_ID>
+.\.venv\Scripts\python.exe -m thekey run create --title "Fix calculator.add"
+.\.venv\Scripts\python.exe -m thekey run plan --run-id <RUN_ID>
+.\.venv\Scripts\python.exe -m thekey run approve-plan --run-id <RUN_ID>
+.\.venv\Scripts\python.exe -m thekey run execute --run-id <RUN_ID>
+.\.venv\Scripts\python.exe -m thekey run verify --run-id <RUN_ID>
+.\.venv\Scripts\python.exe -m thekey evidence verify --run-id <RUN_ID>
 ```
 
-## Build Week provenance and use of Codex
+## OpenAI Build Week contribution and Codex collaboration
 
-The public repository begins after the event cutoff even though the owner says
-the project existed earlier. [BUILD_WEEK_CONTRIBUTION.md](BUILD_WEEK_CONTRIBUTION.md)
-therefore separates verified work in this Codex thread from unresolved earlier
-provenance instead of presenting the first public commit as entirely new.
+THEKEY is explicitly declared a preexisting project. The public Git graph
+available from `origin/main` begins after the event cutoff, so the owner's
+pre-public statement is `CLAIM_RECORDED` and historical records not yet
+imported are `PENDING_EVIDENCE_IMPORT`, never verified pre-cutoff proof. The
+repository baseline already contained the governed lifecycle, workflow
+workspaces, policy and gates, evidence store, CLI, and calculator demo.
 
-Codex was used for codebase inspection, architecture and adversarial analysis,
-implementation, AST caller verification, RED→GREEN testing, regression,
-rollback preparation, and documentation. moli retained the decisions about
-authority, scope, LIVE_E, push, merge, release, video publication, and final
+Only the verifiable post-baseline extension is presented for evaluation. See
+[BUILD_WEEK_CONTRIBUTION.md](BUILD_WEEK_CONTRIBUTION.md), the
+[delta](docs/build-week/BUILD_WEEK_DELTA.md), and the
+[pre-public provenance declaration](docs/build-week/PRE_PUBLIC_PROVENANCE.md).
+
+In the primary Codex thread, Codex with GPT-5.6 was used to inspect the
+codebase, design and implement strict receipts and the fail-closed physical
+guard, rebase all five physical callers, create adversarial tests, harden the
+non-reusable demo grant, run RED→GREEN and regression cycles, verify rollback
+and clean-clone reproduction, and prepare judge materials. GPT-5.6 accelerated
+the security analysis and implementation work; it is development tooling, not
+a runtime dependency of THEKEY.
+
+moli retained the product and authority decisions: human sovereignty, bounded
+scope, no production reuse of the demo grant, no change to `LIVE_E`, and
+separate approval for push, merge, release, video publication, and Devpost
 submission.
 
-- GPT-5.6 development evidence: `PENDING_SESSION_METADATA_VERIFICATION`
-- Primary Codex `/feedback` Session ID: `PENDING_REAL_FEEDBACK_SESSION_ID`
-- Public YouTube video: `PENDING_PUBLIC_YOUTUBE_URL`
-
-These placeholders must be replaced with real evidence. THEKEY does not claim
-a GPT-5.6 runtime integration.
+- Verified primary `/feedback` Session ID:
+  `019f79f2-6a7e-74f0-b1fa-d65335b29a7c`
+- Local session metadata records `gpt-5.6-luna` and `gpt-5.6-sol` during the
+  implementation and verification thread.
+- Public sanitized record:
+  [CODEX_SESSION_EVIDENCE.md](docs/build-week/CODEX_SESSION_EVIDENCE.md)
 
 ## Security boundaries and limitations
 
-- Workflow isolation is not process or OS isolation.
-- The included sovereign grant is not production authorization: the binder
-  requires `JUDGE_MODE_DEMO_ONLY`, the canonical demo's exact path and normalized-text SHA-256,
-  isolated-workspace-only output, and `production_reuse=false`. It remains a
-  transparent local grant, not a cryptographic human signature.
-- SHA-256 evidence is tamper-evident within the implemented chain; it is not
-  invulnerable or a substitute for external attestation.
+- Judge Mode is verified on Windows 11; other platforms are not claimed.
+- Workflow isolation is not process or operating-system isolation.
+- The local grant is repository-visible and bound to
+  `JUDGE_MODE_DEMO_ONLY`, the canonical normalized-text SHA-256, and
+  `ISOLATED_RUN_WORKSPACE_ONLY`; it is not a cryptographic human signature.
+- SHA-256 makes the implemented evidence chain tamper-evident, not invulnerable
+  and not externally attested.
 - The built-in secret scan is deliberately limited.
-- The action registry and Judge Mode cover a bounded demonstration, not
-  arbitrary repository repair.
-- `CANONICAL_SOURCE_STATUS` remains `UNRESOLVED`; `FULL_CHECKMATE` is `FALSE`.
+- Judge Mode demonstrates a bounded action registry, not arbitrary repair.
+- Very deep Windows paths can exceed path-length limits; use a short clone path.
+- The Phase-B manifest retains the legacy
+  `CANONICAL_SOURCE_STATUS=PROVENANCE_UNRESOLVED`; the provenance dossier uses
+  `CLAIM_RECORDED` and `PENDING_EVIDENCE_IMPORT` for pre-public history.
+  `FULL_CHECKMATE=false` and `MACRO_PACK_2=NOT_STARTED`.
 
-See [THREAT_MODEL.en.md](THREAT_MODEL.en.md) and [SECURITY.md](SECURITY.md).
+See [THREAT_MODEL.en.md](THREAT_MODEL.en.md), [SECURITY.md](SECURITY.md), and the
+[final adversarial audit](docs/build-week/CHECKMATE_FINAL_AUDIT.md).
 
 ## License
 
-THEKEY is distributed under the [MIT License](LICENSE).
+THEKEY is distributed under the [MIT License](LICENSE). Direct dependency
+licenses were checked for this candidate; this is not a claim of a complete
+transitive supply-chain audit.

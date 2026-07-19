@@ -45,8 +45,8 @@ thekey = "thekey.cli:main"
 thekey-mimo = "thekey.launchers.mimo_launcher:main"
 
 [project.urls]
-Homepage = "https://example.org/thekey-core-governed-run"
-Repository = "https://example.org/thekey-core-governed-run"
+Homepage = "https://github.com/klssxx/THEKEY"
+Repository = "https://github.com/klssxx/THEKEY"
 
 [tool.setuptools.packages.find]
 where = ["src"]

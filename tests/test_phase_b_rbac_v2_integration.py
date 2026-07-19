@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import ast
+import json
 import shutil
+import subprocess
 from pathlib import Path
+from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 
 from thekey.actions import handler_call_count
+from thekey.cli import cmd_judge_mode
 from thekey.errors import TheKeyError
 from thekey.main import RunCoordinator
 from thekey.models import ActionContext
@@ -90,3 +95,57 @@ def test_all_five_live_callers_pass_explicit_context_keyword():
         assert all(any(kw.arg == "context" for kw in call.keywords) for call in calls)
         total += len(calls)
     assert total == 5
+
+
+def test_judge_mode_evidence_binds_receipts_and_preserves_source(request):
+    root = Path(__file__).resolve().parents[1]
+    session_root = root / ".thekey" / "judge-mode" / f"Judge Mode {uuid4().hex}"
+    request.addfinalizer(lambda: shutil.rmtree(session_root, ignore_errors=True))
+    source_dir = session_root / "Temporary Sample Repository"
+    source_dir.mkdir(parents=True)
+    shutil.copy2(root / "examples/demo_app/calculator.py", source_dir / "calculator.py")
+    shutil.copy2(
+        root / "examples/demo_app/test_calculator.py",
+        source_dir / "test_calculator.py",
+    )
+    subprocess.run(
+        ["git", "init", "--quiet", str(source_dir)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    source = source_dir / "calculator.py"
+    output = session_root / "judge-mode-evidence.json"
+
+    exit_code = cmd_judge_mode(
+        SimpleNamespace(source=str(source), output=str(output), json=True)
+    )
+
+    assert exit_code == 0
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["allow"]["status"] == "APPLIED"
+    assert payload["allow"]["handler_call_count"] == 1
+    assert payload["deny"] == {
+        "reason_code": "ROLE_NOT_ALLOWED",
+        "handler_call_count": 0,
+        "workspace_hash_unchanged": True,
+    }
+    assert payload["source"]["hash_unchanged"] is True
+    assert payload["source"]["sha256_before"] == payload["source"]["sha256_after"]
+    assert all(payload["receipt_binding"].values())
+    assert payload["production_reuse"] is False
+    assert len(payload["gates"]) == 4
+    assert all(gate["passed"] for gate in payload["gates"])
+    assert payload["release_decision"] == "RELEASE_ELIGIBLE"
+
+    run_path = Path(payload["run_path"])
+    review = json.loads(
+        (run_path / "checkmate-review-receipt.json").read_text(encoding="utf-8")
+    )
+    authorization = json.loads(
+        (run_path / "sovereign-authorization-receipt.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for field in ("run_id", "transaction_id", "plan_sha256"):
+        assert review[field] == authorization[field] == payload[field]

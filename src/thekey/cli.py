@@ -217,6 +217,7 @@ def cmd_demo(args) -> int:
 def cmd_judge_mode(args) -> int:
     """Run the Build Week positive and adversarial paths over a temp source."""
     source = Path(args.source).resolve()
+    source_hash_before = action_sha256_file(source)
     coord = RunCoordinator(demo_source=source)
     coord.create("THEKEY Build Week Judge Mode", "Governed change with explicit denial")
     coord.baseline()
@@ -253,6 +254,26 @@ def cmd_judge_mode(args) -> int:
         - before_count
     )
     after_deny = action_sha256_file(workspace_file)
+    source_hash_after = action_sha256_file(source)
+    review_receipt = coord.run.read_json("checkmate-review-receipt.json")
+    sovereign_receipt = coord.run.read_json("sovereign-authorization-receipt.json")
+    receipt_binding = {
+        "run_id_match": (
+            review_receipt["run_id"]
+            == sovereign_receipt["run_id"]
+            == context.run_id
+        ),
+        "transaction_id_match": (
+            review_receipt["transaction_id"]
+            == sovereign_receipt["transaction_id"]
+            == context.transaction_id
+        ),
+        "plan_sha256_match": (
+            review_receipt["plan_sha256"]
+            == sovereign_receipt["plan_sha256"]
+            == context.plan_sha256
+        ),
+    }
     result = {
         "judge_mode": "THEKEY Build Week Judge Mode",
         "run_id": coord.run.run_id,
@@ -270,6 +291,13 @@ def cmd_judge_mode(args) -> int:
             "handler_call_count": denied_handlers,
             "workspace_hash_unchanged": before_deny == after_deny,
         },
+        "source": {
+            "sha256_before": source_hash_before,
+            "sha256_after": source_hash_after,
+            "hash_unchanged": source_hash_before == source_hash_after,
+        },
+        "receipt_binding": receipt_binding,
+        "production_reuse": sovereign_receipt["production_reuse"],
         "gates": [gate.to_dict() for gate in gates],
         "release_decision": decision.decision,
         "run_path": str(coord.run.dir),
@@ -284,6 +312,9 @@ def cmd_judge_mode(args) -> int:
         and denied_handlers == 0
         and deny_reason == "ROLE_NOT_ALLOWED"
         and before_deny == after_deny
+        and source_hash_before == source_hash_after
+        and all(receipt_binding.values())
+        and sovereign_receipt["production_reuse"] is False
         and all(gate.passed for gate in gates)
         and decision.decision == "RELEASE_ELIGIBLE"
     )

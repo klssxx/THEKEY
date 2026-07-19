@@ -1,0 +1,30 @@
+THEKEY — Governed Transactions for Coding Agents
+
+THEKEY is a developer tool for turning an agentic code change into a governed
+transaction. This Windows 11 Judge Mode demonstration shows one authorized
+physical action, one adversarial denial, four deterministic release gates, and
+JSON evidence tied to the same run, transaction, and plan SHA-256.
+
+THEKEY is a declared preexisting project; its accessible public Git history
+begins after the event cutoff. Only the verified post-baseline delta is
+submitted. Build Week work significantly extended it with bound review and
+authorization receipts, fail-closed physical dispatch, five governed callers,
+adversarial security coverage, Judge Mode, and reproducibility evidence. Codex
+with GPT-5.6 assisted development and validation; GPT-5.6 is not a runtime
+dependency. moli retained authority, scope, and publication decisions.
+
+Candidate commit: the SHA shown by `git rev-parse HEAD` in the video must match
+the exact FINAL_CANDIDATE value supplied in Devpost.
+
+The demo requires no API key, paid service, Docker, WSL, or GPU.
+
+Limitations: THEKEY provides workflow isolation, not an operating-system
+sandbox. Its local demonstration grant is not a cryptographic human signature.
+The included secret scan and action set are deliberately bounded, and SHA-256
+evidence is tamper-evident within the implemented chain rather than external
+attestation.
+
+Repository and testing instructions:
+https://github.com/klssxx/THEKEY
+
+License: MIT

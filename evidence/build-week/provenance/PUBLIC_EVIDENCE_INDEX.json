@@ -1,0 +1,51 @@
+{
+  "schema_version": "v1",
+  "generated_at_utc": "2026-07-19T20:55:29.082Z",
+  "privacy_rule": "Raw pre-public chat exports and raw Codex session logs are never public evidence artifacts.",
+  "entries": [
+    {
+      "evidence_id": "PREPUBLIC-OWNER-DECLARATION",
+      "status": "CLAIM_RECORDED",
+      "public_path": "docs/build-week/PRE_PUBLIC_PROVENANCE.md",
+      "claim": "THEKEY is a preexisting project."
+    },
+    {
+      "evidence_id": "PUBLIC-GIT-ROOT",
+      "status": "VERIFIED_GIT_OBJECT",
+      "git_object": "b7b6c32cf3a2621d29ef2c5856db50d116d8dff6",
+      "public_path": "docs/build-week/PROVENANCE_TIMELINE.md"
+    },
+    {
+      "evidence_id": "SESSION-BASELINE",
+      "status": "VERIFIED_GIT_OBJECT",
+      "git_object": "3a8456416ed9ae9183840585b488cec04e9a069d",
+      "public_path": "docs/build-week/BUILD_WEEK_DELTA.md"
+    },
+    {
+      "evidence_id": "PHASE-B-COMMIT",
+      "status": "VERIFIED_GIT_OBJECT",
+      "git_object": "c0410feaf869e0ac08c9e637b70e30ebac8085c8",
+      "public_path": "evidence/phase-b/RBAC-01-v2/FINAL_MANIFEST.json"
+    },
+    {
+      "evidence_id": "CODEX-PRIMARY-SESSION",
+      "status": "VERIFIED_SESSION_METADATA",
+      "session_id": "019f79f2-6a7e-74f0-b1fa-d65335b29a7c",
+      "public_path": "docs/build-week/CODEX_SESSION_EVIDENCE.md",
+      "raw_source_published": false
+    },
+    {
+      "evidence_id": "FINAL-CANDIDATE",
+      "status": "BOUND_TO_FINAL_HEAD",
+      "git_ref": "HEAD",
+      "public_path": "docs/build-week/BUILD_WEEK_DELTA.md"
+    },
+    {
+      "evidence_id": "PREPUBLIC-CHAT-EXPORTS",
+      "status": "PENDING_EVIDENCE_IMPORT",
+      "private_path": "evidence-private/build-week/chat-exports/",
+      "public_path": null,
+      "published": false
+    }
+  ]
+}

@@ -1,8 +1,6 @@
 """Unit tests for the entropy secret scanner (improvement B)."""
 
-from pathlib import Path
-
-from scripts.ci.secret_entropy import _is_benign, scan_tree, shannon_entropy
+from scripts.ci.secret_entropy import scan_tree, shannon_entropy
 
 
 def test_entropy_distinguishes_random_from_text():
@@ -38,4 +36,15 @@ def test_scan_ignores_benign_text(tmp_path):
 def test_scan_ignores_short_tokens(tmp_path):
     f = tmp_path / "x.py"
     f.write_text('short = "abc123"\n', encoding="utf-8")
+    assert scan_tree(tmp_path, threshold=3.7, min_len=20) == []
+
+
+def test_scan_ignores_thekey_runtime_state(tmp_path):
+    runtime = tmp_path / ".thekey"
+    runtime.mkdir()
+    (runtime / "generated.json").write_text(
+        '{"generated": "k9F2mPqLx7RtVbN3wZc8YsA1uD4eH6gJz"}',
+        encoding="utf-8",
+    )
+
     assert scan_tree(tmp_path, threshold=3.7, min_len=20) == []

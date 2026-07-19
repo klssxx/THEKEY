@@ -29,6 +29,10 @@ evidence.key
 # Frozen baseline working dir (local audit artifact, not shipped)
 development-audit/
 
+# Private pre-public provenance imports (never publish raw chat exports)
+/evidence-private/build-week/chat-exports/
+/evidence-private/build-week/PRIVATE_IMPORT_MANIFEST.json
+
 # Editor / OS
 .vscode/
 .idea/
