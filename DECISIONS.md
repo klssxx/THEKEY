@@ -2,6 +2,13 @@
 
 This document records architecture decisions for THEKEY Core Governed Run.
 
+Legacy technical label; not the current public brand. The current public name
+is **THEKEY — THE KING OF CHECKMATE**, with the functional tagline **Governed
+Codex Transactions for Coding Agents**. THEKEY is the governed-transaction core;
+THE KING coordinates phases and context without self-approval or PolicyEngine
+bypass; CHECKMATE performs adversarial pre-execution review and no physical
+writes. The historical decisions below retain their original meaning.
+
 ## ADR-001: Deterministic MVP without mandatory AI
 The MVP runs the canonical demo and all blocked scenarios **deterministically**
 with no external AI. HY3 is designed as a stateless phase operator behind the

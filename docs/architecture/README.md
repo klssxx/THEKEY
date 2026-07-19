@@ -1,12 +1,23 @@
 # Architecture
 
-THEKEY Core Governed Run splits authority between a **control plane** (the
-orchestrator that validates and persists) and an **execution plane** (the roles
-that request and perform work).
+**THEKEY — THE KING OF CHECKMATE**
+
+**Governed Codex Transactions for Coding Agents**
+
+THEKEY is the product and governed-transaction core. THE KING orchestrates
+phases and context, but cannot approve itself or bypass the PolicyEngine.
+CHECKMATE performs adversarial pre-execution review: it analyzes risk and emits
+a verdict, but performs no physical writes. Codex with GPT-5.6 is the agent used
+to analyze, build, test, and improve the project.
+
+`THEKEY Core Governed Run` is a legacy technical label, not the current public
+brand. The corresponding implementation splits authority between a **control
+plane** (the orchestrator that validates and persists) and an **execution
+plane** (the roles that request and perform work).
 
 ```
                          ┌─────────────────────────────┐
-   thekey CLI ─────────► │     Run Coordinator          │  (control plane)
+   thekey CLI ─────────► │ THE KING / Run Coordinator   │  (control plane)
                          │  - validates every step      │
                          │  - applies state transitions │
                          │  - writes evidence + state   │
@@ -39,6 +50,9 @@ that request and perform work).
 
    Execution plane (request work, never persist):
      PLANNER → EXECUTOR → VERIFIER            APPROVER (decision owner)
+
+   Adversarial review before physical execution:
+     CHECKMATE → risk analysis + verdict       (no physical writes)
 ```
 
 ## Authoritative state
@@ -60,4 +74,4 @@ that request and perform work).
   `governance/schemas/policy.schema.json`.
 * An invalid policy stops execution and never executes the plan.
 
-See [GOVERNANCE.md](../GOVERNANCE.md) for role separation and decision ownership.
+See [GOVERNANCE.md](../../GOVERNANCE.md) for role separation and decision ownership.

@@ -1,9 +1,15 @@
 # Devpost draft — not submitted
-**Project:** THEKEY — Governed Transactions for Coding Agents
-**Tagline:** Every agentic change gets a plan identity, explicit authorization,
-deterministic gates, and reviewable evidence.
+**Project:** THEKEY — THE KING OF CHECKMATE
+**Tagline:** Governed Codex Transactions for Coding Agents
+**Value proposition:** Every agentic change gets a plan identity, explicit
+authorization, deterministic gates, and reviewable evidence.
 **Track:** Developer Tools
 ## Description
+THEKEY is the product and governed-transaction core. THE KING orchestrates
+phases and context, but cannot self-approve or bypass the `PolicyEngine`.
+CHECKMATE performs adversarial pre-execution review: it analyzes risk and issues
+a verdict, but performs no physical writes.
+
 Agentic changes are fast, but teams often cannot prove which plan was
 authorized, what executed, or why release was allowed. THEKEY turns a change
 into a governed transaction. Before resolving a physical handler it requires a
@@ -26,11 +32,11 @@ canonical demo. Only the verifiable delta after baseline
 `docs/build-week/BUILD_WEEK_DELTA.md`. This Codex thread added bound double
 receipts, the production policy decision API, 5/5 governed callers,
 state-provenance fixes, security tests, Judge Mode, and submission
-documentation. Codex drove inspection, adversarial design,
-implementation and RED→GREEN verification; moli retained product, authority,
-and publication decisions. Codex with GPT-5.6 compared the physical caller
-paths, helped design adversarial cases, implemented the governed boundary, and
-supported regression and clean-clone verification. GPT-5.6 was development
+documentation. Codex drove inspection, adversarial design, implementation and
+RED→GREEN verification; moli retained product, authority, and publication
+decisions. Codex with GPT-5.6 was the agent used to analyze, build, test, and
+improve the project, including caller comparison, denial cases, the governed
+boundary, regression, and clean-clone verification. GPT-5.6 was development
 tooling, not a runtime dependency; the sanitized session record is in
 `docs/build-week/CODEX_SESSION_EVIDENCE.md`.
 ## Judge instructions

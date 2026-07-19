@@ -1,4 +1,9 @@
-# THEKEY — Governed Transactions for Coding Agents
+# THEKEY
+## THE KING OF CHECKMATE
+
+**Governed Codex Transactions for Coding Agents**
+
+Official public name: **THEKEY — THE KING OF CHECKMATE**.
 
 > Every agentic change gets a plan identity, explicit authorization,
 > deterministic gates, and reviewable evidence.
@@ -19,6 +24,16 @@ release. THEKEY makes those questions part of the transaction instead of an
 after-the-fact narrative.
 
 ## What THEKEY is — and is not
+
+The canonical public hierarchy separates four responsibilities:
+
+- **THEKEY:** the product and governed-transaction core.
+- **THE KING:** the phase-and-context orchestrator; it cannot self-approve or
+  bypass the `PolicyEngine`.
+- **CHECKMATE:** adversarial pre-execution review; it analyzes risk and issues a
+  verdict, but performs no physical writes.
+- **Codex with GPT-5.6:** the agent used to analyze, build, test, and improve the
+  project; it is not a runtime dependency.
 
 THEKEY is a small Python governance layer for coding-agent changes. It binds a
 plan, a CHECKMATE pre-action review, explicit human authority, a deterministic
@@ -95,9 +110,11 @@ created only after the gates and is never reused retroactively as authority.
 
 ## Architecture
 
-- **Coordinator:** persists run artifacts and rehydrates a transaction across
-  separate CLI processes.
-- **CHECKMATE reviewer:** emits a pre-action receipt for the bounded plan.
+- **THE KING (orchestrator):** coordinates phases and context, persists run
+  artifacts, and rehydrates a transaction without self-approval or bypassing
+  the `PolicyEngine`.
+- **CHECKMATE reviewer:** analyzes risk and emits a pre-action receipt for the
+  bounded plan; it performs no physical writes.
 - **Sovereign grant binder:** binds moli's explicit, repository-visible Judge
   Mode grant to one source, run, transaction, and isolated output scope.
 - **PolicyEngine:** returns `allowed`, a reason code, a decision ID, and the

@@ -1,4 +1,9 @@
-# THEKEY — Transacciones gobernadas para agentes de programación
+# THEKEY
+## THE KING OF CHECKMATE
+
+**Governed Codex Transactions for Coding Agents**
+
+Nombre público oficial: **THEKEY — THE KING OF CHECKMATE**.
 
 > Cada cambio agéntico recibe una identidad de plan, autorización explícita,
 > gates deterministas y evidencia revisable.
@@ -18,6 +23,16 @@ ejecución física, qué se ejecutó y por qué el resultado quedó habilitado p
 release. THEKEY incorpora esas preguntas a la transacción.
 
 ## Qué es — y qué no es
+
+La jerarquía pública canónica distingue cuatro responsabilidades:
+
+- **THEKEY:** producto y núcleo de transacciones gobernadas.
+- **THE KING:** orquestador de fases y contexto; no puede autoaprobarse ni
+  eludir el `PolicyEngine`.
+- **CHECKMATE:** revisión adversarial previa a la ejecución; analiza riesgos y
+  emite un veredicto, pero no realiza escrituras físicas.
+- **Codex with GPT-5.6:** agente utilizado para analizar, construir, probar y
+  mejorar el proyecto; no es una dependencia runtime.
 
 THEKEY es una capa pequeña de gobierno en Python. Liga plan, revisión CHECKMATE
 previa, autoridad humana explícita, política determinista, handlers físicos,
@@ -90,8 +105,10 @@ de los gates y nunca se reutiliza retroactivamente como autoridad.
 
 ## Arquitectura
 
-- **Coordinador:** persiste y rehidrata la transacción entre procesos CLI.
-- **Revisor CHECKMATE:** emite el recibo previo del plan acotado.
+- **THE KING (orquestador):** coordina fases y contexto, persiste y rehidrata
+  la transacción, sin autoaprobarse ni eludir el `PolicyEngine`.
+- **Revisor CHECKMATE:** analiza riesgos y emite el recibo previo del plan
+  acotado; no realiza escrituras físicas.
 - **Binder soberano:** liga el grant visible de moli a una fuente, run,
   transacción y salida aislada.
 - **PolicyEngine:** devuelve permiso, razón, decision ID y hash de policy bundle.

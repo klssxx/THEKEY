@@ -1,9 +1,16 @@
-THEKEY — Governed Transactions for Coding Agents
+THEKEY — THE KING OF CHECKMATE
+
+Governed Codex Transactions for Coding Agents
 
 THEKEY is a developer tool for turning an agentic code change into a governed
 transaction. This Windows 11 Judge Mode demonstration shows one authorized
 physical action, one adversarial denial, four deterministic release gates, and
 JSON evidence tied to the same run, transaction, and plan SHA-256.
+
+THEKEY is the product and governed-transaction core. THE KING orchestrates
+phases and context, but cannot self-approve or bypass the PolicyEngine.
+CHECKMATE analyzes risk and issues a pre-execution verdict, but performs no
+physical writes.
 
 THEKEY is a declared preexisting project; its accessible public Git history
 begins after the event cutoff. Only the verified post-baseline delta is

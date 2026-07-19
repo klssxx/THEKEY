@@ -2,6 +2,11 @@
 
 Phase 0 discovery notes for THEKEY Core Governed Run OSS MVP.
 
+Legacy technical label; not the current public brand. The current public name
+is **THEKEY — THE KING OF CHECKMATE**, with the functional tagline **Governed
+Codex Transactions for Coding Agents**. These historical discovery notes retain
+their original technical scope and path references.
+
 ## Environment
 * OS: Windows 11
 * Shell: PowerShell 7.6.3

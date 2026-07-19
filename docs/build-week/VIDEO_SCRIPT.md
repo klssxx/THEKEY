@@ -5,7 +5,14 @@ English.
 
 ## 0:00–0:18 — The problem
 
-**On screen:** title card, then the repository README.
+**On screen:** use this exact title card, then the repository README.
+
+```text
+THEKEY
+THE KING OF CHECKMATE
+
+Governed Codex Transactions for Coding Agents
+```
 
 **Narration:**
 
@@ -19,11 +26,11 @@ English.
 
 **Narration:**
 
-> THEKEY turns an agentic change into a governed transaction. One plan identity
-> connects pre-action CHECKMATE review, explicit scoped human authority, a
-> deterministic policy decision, the physical action, four release gates, and
-> reviewable evidence. Authorization happens before the handler is resolved,
-> and only the EXECUTOR role can cross that boundary.
+> THEKEY is the governed-transaction core. THE KING coordinates phases and
+> context, but cannot self-approve or bypass the PolicyEngine. CHECKMATE reviews
+> risk before execution and issues a verdict without physical writes. Scoped
+> human authority and policy authorization are required before the EXECUTOR
+> reaches a declared handler.
 
 ## 0:40–1:32 — Live Judge Mode
 
@@ -73,22 +80,22 @@ the final candidate handoff.
 > Build Week it was significantly extended with bound double receipts, a
 > fail-closed physical guard, five
 > governed callers, adversarial security tests, Judge Mode, and reproducibility
-> evidence. Codex with GPT-5.6 compared the five caller paths, designed denial
-> cases, implemented the governed boundary, and drove regression and clean-clone
+> evidence. Codex with GPT-5.6 was the agent used to analyze, build, test, and
+> improve the project: it compared the five caller paths, designed denial cases,
+> implemented the governed boundary, and drove regression and clean-clone
 > checks. I, moli, retained authority, scope, and publication decisions. GPT-5.6
 > is development tooling here, not a runtime dependency.
 
 ## 2:30–2:48 — Limits and close
 
-**On screen:** the README limitations, then the project title.
+**On screen:** the README limitations, then the exact opening title card.
 
 **Narration:**
 
 > The boundaries are deliberate: this is workflow isolation, not an operating-
 > system sandbox; the local grant is not a cryptographic human signature; and
 > the built-in secret scan and action set are bounded. Within those limits,
-> THEKEY gives every agentic change a plan identity, explicit authorization,
-> deterministic gates, and reviewable evidence.
+> THEKEY — THE KING OF CHECKMATE. Governed Codex Transactions for Coding Agents.
 
 ## Timing discipline
 

@@ -1,18 +1,30 @@
 # THEKEY CONTRACT
 
-THEKEY Core Governed Run is a deterministic control plane that lets an
+**THEKEY — THE KING OF CHECKMATE**
+
+**Governed Codex Transactions for Coding Agents**
+
+`THEKEY Core Governed Run` is a legacy technical label for the deterministic
+control-plane flow; it is not the current public brand. That flow lets an
 autonomous actor (MiMo) make real code changes **without** breaking the
 source it works on, and **without** anyone having to babysit it.
+
+THEKEY is the product and governed-transaction core. THE KING orchestrates
+phases and context, but cannot approve itself or bypass the PolicyEngine.
+CHECKMATE performs adversarial pre-execution review: it analyzes risk and emits
+a verdict, but performs no physical writes. Codex with GPT-5.6 is the agent used
+to analyze, build, test, and improve the project.
 
 ## The deal (for contributors)
 
 1. **Original source is immutable.** MiMo never writes to the project it is
    fixing. It works in an isolated `workspaces/<run_id>/` copy. If the run
    is BLOCKED, the original is untouched — guaranteed.
-2. **Approval is automatic, never a prompt.** The plan is approved by a
-   deterministic local identity bound to the plan's SHA-256. No human is
-   asked. (A human-in-the-loop transition exists in the state machine for
-   future opt-in, but it is *not* the default.)
+2. **Plan progression may be automated; authority is never implicit.** The
+   legacy deterministic flow can bind a local approver identity to the plan's
+   SHA-256 without an interactive prompt. This is not THE KING self-approval.
+   Physical execution requires a CHECKMATE verdict, scoped authority, and
+   PolicyEngine authorization before handler resolution.
 3. **Evidence is hash-sealed.** Every artifact carries a SHA-256; a tampered
    artifact makes the run BLOCKED, never silent. An append-only SQLite event
    store records every transition, hash-chained, so the audit log is
@@ -31,13 +43,16 @@ source it works on, and **without** anyone having to babysit it.
 | Actor | Role | Writes? |
 |--------|------|--------|
 | MiMo   | Implementer — writes product code in the isolated workspace | workspace only |
-| THEKEY | Orchestrator / control plane — deterministic, no LLM calls | state + evidence |
+| THEKEY | Product and governed-transaction core | state + evidence |
+| THE KING | Orchestrates phases and context; cannot self-approve or bypass the PolicyEngine | orchestration records only |
+| CHECKMATE | Adversarial pre-execution review; analyzes risk and emits a verdict | no physical writes |
 | HY3    | Independent verifier/auditor — reproduces proof | nothing (read-only) |
+| Codex with GPT-5.6 | Development agent used to analyze, build, test, and improve the project | development workspace only |
 
 ## Quick start
 
     pip install -e ".[dev]"
-    python -m thekey demo            # canonical governed demo (auto-approved)
+    python -m thekey demo          # deterministic plan progression; governed dispatch
     python -m thekey-mimo          # autonomous MiMo launcher (no prompts)
     python -m thekey history verify
 

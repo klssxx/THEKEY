@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "thekey-core-governed-run"
 version = "0.2.0"
-description = "THEKEY Core Governed Run - a lightweight engine for governed software changes with versioned policy, isolated workspaces, and verifiable evidence."
+description = "THEKEY — THE KING OF CHECKMATE: Governed Codex Transactions for Coding Agents."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

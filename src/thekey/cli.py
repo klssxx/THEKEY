@@ -357,7 +357,13 @@ def cmd_history(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="thekey", description="THEKEY Core Governed Run (MVP 0.1.0)")
+    p = argparse.ArgumentParser(
+        prog="thekey",
+        description=(
+            "THEKEY — THE KING OF CHECKMATE: "
+            "Governed Codex Transactions for Coding Agents"
+        ),
+    )
     p.add_argument("--version", action="version", version=f"thekey {__version__}")
     sub = p.add_subparsers(dest="group")
 
