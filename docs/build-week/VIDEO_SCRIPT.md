@@ -77,8 +77,8 @@ sanitized `CODEX_SESSION_EVIDENCE.md`.
 
 > THEKEY is a declared preexisting project and only its verified post-baseline
 > delta is submitted. Codex with GPT-5.6 helped analyze, build, test, and improve
-> the governed boundary, security cases, evidence and portable interface. I,
-> usuario, retained authority, scope and publication decisions. GPT-5.6 is
+> the governed boundary, security cases, evidence and portable interface. The
+> user retained authority, scope and publication decisions. GPT-5.6 is
 > development tooling, not a runtime dependency.
 
 ## 2:40–2:55 — Limits and close

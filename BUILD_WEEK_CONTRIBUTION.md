@@ -45,8 +45,8 @@ diff, not undocumented history. See the
 - Bilingual README and judge quickstart, contribution record, Devpost draft,
   evidence verifier, and video package.
 Codex performed inspection, adversarial design, implementation, AST analysis,
-RED→GREEN testing, regression, rollback preparation, and documentation. usuario
-retained authority, scope, LIVE_E, push, merge, release, video, and submission
+RED→GREEN testing, regression, rollback preparation, and documentation. The
+user retained authority, scope, LIVE_E, push, merge, release, video, and submission
 decisions. Exact files, hashes, commands, and diff statistics are in the final
 manifest.
 ## Evidence status and limitations

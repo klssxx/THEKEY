@@ -264,6 +264,8 @@ def build():
 
 
 if __name__ == "__main__":
-    out = r"C:\Users\KLSX\Desktop\THEKEY_Como_procesa_tu_aplicacion.pdf"
+    import os
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "THEKEY_Como_procesa_tu_aplicacion.pdf")
     build().output(out)
     print("PDF generado:", out)
