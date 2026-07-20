@@ -4,9 +4,12 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 
 namespace TheKeyPortable
@@ -75,8 +78,8 @@ namespace TheKeyPortable
             footerGrid.Children.Add(brand);
 
             Button skip = new Button();
-            skip.Content = "SKIP";
-            skip.Width = 86;
+            skip.Content = "OMITIR / SKIP";
+            skip.Width = 118;
             skip.Height = 34;
             skip.HorizontalAlignment = HorizontalAlignment.Right;
             skip.VerticalAlignment = VerticalAlignment.Center;
@@ -132,7 +135,11 @@ namespace TheKeyPortable
             MinWidth = 900;
             MinHeight = 650;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            Background = new SolidColorBrush(Color.FromRgb(8, 13, 26));
+            FontFamily = new FontFamily("Segoe UI Variable Text, Segoe UI");
+            UseLayoutRounding = true;
+            SnapsToDevicePixels = true;
+            Background = new LinearGradientBrush(
+                Color.FromRgb(10, 16, 31), Color.FromRgb(5, 9, 19), 90);
             Foreground = Brushes.White;
 
             Grid layout = new Grid();
@@ -147,46 +154,105 @@ namespace TheKeyPortable
             layout.Children.Add(header);
 
             actions = new StackPanel();
-            actions.Margin = new Thickness(24, 18, 24, 8);
+            actions.Margin = new Thickness(24, 16, 24, 6);
             actions.HorizontalAlignment = HorizontalAlignment.Center;
             actions.Children.Add(CreatePrimaryAction());
 
             WrapPanel essentials = new WrapPanel();
+            essentials.Width = 810;
             essentials.HorizontalAlignment = HorizontalAlignment.Center;
             essentials.Margin = new Thickness(0, 7, 0, 0);
-            verifyProjectButton = CreateCard("\u2713", "Verificar aplicación", "Copia aislada y gates reales", VerifySelectedApplication);
+            verifyProjectButton = CreateCard("\u2713", "Verificar / Verify", "Aplicación en copia aislada / Isolated copy", VerifySelectedApplication);
             verifyProjectButton.IsEnabled = false;
             essentials.Children.Add(verifyProjectButton);
-            repairProjectButton = CreateCard("\u2692", "Escanear y reparar", "Diagnóstico, reparación y re-test", RepairSelectedApplication);
+            repairProjectButton = CreateCard("\u2692", "Reparar / Repair", "Escaneo, reparación y re-test / Scan & re-test", RepairSelectedApplication);
             repairProjectButton.IsEnabled = false;
             essentials.Children.Add(repairProjectButton);
-            essentials.Children.Add(CreateCard("\u25B6", "Demo para jueces", "Ejemplo gobernado reproducible", RunDemo));
-            essentials.Children.Add(CreateCard("\u25A3", "Ver resultados / View", "Recibos y decisiones", OpenResults));
+            essentials.Children.Add(CreateCard("\u25B6", "Demo para jueces / Judge demo", "Ejemplo gobernado / Governed example", RunDemo));
+            essentials.Children.Add(CreateCard("\u25A3", "Ver resultados / View results", "Recibos y decisiones / Receipts & decisions", OpenResults));
             actions.Children.Add(essentials);
+
+            Grid futureHeader = new Grid();
+            futureHeader.Width = 798;
+            futureHeader.Margin = new Thickness(6, 7, 6, 3);
+            futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            TextBlock futureTitle = new TextBlock();
+            futureTitle.Text = "PRÓXIMOS MODOS / UPCOMING MODES";
+            futureTitle.FontSize = 11;
+            futureTitle.FontWeight = FontWeights.SemiBold;
+            futureTitle.Foreground = new SolidColorBrush(Color.FromRgb(139, 158, 190));
+            futureHeader.Children.Add(futureTitle);
+            TextBlock futureHint = new TextBlock();
+            futureHint.Text = "HOJA DE RUTA / ROADMAP";
+            futureHint.FontSize = 10;
+            futureHint.Foreground = new SolidColorBrush(Color.FromRgb(101, 121, 154));
+            Grid.SetColumn(futureHint, 1);
+            futureHeader.Children.Add(futureHint);
+            actions.Children.Add(futureHeader);
+
+            WrapPanel futureModes = new WrapPanel();
+            futureModes.HorizontalAlignment = HorizontalAlignment.Center;
+            futureModes.Children.Add(CreateFutureCard("\u265A", "THE KING", "Construcción orquestada / Orchestrated build"));
+            futureModes.Children.Add(CreateFutureCard("\u25C8", "CHECKMATE", "Revisión adversarial / Adversarial review"));
+            actions.Children.Add(futureModes);
 
             Expander advanced = new Expander();
             advanced.Header = "Opciones avanzadas / Advanced options";
             advanced.Foreground = new SolidColorBrush(Color.FromRgb(151, 168, 198));
-            advanced.Margin = new Thickness(12, 8, 12, 0);
+            advanced.Margin = new Thickness(12, 7, 12, 0);
             advanced.HorizontalAlignment = HorizontalAlignment.Center;
             WrapPanel advancedCards = new WrapPanel();
             advancedCards.HorizontalAlignment = HorizontalAlignment.Center;
-            advancedCards.Children.Add(CreateCard("\u2713", "Verificar evidencia", "Revisar la última demo", VerifyEvidence));
-            advancedCards.Children.Add(CreateCard("\u2605", "Ayuda / Help", "Guía rápida bilingüe", OpenGuide));
-            advancedCards.Children.Add(CreateCard("\u265A", "Acceso / Shortcut", "Crear acceso en escritorio", CreateShortcut));
-            advancedCards.Children.Add(CreateCard("?", "Ayuda CLI / CLI help", "Todos los comandos técnicos", ShowHelp));
+            advancedCards.Children.Add(CreateCard("\u2713", "Verificar evidencia / Verify evidence", "Revisar demo / Review latest demo", VerifyEvidence));
+            advancedCards.Children.Add(CreateCard("\u2605", "Ayuda / Help", "Guía rápida bilingüe / Bilingual guide", OpenGuide));
+            advancedCards.Children.Add(CreateCard("\u265A", "Acceso / Shortcut", "Crear acceso de escritorio / Desktop shortcut", CreateShortcut));
+            advancedCards.Children.Add(CreateCard("?", "Ayuda CLI / CLI help", "Comandos técnicos / Technical commands", ShowHelp));
             advanced.Content = advancedCards;
             actions.Children.Add(advanced);
             Grid.SetRow(actions, 1);
             layout.Children.Add(actions);
 
             Border consoleBorder = new Border();
-            consoleBorder.Margin = new Thickness(24, 8, 24, 14);
+            consoleBorder.Margin = new Thickness(24, 7, 24, 12);
             consoleBorder.Padding = new Thickness(1);
-            consoleBorder.CornerRadius = new CornerRadius(8);
-            consoleBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(49, 65, 96));
+            consoleBorder.CornerRadius = new CornerRadius(10);
+            consoleBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 61, 91));
             consoleBorder.BorderThickness = new Thickness(1);
-            consoleBorder.Background = new SolidColorBrush(Color.FromRgb(4, 8, 17));
+            consoleBorder.Background = new SolidColorBrush(Color.FromRgb(5, 10, 20));
+            consoleBorder.Effect = new DropShadowEffect
+            {
+                Color = Color.FromRgb(0, 0, 0),
+                BlurRadius = 18,
+                ShadowDepth = 5,
+                Opacity = 0.28
+            };
+
+            Grid consoleLayout = new Grid();
+            consoleLayout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            consoleLayout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            Border consoleHeader = new Border();
+            consoleHeader.Padding = new Thickness(15, 8, 15, 8);
+            consoleHeader.Background = new SolidColorBrush(Color.FromRgb(12, 20, 36));
+            consoleHeader.BorderBrush = new SolidColorBrush(Color.FromRgb(39, 54, 82));
+            consoleHeader.BorderThickness = new Thickness(0, 0, 0, 1);
+            Grid consoleHeaderGrid = new Grid();
+            consoleHeaderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            consoleHeaderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            TextBlock activityTitle = new TextBlock();
+            activityTitle.Text = "ACTIVIDAD / ACTIVITY";
+            activityTitle.FontSize = 11;
+            activityTitle.FontWeight = FontWeights.SemiBold;
+            activityTitle.Foreground = new SolidColorBrush(Color.FromRgb(188, 202, 226));
+            consoleHeaderGrid.Children.Add(activityTitle);
+            TextBlock localBadge = new TextBlock();
+            localBadge.Text = "●  LOCAL";
+            localBadge.FontSize = 10;
+            localBadge.Foreground = new SolidColorBrush(Color.FromRgb(105, 211, 162));
+            Grid.SetColumn(localBadge, 1);
+            consoleHeaderGrid.Children.Add(localBadge);
+            consoleHeader.Child = consoleHeaderGrid;
+            consoleLayout.Children.Add(consoleHeader);
 
             output = new TextBox();
             output.IsReadOnly = true;
@@ -199,24 +265,30 @@ namespace TheKeyPortable
             output.BorderThickness = new Thickness(0);
             output.FontFamily = new FontFamily("Consolas");
             output.FontSize = 13;
-            output.Padding = new Thickness(16);
+            output.Padding = new Thickness(16, 12, 16, 12);
+            output.SelectionBrush = new SolidColorBrush(Color.FromRgb(67, 91, 136));
             output.Text = "1. Selecciona una aplicación compatible.\r\n2. THEKEY la analiza sin ejecutar código.\r\n3. Verifica o escanea fallos en una copia aislada.\r\n4. Autoriza solo reparaciones que hayan pasado todos los gates.\r\n";
-            consoleBorder.Child = output;
+            Grid.SetRow(output, 1);
+            consoleLayout.Children.Add(output);
+            consoleBorder.Child = consoleLayout;
             Grid.SetRow(consoleBorder, 2);
             layout.Children.Add(consoleBorder);
 
             Grid footer = new Grid();
-            footer.Margin = new Thickness(24, 0, 24, 18);
+            footer.Margin = new Thickness(28, 0, 28, 15);
             footer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             status = new TextBlock();
             status.Text = File.Exists(backend) ? "LISTO / READY · SELECCIONA UNA APLICACIÓN · Windows 10/11" : "FALTA EL MOTOR / BACKEND MISSING";
             status.Foreground = new SolidColorBrush(Color.FromRgb(123, 220, 172));
+            status.FontWeight = FontWeights.SemiBold;
+            status.FontSize = 11;
             status.VerticalAlignment = VerticalAlignment.Center;
             footer.Children.Add(status);
             TextBlock boundary = new TextBlock();
             boundary.Text = "Reparación verificada · consentimiento explícito · backup";
             boundary.Foreground = new SolidColorBrush(Color.FromRgb(139, 153, 181));
+            boundary.FontSize = 11;
             Grid.SetColumn(boundary, 1);
             footer.Children.Add(boundary);
             Grid.SetRow(footer, 3);
@@ -226,52 +298,78 @@ namespace TheKeyPortable
         private Border BuildHeader()
         {
             Border border = new Border();
-            border.Padding = new Thickness(32, 24, 32, 22);
+            border.Padding = new Thickness(32, 18, 32, 17);
             border.Background = new LinearGradientBrush(
-                Color.FromRgb(15, 25, 49), Color.FromRgb(8, 13, 26), 0);
-            border.BorderBrush = new SolidColorBrush(Color.FromRgb(62, 76, 105));
+                Color.FromRgb(18, 29, 54), Color.FromRgb(8, 14, 28), 0);
+            border.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 61, 91));
             border.BorderThickness = new Thickness(0, 0, 0, 1);
 
             Grid grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             Border emblem = new Border();
-            emblem.Width = 68;
-            emblem.Height = 68;
-            emblem.CornerRadius = new CornerRadius(14);
-            emblem.Background = new SolidColorBrush(Color.FromRgb(228, 184, 74));
+            emblem.Width = 62;
+            emblem.Height = 62;
+            emblem.CornerRadius = new CornerRadius(16);
+            emblem.Background = new LinearGradientBrush(
+                Color.FromRgb(249, 207, 92), Color.FromRgb(214, 159, 42), 45);
+            emblem.Effect = new DropShadowEffect
+            {
+                Color = Color.FromRgb(232, 190, 82),
+                BlurRadius = 18,
+                ShadowDepth = 0,
+                Opacity = 0.22
+            };
             TextBlock king = new TextBlock();
             king.Text = "\u265A";
             king.Foreground = new SolidColorBrush(Color.FromRgb(8, 13, 26));
-            king.FontSize = 46;
+            king.FontSize = 40;
             king.HorizontalAlignment = HorizontalAlignment.Center;
             king.VerticalAlignment = VerticalAlignment.Center;
             emblem.Child = king;
             grid.Children.Add(emblem);
 
             StackPanel titles = new StackPanel();
-            titles.Margin = new Thickness(20, 0, 0, 0);
+            titles.Margin = new Thickness(18, 0, 0, 0);
+            TextBlock eyebrow = new TextBlock();
+            eyebrow.Text = "GOVERNED APPLICATION INTELLIGENCE";
+            eyebrow.FontSize = 10;
+            eyebrow.FontWeight = FontWeights.SemiBold;
+            eyebrow.Foreground = new SolidColorBrush(Color.FromRgb(126, 149, 188));
+            titles.Children.Add(eyebrow);
             TextBlock product = new TextBlock();
             product.Text = "THEKEY";
-            product.FontSize = 31;
+            product.FontSize = 29;
             product.FontWeight = FontWeights.Bold;
             product.Foreground = Brushes.White;
+            product.Margin = new Thickness(0, 1, 0, 0);
             titles.Children.Add(product);
             TextBlock name = new TextBlock();
             name.Text = "THE KING OF CHECKMATE";
-            name.FontSize = 18;
+            name.FontSize = 15;
             name.FontWeight = FontWeights.SemiBold;
             name.Foreground = new SolidColorBrush(Color.FromRgb(232, 190, 82));
             titles.Children.Add(name);
-            TextBlock tagline = new TextBlock();
-            tagline.Text = "Governed Codex Transactions for Coding Agents";
-            tagline.Margin = new Thickness(0, 5, 0, 0);
-            tagline.Foreground = new SolidColorBrush(Color.FromRgb(168, 183, 210));
-            tagline.FontSize = 14;
-            titles.Children.Add(tagline);
             Grid.SetColumn(titles, 1);
             grid.Children.Add(titles);
+
+            Border trustBadge = new Border();
+            trustBadge.Padding = new Thickness(14, 9, 14, 9);
+            trustBadge.CornerRadius = new CornerRadius(18);
+            trustBadge.Background = new SolidColorBrush(Color.FromArgb(82, 29, 51, 68));
+            trustBadge.BorderBrush = new SolidColorBrush(Color.FromRgb(58, 92, 102));
+            trustBadge.BorderThickness = new Thickness(1);
+            trustBadge.VerticalAlignment = VerticalAlignment.Center;
+            TextBlock trustText = new TextBlock();
+            trustText.Text = "●  LOCAL · PRIVACY FIRST";
+            trustText.FontSize = 10;
+            trustText.FontWeight = FontWeights.SemiBold;
+            trustText.Foreground = new SolidColorBrush(Color.FromRgb(116, 219, 172));
+            trustBadge.Child = trustText;
+            Grid.SetColumn(trustBadge, 2);
+            grid.Children.Add(trustBadge);
             border.Child = grid;
             return border;
         }
@@ -279,8 +377,8 @@ namespace TheKeyPortable
         private Button CreateCard(string symbol, string title, string detail, RoutedEventHandler action)
         {
             Button button = new Button();
-            button.Width = 258;
-            button.Height = 72;
+            button.Width = 393;
+            button.Height = 66;
             button.Margin = new Thickness(6);
             button.Padding = new Thickness(13, 8, 13, 8);
             button.Background = new SolidColorBrush(Color.FromRgb(20, 31, 54));
@@ -289,6 +387,18 @@ namespace TheKeyPortable
             button.Foreground = Brushes.White;
             button.Cursor = Cursors.Hand;
             button.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            button.Template = CreateCardTemplate();
+            button.Effect = new DropShadowEffect
+            {
+                Color = Color.FromRgb(0, 0, 0),
+                BlurRadius = 10,
+                ShadowDepth = 3,
+                Opacity = 0.2
+            };
+            button.ToolTip = title + " — " + detail;
+            AutomationProperties.SetName(button, title);
+            AutomationProperties.SetHelpText(button, detail);
+            AttachHoverAnimation(button);
             button.Click += action;
 
             Grid content = new Grid();
@@ -296,7 +406,8 @@ namespace TheKeyPortable
             content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             TextBlock icon = new TextBlock();
             icon.Text = symbol;
-            icon.FontSize = 28;
+            icon.FontFamily = new FontFamily("Segoe UI Symbol");
+            icon.FontSize = 25;
             icon.Foreground = new SolidColorBrush(Color.FromRgb(232, 190, 82));
             icon.VerticalAlignment = VerticalAlignment.Center;
             content.Children.Add(icon);
@@ -304,9 +415,10 @@ namespace TheKeyPortable
             copy.VerticalAlignment = VerticalAlignment.Center;
             TextBlock heading = new TextBlock();
             heading.Text = title;
-            heading.FontSize = 16;
+            heading.FontSize = 14;
             heading.FontWeight = FontWeights.SemiBold;
             heading.Foreground = Brushes.White;
+            heading.TextWrapping = TextWrapping.Wrap;
             copy.Children.Add(heading);
             TextBlock description = new TextBlock();
             description.Text = detail;
@@ -318,6 +430,154 @@ namespace TheKeyPortable
             content.Children.Add(copy);
             button.Content = content;
             return button;
+        }
+
+        private Button CreateFutureCard(string symbol, string title, string detail)
+        {
+            Button button = new Button();
+            button.Width = 393;
+            button.Height = 58;
+            button.Margin = new Thickness(6, 2, 6, 2);
+            button.Padding = new Thickness(14, 7, 14, 7);
+            button.Background = new SolidColorBrush(Color.FromRgb(14, 23, 40));
+            button.BorderBrush = new SolidColorBrush(Color.FromRgb(46, 61, 87));
+            button.BorderThickness = new Thickness(1);
+            button.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            button.Template = CreateCardTemplate();
+            button.IsEnabled = false;
+            button.ToolTip = "Próximamente / Coming soon — " + detail;
+            AutomationProperties.SetName(button, title + " — Próximamente / Coming soon");
+
+            Grid content = new Grid();
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(42) });
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            TextBlock icon = new TextBlock();
+            icon.Text = symbol;
+            icon.FontFamily = new FontFamily("Segoe UI Symbol");
+            icon.FontSize = 22;
+            icon.Foreground = new SolidColorBrush(Color.FromRgb(184, 151, 70));
+            icon.VerticalAlignment = VerticalAlignment.Center;
+            content.Children.Add(icon);
+            StackPanel copy = new StackPanel();
+            copy.VerticalAlignment = VerticalAlignment.Center;
+            TextBlock heading = new TextBlock();
+            heading.Text = title;
+            heading.FontSize = 14;
+            heading.FontWeight = FontWeights.SemiBold;
+            heading.Foreground = new SolidColorBrush(Color.FromRgb(222, 228, 240));
+            copy.Children.Add(heading);
+            TextBlock description = new TextBlock();
+            description.Text = detail;
+            description.FontSize = 10;
+            description.Foreground = new SolidColorBrush(Color.FromRgb(133, 149, 178));
+            copy.Children.Add(description);
+            Grid.SetColumn(copy, 1);
+            content.Children.Add(copy);
+            Border badge = new Border();
+            badge.Padding = new Thickness(8, 4, 8, 4);
+            badge.CornerRadius = new CornerRadius(10);
+            badge.Background = new SolidColorBrush(Color.FromRgb(28, 38, 59));
+            TextBlock badgeText = new TextBlock();
+            badgeText.Text = "PRÓXIMAMENTE / SOON";
+            badgeText.FontSize = 9;
+            badgeText.Foreground = new SolidColorBrush(Color.FromRgb(157, 171, 198));
+            badge.Child = badgeText;
+            Grid.SetColumn(badge, 2);
+            content.Children.Add(badge);
+            button.Content = content;
+            return button;
+        }
+
+        private static void AttachHoverAnimation(Button button)
+        {
+            TranslateTransform transform = new TranslateTransform();
+            button.RenderTransform = transform;
+            button.RenderTransformOrigin = new Point(0.5, 0.5);
+            button.MouseEnter += delegate
+            {
+                if (!button.IsEnabled) return;
+                DoubleAnimation lift = new DoubleAnimation(-2, TimeSpan.FromMilliseconds(140));
+                lift.EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+                transform.BeginAnimation(TranslateTransform.YProperty, lift);
+            };
+            button.MouseLeave += delegate
+            {
+                DoubleAnimation settle = new DoubleAnimation(0, TimeSpan.FromMilliseconds(170));
+                settle.EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+                transform.BeginAnimation(TranslateTransform.YProperty, settle);
+            };
+        }
+
+        private static ControlTemplate CreateCardTemplate()
+        {
+            ControlTemplate template = new ControlTemplate(typeof(Button));
+            FrameworkElementFactory border = new FrameworkElementFactory(typeof(Border));
+            border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+            border.SetValue(Border.BackgroundProperty,
+                new TemplateBindingExtension(Control.BackgroundProperty));
+            border.SetValue(Border.BorderBrushProperty,
+                new TemplateBindingExtension(Control.BorderBrushProperty));
+            border.SetValue(Border.BorderThicknessProperty,
+                new TemplateBindingExtension(Control.BorderThicknessProperty));
+
+            FrameworkElementFactory presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            presenter.SetValue(ContentPresenter.ContentProperty,
+                new TemplateBindingExtension(ContentControl.ContentProperty));
+            presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty,
+                new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
+            presenter.SetValue(ContentPresenter.VerticalAlignmentProperty,
+                new TemplateBindingExtension(Control.VerticalContentAlignmentProperty));
+            presenter.SetValue(FrameworkElement.MarginProperty,
+                new TemplateBindingExtension(Control.PaddingProperty));
+            border.AppendChild(presenter);
+            template.VisualTree = border;
+
+            Trigger hover = new Trigger();
+            hover.Property = UIElement.IsMouseOverProperty;
+            hover.Value = true;
+            hover.Setters.Add(new Setter(
+                Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(28, 43, 72))));
+            hover.Setters.Add(new Setter(
+                Control.BorderBrushProperty,
+                new SolidColorBrush(Color.FromRgb(232, 190, 82))));
+            template.Triggers.Add(hover);
+
+            Trigger pressed = new Trigger();
+            pressed.Property = Button.IsPressedProperty;
+            pressed.Value = true;
+            pressed.Setters.Add(new Setter(
+                Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(12, 21, 39))));
+            template.Triggers.Add(pressed);
+
+            Trigger focused = new Trigger();
+            focused.Property = UIElement.IsKeyboardFocusedProperty;
+            focused.Value = true;
+            focused.Setters.Add(new Setter(
+                Control.BorderBrushProperty,
+                new SolidColorBrush(Color.FromRgb(255, 215, 112))));
+            focused.Setters.Add(new Setter(
+                Control.BorderThicknessProperty,
+                new Thickness(2)));
+            template.Triggers.Add(focused);
+
+            Trigger disabled = new Trigger();
+            disabled.Property = UIElement.IsEnabledProperty;
+            disabled.Value = false;
+            disabled.Setters.Add(new Setter(
+                Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(24, 35, 58))));
+            disabled.Setters.Add(new Setter(
+                Control.BorderBrushProperty,
+                new SolidColorBrush(Color.FromRgb(82, 101, 130))));
+            disabled.Setters.Add(new Setter(
+                FrameworkElement.CursorProperty,
+                Cursors.Arrow));
+            template.Triggers.Add(disabled);
+
+            return template;
         }
 
         private Button CreatePrimaryAction()
@@ -333,25 +593,81 @@ namespace TheKeyPortable
             button.BorderThickness = new Thickness(1);
             button.Foreground = new SolidColorBrush(Color.FromRgb(8, 13, 26));
             button.Cursor = Cursors.Hand;
+            button.Template = CreatePrimaryTemplate();
+            button.ToolTip = "Seleccionar y analizar una aplicación local / Select and analyze a local application";
+            AutomationProperties.SetName(button, "Seleccionar y analizar / Select and analyze");
+            AutomationProperties.SetHelpText(button, "Inspección local de solo lectura / Local read-only inspection");
+            AttachHoverAnimation(button);
             button.Click += SelectApplication;
 
             StackPanel content = new StackPanel();
             content.HorizontalAlignment = HorizontalAlignment.Center;
             content.VerticalAlignment = VerticalAlignment.Center;
             TextBlock heading = new TextBlock();
-            heading.Text = "\u25A3  SELECCIONAR Y ANALIZAR APLICACIÓN";
+            heading.Text = "\u25A3  SELECCIONAR Y ANALIZAR / SELECT & ANALYZE";
             heading.FontSize = 22;
             heading.FontWeight = FontWeights.Bold;
             heading.HorizontalAlignment = HorizontalAlignment.Center;
             content.Children.Add(heading);
             TextBlock description = new TextBlock();
-            description.Text = "Inspección de solo lectura: no ejecuta código de la aplicación";
+            description.Text = "Aplicación local / Local application · solo lectura / read-only";
             description.FontSize = 13;
             description.Margin = new Thickness(0, 6, 0, 0);
             description.HorizontalAlignment = HorizontalAlignment.Center;
             content.Children.Add(description);
             button.Content = content;
             return button;
+        }
+
+        private static ControlTemplate CreatePrimaryTemplate()
+        {
+            ControlTemplate template = new ControlTemplate(typeof(Button));
+            FrameworkElementFactory border = new FrameworkElementFactory(typeof(Border));
+            border.SetValue(Border.CornerRadiusProperty, new CornerRadius(9));
+            border.SetValue(Border.BackgroundProperty,
+                new TemplateBindingExtension(Control.BackgroundProperty));
+            border.SetValue(Border.BorderBrushProperty,
+                new TemplateBindingExtension(Control.BorderBrushProperty));
+            border.SetValue(Border.BorderThicknessProperty,
+                new TemplateBindingExtension(Control.BorderThicknessProperty));
+            border.SetValue(Border.EffectProperty, new DropShadowEffect
+            {
+                Color = Color.FromRgb(220, 166, 49),
+                BlurRadius = 20,
+                ShadowDepth = 4,
+                Opacity = 0.2
+            });
+            FrameworkElementFactory presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            presenter.SetValue(ContentPresenter.ContentProperty,
+                new TemplateBindingExtension(ContentControl.ContentProperty));
+            presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            presenter.SetValue(FrameworkElement.MarginProperty,
+                new TemplateBindingExtension(Control.PaddingProperty));
+            border.AppendChild(presenter);
+            template.VisualTree = border;
+
+            Trigger hover = new Trigger();
+            hover.Property = UIElement.IsMouseOverProperty;
+            hover.Value = true;
+            hover.Setters.Add(new Setter(
+                Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(255, 215, 112))));
+            template.Triggers.Add(hover);
+            Trigger pressed = new Trigger();
+            pressed.Property = Button.IsPressedProperty;
+            pressed.Value = true;
+            pressed.Setters.Add(new Setter(
+                Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(207, 151, 36))));
+            template.Triggers.Add(pressed);
+            Trigger focused = new Trigger();
+            focused.Property = UIElement.IsKeyboardFocusedProperty;
+            focused.Value = true;
+            focused.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.White));
+            focused.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(2)));
+            template.Triggers.Add(focused);
+            return template;
         }
 
         private void RunDemo(object sender, RoutedEventArgs e)
