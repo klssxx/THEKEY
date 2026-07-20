@@ -165,7 +165,7 @@ class Approver:
             raise TheKeyError("Invalid sovereign grant", code="INVALID_AUTHORIZATION_GRANT")
         if grant["schema_version"] != "v1" or grant["protocol_version"] != "v1":
             raise TheKeyError("Incompatible sovereign grant", code="INVALID_AUTHORIZATION_GRANT")
-        if grant["sovereign_identity_id"] != "moli":
+        if grant["sovereign_identity_id"] != "usuario":
             raise TheKeyError("Unexpected sovereign identity", code="INVALID_AUTHORIZATION_GRANT")
         fixed_fields = {
             "grant_id": DEMO_GRANT_ID,
@@ -212,7 +212,7 @@ class Approver:
             authorization_id=authorization_id,
             grant_id=grant["grant_id"],
             grant_sha256=grant_sha256,
-            sovereign_identity_id="moli",
+            sovereign_identity_id="usuario",
             run_id=run_id,
             transaction_id=transaction_id,
             plan_sha256=plan_sha256,
@@ -227,7 +227,7 @@ class Approver:
         )
         approval = Approval(
             run_id=run_id,
-            approved_by="moli (persisted explicit grant)",
+            approved_by="usuario (persisted explicit grant)",
             policy_id=policy.policy_id,
             approved_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
             note=f"Bound to sovereign grant {grant['grant_id']}.",

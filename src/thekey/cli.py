@@ -321,6 +321,104 @@ def cmd_judge_mode(args) -> int:
     return 0 if success else EXIT_CODES["GATE_FAILURE"]
 
 
+def cmd_project_inspect(args) -> int:
+    from .project_verification import inspect_application
+
+    result = inspect_application(
+        args.source,
+        output=Path(args.output) if args.output else None,
+    )
+    if args.json:
+        _print(result, True)
+    else:
+        external_tests = result["inspection"].get("external_tests")
+        tests = result["inspection"]["test_roots"]
+        if not tests and external_tests:
+            tests = [external_tests["path"]]
+        _print({
+            "project": result["profile"]["project_name"],
+            "profile": result["profile"]["detected_profile"],
+            "checkmate": result["checkmate_review"]["verdict"],
+            "policy": result["policy_decision"]["reason_code"],
+            "tests": tests,
+            "source_access": result["source"]["access_mode"],
+            "next_action": result["next_action"],
+            "evidence": result["evidence_path"],
+        }, False)
+    return 0 if result["policy_decision"]["allowed"] else EXIT_CODES["INVALID_POLICY"]
+
+
+def cmd_project_verify(args) -> int:
+    from .project_verification import verify_application
+
+    result = verify_application(
+        args.source,
+        consent=args.consent,
+        output=Path(args.output) if args.output else None,
+    )
+    if args.json:
+        _print(result, True)
+    else:
+        _print({
+            "project": result["profile"]["project_name"],
+            "profile": result["profile"]["detected_profile"],
+            "checkmate": result["checkmate_review"]["verdict"],
+            "policy": result["policy_decision"]["reason_code"],
+            "verdict": result["final_verdict"],
+            "source_unchanged": result["source"].get("unchanged"),
+            "gates": [f"{gate['gate']}={gate['status']}" for gate in result.get("gates", [])],
+            "diagnostics": [
+                f"{item['code']}: {item['summary']}"
+                for item in result.get("diagnostics", [])
+            ],
+            "evidence": result.get("evidence_path"),
+        }, False)
+    return 0 if result["final_verdict"] == "VERIFIED" else EXIT_CODES["GATE_FAILURE"]
+
+
+def cmd_project_repair(args) -> int:
+    from .project_repair import repair_application
+
+    result = repair_application(
+        args.source,
+        consent=args.consent,
+        apply_consent=args.apply_consent,
+        output=Path(args.output) if args.output else None,
+        max_candidates=args.max_candidates,
+        candidate_timeout_seconds=args.candidate_timeout,
+    )
+    if args.json:
+        _print(result, True)
+    else:
+        repair = result.get("repair") or {}
+        _print({
+            "project": Path(args.source).resolve().name,
+            "initial_verdict": result["initial_verification"]["verdict"],
+            "diagnostics": [
+                f"{item['code']}: {item['summary']}"
+                for item in result["initial_verification"].get("diagnostics", [])
+            ],
+            "outcome": result["outcome"],
+            "source_changed": result["source_changed"],
+            "repair": (
+                f"{repair.get('path')}:{repair.get('line')} "
+                f"{repair.get('before')!r} -> {repair.get('after')!r}"
+                if repair
+                else None
+            ),
+            "policy": (result.get("repair_policy_decision") or {}).get("reason_code"),
+            "message": result["message"],
+            "backup": result.get("backup_path"),
+            "evidence": result.get("evidence_path"),
+        }, False)
+    successful = {
+        "NO_CHANGES_NEEDED",
+        "REPAIR_READY",
+        "REPAIRED_AND_VERIFIED",
+    }
+    return 0 if result["outcome"] in successful else EXIT_CODES["GATE_FAILURE"]
+
+
 def cmd_history(args) -> int:
     rh = RunHistory()
     if args.history_cmd == "verify":
@@ -417,6 +515,53 @@ def build_parser() -> argparse.ArgumentParser:
     judge.add_argument("--output", required=True)
     judge.add_argument("--json", action="store_true")
     judge.set_defaults(func=cmd_judge_mode)
+
+    # local project inspection / verification
+    project = sub.add_parser(
+        "project", help="Inspect, diagnose, verify, or repair a supported local project"
+    )
+    project_sub = project.add_subparsers(dest="command")
+    project_inspect = project_sub.add_parser(
+        "inspect", help="Read-only project intake without executing project code"
+    )
+    project_inspect.add_argument("--source", required=True)
+    project_inspect.add_argument("--output")
+    project_inspect.add_argument("--json", action="store_true")
+    project_inspect.set_defaults(func=cmd_project_inspect)
+    project_verify = project_sub.add_parser(
+        "verify", help="Run bounded gates in an isolated copy"
+    )
+    project_verify.add_argument("--source", required=True)
+    project_verify.add_argument("--output")
+    project_verify.add_argument(
+        "--consent",
+        required=True,
+        choices=["execute_trusted_tests"],
+        help="Explicit acknowledgement that project tests execute trusted local code",
+    )
+    project_verify.add_argument("--json", action="store_true")
+    project_verify.set_defaults(func=cmd_project_verify)
+    project_repair = project_sub.add_parser(
+        "repair",
+        help="Find a bounded repair in isolation and optionally apply it after verification",
+    )
+    project_repair.add_argument("--source", required=True)
+    project_repair.add_argument("--output")
+    project_repair.add_argument(
+        "--consent",
+        required=True,
+        choices=["execute_trusted_tests"],
+        help="Explicit acknowledgement that project tests execute trusted local code",
+    )
+    project_repair.add_argument(
+        "--apply-consent",
+        choices=["apply_verified_repairs"],
+        help="Apply the exact repair only after all isolated gates pass",
+    )
+    project_repair.add_argument("--max-candidates", type=int, default=60)
+    project_repair.add_argument("--candidate-timeout", type=int, default=60)
+    project_repair.add_argument("--json", action="store_true")
+    project_repair.set_defaults(func=cmd_project_repair)
 
     # history
     hist = sub.add_parser("history", help="Run-history index and queries")

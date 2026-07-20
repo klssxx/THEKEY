@@ -61,6 +61,17 @@ hash. The final candidate adds the submission-safe README and Judge Mode
 evidence contract, independent evidence verifier, tests, video/Devpost package,
 and this provenance dossier.
 
+A later, separately committed portable-candidate delta adds a Windows 10/11 x64
+graphical launcher and frozen runtime; read-only intake for recognized local
+Python applications; CHECKMATE and PolicyEngine preconditions; explicit consent
+before trusted tests execute; verification of a short isolated copy; structured
+`VERIFIED`, `BLOCKED`, or `NO_VERIFICABLE` evidence; generated-directory and
+Windows long-path protections; actionable redacted diagnostics; bounded
+single-point repair synthesis; a separately authorized exact-byte source
+application with stale-input protection, out-of-tree backup, post-apply
+verification, and rollback; a bundled transparent sample; and bilingual
+operator guidance. It does not rewrite the baseline or the Phase-B commit.
+
 ## Evaluation command
 
 Review only the verifiable post-baseline range:

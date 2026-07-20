@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -148,6 +149,14 @@ def create_declared_file(run_id: str, parameters: dict) -> dict:
 # Command handlers (orchestrator executes; deterministic, no network).
 # --------------------------------------------------------------------------
 def _run_python(args: list[str], cwd: Path) -> dict:
+    env = None
+    if getattr(sys, "frozen", False):
+        # The portable entry point deliberately accepts the two bounded
+        # ``-m`` invocations used by THEKEY gates.  Resetting the PyInstaller
+        # environment makes the child a fresh process instead of a bootloader
+        # continuation.  Source installs keep their existing behavior.
+        env = os.environ.copy()
+        env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
     try:
         proc = subprocess.run(
             [sys.executable, *args],
@@ -155,6 +164,7 @@ def _run_python(args: list[str], cwd: Path) -> dict:
             capture_output=True,
             text=True,
             timeout=300,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         return {"status": "TIMEOUT", "returncode": None, "stdout": "", "stderr": "timeout"}

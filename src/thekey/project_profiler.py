@@ -1,4 +1,4 @@
-"""Project profiler: detect the supported Python project profile (section 11).
+"""Project profiler: detect supported Python and Windows .NET profiles.
 
 Detection is conservative and evidence-based. It does NOT classify from a single
 filename. Confidence drives the decision:
@@ -14,19 +14,18 @@ UNSUPPORTED_PROJECT_PROFILE.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 from .errors import UnsupportedProjectProfileError
 from .project_loader import inspect_project
 from .project_models import (
+    _PROFILE_SIGNALS,
+    SUPPORTED_PROFILES,
     ProjectInspection,
     ProjectProfile,
-    SUPPORTED_PROFILES,
 )
-
-# Signal markers used for evidence. Imported from project_models tables.
-from .project_models import _PROFILE_SIGNALS
 
 # Non-Python / unsupported signal files.
 _UNSUPPORTED_MARKERS = [
@@ -35,6 +34,138 @@ _UNSUPPORTED_MARKERS = [
     "go.mod",
     "pom.xml",
 ]
+
+
+def _recognized_non_python_profile(
+    inspection: ProjectInspection, root: Path
+) -> ProjectProfile | None:
+    """Return supported profile records for non-Python local projects."""
+    names = {Path(rel).name for rel in inspection.canonical_hashes}
+    markers = {
+        "package.json": ("javascript", "Node.js / JavaScript", "node-javascript"),
+        "Cargo.toml": ("rust", "Rust / Cargo", "rust-cargo"),
+        "go.mod": ("go", "Go module", "go-module"),
+        "pom.xml": ("java", "Java / Maven", "java-maven"),
+    }
+    for marker, (language, label, profile_name) in markers.items():
+        if marker not in names:
+            continue
+        text = _read_text_safe(root / marker)
+        test_configuration: dict[str, object] = {"test_roots": inspection.test_roots}
+        if marker == "package.json":
+            try:
+                package = json.loads(text)
+                scripts = package.get("scripts", {})
+                scripts = scripts if isinstance(scripts, dict) else {}
+            except json.JSONDecodeError:
+                scripts = {}
+            test_configuration.update({
+                "has_test_script": isinstance(scripts.get("test"), str),
+                "has_build_script": isinstance(scripts.get("build"), str),
+            })
+        elif marker == "Cargo.toml":
+            test_configuration["has_tests"] = any(
+                Path(rel).parts[0] == "tests" or "#[test]" in _read_text_safe(root / rel)
+                for rel in inspection.canonical_hashes if rel.endswith(".rs")
+            )
+        elif marker == "go.mod":
+            test_configuration["has_tests"] = any(
+                Path(rel).name.endswith("_test.go") for rel in inspection.canonical_hashes
+            )
+        else:
+            test_configuration["has_tests"] = any(
+                str(Path(rel)).replace("\\", "/").startswith("src/test/")
+                for rel in inspection.canonical_hashes
+            )
+        return ProjectProfile(
+            project_id=_project_id(root),
+            project_name=root.name,
+            source_root=str(root),
+            language=language,
+            detected_profile=profile_name,
+            profile_confidence=0.98,
+            profile_evidence=[f"{marker}: recognized {label} manifest"],
+            packaging={"manifest": marker},
+            test_configuration=test_configuration,
+            git={
+                "detected": inspection.git_detected,
+                "head": inspection.git_head,
+                "dirty": inspection.git_dirty,
+            },
+            warnings=list(inspection.warnings),
+        )
+    return None
+
+
+def _dotnet_profile(inspection: ProjectInspection, root: Path) -> ProjectProfile | None:
+    """Return a high-confidence .NET profile when a project file proves it.
+
+    This is intentionally based on ``.csproj`` content rather than directory
+    names.  A stray Python utility in a Windows application must not cause the
+    application itself to be classified as a Python target.
+    """
+    projects = sorted(
+        rel for rel in inspection.canonical_hashes
+        if Path(rel).suffix.casefold() == ".csproj"
+    )
+    if not projects:
+        return None
+    primary = projects[0]
+    text = _read_text_safe(root / primary)
+    is_windows = bool(
+        re.search(r"<TargetFrameworks?>[^<]*-windows", text, re.IGNORECASE)
+        or re.search(r"<UseWinUI>\s*true\s*</UseWinUI>", text, re.IGNORECASE)
+        or "Microsoft.WindowsAppSDK" in text
+    )
+    is_console = bool(
+        re.search(r"<OutputType>\s*Exe\s*</OutputType>", text, re.IGNORECASE)
+        or any(Path(rel).name == "Program.cs" for rel in inspection.canonical_hashes)
+    )
+    profile_name = (
+        "dotnet-windows" if is_windows
+        else "dotnet-console" if is_console
+        else "dotnet-library"
+    )
+    frameworks = re.findall(r"<TargetFrameworks?>([^<]+)</TargetFrameworks?>", text)
+    packages = re.findall(r'<PackageReference\s+Include="([^"]+)"', text)
+    entrypoints = sorted(
+        rel for rel in inspection.canonical_hashes
+        if Path(rel).name in {"App.xaml", "Program.cs", "MainWindow.xaml"}
+    )
+    return ProjectProfile(
+        project_id=_project_id(root),
+        project_name=root.name,
+        source_root=str(root),
+        language="csharp",
+        detected_profile=profile_name,
+        profile_confidence=0.98,
+        profile_evidence=[
+            (
+                f"{primary}: Windows target / WinUI application marker"
+                if is_windows else f"{primary}: SDK-style .NET project"
+            ),
+            *[f"{primary}: target={value}" for value in frameworks[:3]],
+        ],
+        frameworks=sorted({"WinUI" if is_windows else ".NET", *packages}),
+        entrypoints=entrypoints,
+        test_configuration={
+            "test_roots": inspection.test_roots,
+            "project_files": projects,
+            "test_projects": [
+                rel for rel in projects
+                if "test" in Path(rel).stem.casefold()
+                or "Microsoft.NET.Test.Sdk" in _read_text_safe(root / rel)
+            ],
+            "build_command": "dotnet build --no-restore --configuration Release",
+        },
+        packaging={"csproj": primary, "target_frameworks": frameworks},
+        git={
+            "detected": inspection.git_detected,
+            "head": inspection.git_head,
+            "dirty": inspection.git_dirty,
+        },
+        warnings=list(inspection.warnings),
+    )
 
 
 def _read_text_safe(path: Path, limit: int = 200_000) -> str:
@@ -112,6 +243,12 @@ def profile_project(
 ) -> ProjectProfile:
     root = Path(source).expanduser().resolve()
     inspection = inspect_project(root, scan_limits)
+    dotnet_profile = _dotnet_profile(inspection, root)
+    if dotnet_profile is not None:
+        return dotnet_profile
+    recognized_non_python = _recognized_non_python_profile(inspection, root)
+    if recognized_non_python is not None:
+        return recognized_non_python
     evidence = _scan_for_imports_and_markers(inspection, root)
     scores = _score(evidence)
 
@@ -150,7 +287,12 @@ def profile_project(
             profile_confidence=0.90,
             profile_evidence=[
                 f"{n} python file(s) without packaging metadata"
-                for n in [str(sum(1 for r in inspection.canonical_hashes if str(r).endswith('.py')))]
+                for n in [
+                    str(sum(
+                        1 for r in inspection.canonical_hashes
+                        if str(r).endswith(".py")
+                    ))
+                ]
             ][:1],
             entrypoints=inspection.detected_entrypoints,
             test_configuration={"test_roots": inspection.test_roots},

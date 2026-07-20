@@ -3,6 +3,26 @@
 All notable changes to THEKEY Core Governed Run are documented here. The format
 is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+* Windows 10/11 x64 portable launcher and frozen runtime.
+* Read-only Python-project inspection plus isolated compile, pytest, bounded
+  secret-scan, and documentation diagnostics.
+* Bounded single-point automatic repair with exact-byte policy authorization,
+  stale-input refusal, out-of-tree backup, post-apply verification, and
+  rollback.
+* Transparent healthy and repairable portable samples with reviewable JSON
+  evidence.
+
+### Fixed
+
+* Entropy scanning now evaluates exclusions relative to the requested root, so
+  a scan rooted beneath an excluded-named parent is not silently skipped.
+* Bounded project commands return redacted diagnostic excerpts and convert
+  subprocess timeouts into fail-closed evidence.
+
 ## [0.2.0] - 2026-07-18
 
 Public Preview. Governance, workspace isolation, deterministic gates, and

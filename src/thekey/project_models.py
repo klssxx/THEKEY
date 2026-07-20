@@ -19,6 +19,13 @@ SUPPORTED_PROFILES = {
     "python-desktop",
     "python-web",
     "single-file-python",
+    "dotnet-windows",
+    "dotnet-console",
+    "dotnet-library",
+    "node-javascript",
+    "rust-cargo",
+    "go-module",
+    "java-maven",
 }
 
 # Packaging / framework signal tables used by the profiler (section 11).

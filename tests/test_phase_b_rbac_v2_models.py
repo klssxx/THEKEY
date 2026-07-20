@@ -46,7 +46,7 @@ def valid_context(**changes) -> dict:
         authorization_id=authorization_id,
         grant_id="build-week-judge-mode-v1",
         grant_sha256="d4" * 32,
-        sovereign_identity_id="moli",
+        sovereign_identity_id="usuario",
         run_id=run_id,
         transaction_id=transaction_id,
         plan_sha256=PLAN,

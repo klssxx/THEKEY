@@ -13,16 +13,36 @@ a verdict, but performs no physical writes.
 Agentic changes are fast, but teams often cannot prove which plan was
 authorized, what executed, or why release was allowed. THEKEY turns a change
 into a governed transaction. Before resolving a physical handler it requires a
-CHECKMATE pre-action PASS and scoped moli authorization bound to the same run,
+CHECKMATE pre-action PASS and scoped usuario authorization bound to the same run,
 transaction, plan SHA-256, policy version, and policy bundle hash. Only
 EXECUTOR crosses the boundary; malformed, mismatched, deferred, failed, or
 unauthorized inputs fail closed.
+
+The Windows portable application turns that boundary into a two-click product
+flow. A user selects a trusted local Python project; THEKEY performs a
+read-only inspection, profiles it, records a CHECKMATE verdict and asks the
+`PolicyEngine` for a narrowly scoped authorization. Only after explicit test-
+execution consent does it copy inspected files to a short isolated workspace
+and run compileall, existing pytest tests, a limited secret scan, and a
+documentation gate. It then re-hashes the original and emits a final
+`VERIFIED`, `BLOCKED`, or `NO_VERIFICABLE` verdict with JSON evidence. Generated
+`bin`, `obj`, `publish`, `build`, and `dist` trees are excluded; dependencies
+are never installed automatically.
+
+The product now closes the loop instead of stopping at detection. **Scan and
+repair** emits redacted actionable diagnostics and searches a closed set of
+conservative single-point Python mutations in the isolated copy. It accepts a
+candidate only after compileall, the complete pytest suite, secret scan, and
+documentation gate pass. A separate consent authorizes the exact verified
+bytes; THEKEY rejects stale source/test hashes, stores an out-of-tree backup,
+re-verifies after applying, and rolls back on failure.
+
 Judge Mode creates a temporary Git repository, repairs one controlled defect
 inside a workflow-isolated runtime, runs build/tests/secret-scan/documentation,
 and emits JSON evidence. An adversarial `Role.SYSTEM` request then returns DENY,
 executes zero handlers, and leaves the workspace hash unchanged.
 **Technologies:** Python 3.11+, Pydantic v2, pytest, JSON Schema, PowerShell 7,
-SQLite, Git, and Codex.
+SQLite, Git, WPF/.NET Framework, PyInstaller, and Codex.
 THEKEY is explicitly declared a preexisting project. Its accessible public Git
 history begins after the cutoff: the owner statement is `CLAIM_RECORDED`, and
 unimported historical records remain `PENDING_EVIDENCE_IMPORT`. The session
@@ -33,13 +53,26 @@ canonical demo. Only the verifiable delta after baseline
 receipts, the production policy decision API, 5/5 governed callers,
 state-provenance fixes, security tests, Judge Mode, and submission
 documentation. Codex drove inspection, adversarial design, implementation and
-RED→GREEN verification; moli retained product, authority, and publication
+RED→GREEN verification; usuario retained product, authority, and publication
 decisions. Codex with GPT-5.6 was the agent used to analyze, build, test, and
 improve the project, including caller comparison, denial cases, the governed
 boundary, regression, and clean-clone verification. GPT-5.6 was development
 tooling, not a runtime dependency; the sanitized session record is in
 `docs/build-week/CODEX_SESSION_EVIDENCE.md`.
 ## Judge instructions
+
+Portable path for Windows 10/11 x64: extract
+`THEKEY-Portable-Windows-x64.zip`, open `THEKEY.exe`, and select **Demo para
+jueces** for the deterministic competition scenario. To exercise the product
+flow, select **SELECCIONAR Y ANALIZAR APLICACIÓN**, choose the included
+`SAMPLE-REPAIRABLE-PYTHON-APP`, then select **Escanear y reparar** and approve
+execution of that trusted sample's tests plus application of only a fully
+verified repair. The visible result is `REPAIRED_AND_VERIFIED`, with the exact
+diff, policy decision, backup, and post-apply gates in JSON. No Python, Git,
+PowerShell, API key, account, or network installation is needed.
+
+Source-install fallback:
+
 ```powershell
 git clone https://github.com/klssxx/THEKEY.git
 cd THEKEY
@@ -58,9 +91,16 @@ commit hash; this check binds the instructions to the checked-out candidate.
 Expected: ALLOW `handlers=1`, DENY `handlers=0`, `4/4 PASS`, and
 `RELEASE_ELIGIBLE`, plus unchanged source, bound receipts, and
 `production_reuse=False`. Repository: https://github.com/klssxx/THEKEY.
-Platform: Windows 11. Public YouTube: `PENDING_PUBLIC_YOUTUBE_URL`.
+Portable target: Windows 10 x64 and Windows 11 x64; current verification host:
+Windows 11. Public YouTube: `PENDING_PUBLIC_YOUTUBE_URL`.
 `/feedback`: `019f79f2-6a7e-74f0-b1fa-d65335b29a7c`.
 Limits: workflow isolation is not an OS sandbox. The local grant is hard-bound
 to the canonical demo path/hash and isolated output, with production reuse
 denied; it is not a cryptographic signature. Secret scanning is limited; no
 paid service or secret is required for the main demo.
+Project verification supports recognized Python profiles and existing pytest
+tests. Consent runs trusted project tests in an isolated copy, not an OS
+sandbox; unsupported projects or missing evidence do not receive a VERIFIED
+verdict. Automatic repair covers only the documented closed single-point
+candidate set, never changes tests or installs dependencies, and blocks defects
+it cannot prove fixed.

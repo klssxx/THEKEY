@@ -14,10 +14,18 @@ No path here points at the protected historical THEKEY framework.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
-# Real checkout root (src/thekey/config.py -> parents[2] = repo root).
-REAL_ROOT = Path(__file__).resolve().parents[2]
+# Real checkout root (src/thekey/config.py -> parents[2] = repo root).  In the
+# Windows portable build PyInstaller places imported modules below its
+# ``_internal`` directory, while the immutable governance assets live beside
+# the executable.  Resolve that layout explicitly without changing source-run
+# behavior.
+if getattr(sys, "frozen", False):
+    REAL_ROOT = Path(sys.executable).resolve().parent
+else:
+    REAL_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _env_path(name: str, default: Path) -> Path:
@@ -27,8 +35,19 @@ def _env_path(name: str, default: Path) -> Path:
     return default
 
 
-# Mutable runtime root (state + workspaces). Overridable for tests.
-RUNTIME_ROOT = _env_path("THEKEY_REPO_ROOT", REAL_ROOT)
+# Mutable runtime root (state + workspaces). Overridable for tests.  A frozen
+# Windows app must not place nested verification workspaces beside the
+# executable: an extracted package can already have a long path and Windows
+# would then reject otherwise valid project paths.  LocalApplicationData is a
+# persistent, user-writable and substantially shorter default.
+if getattr(sys, "frozen", False) and os.name == "nt":
+    _local_app_data = Path(
+        os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local"))
+    )
+    _default_runtime_root = _local_app_data / "THEKEY"
+else:
+    _default_runtime_root = REAL_ROOT
+RUNTIME_ROOT = _env_path("THEKEY_REPO_ROOT", _default_runtime_root)
 
 # Source tree (real checkout; the package itself is read-only at runtime).
 SRC_ROOT = REAL_ROOT / "src"

@@ -30,10 +30,22 @@ diff, not undocumented history. See the
 - Judge Mode: temporary Git repository, workflow isolation, one-handler ALLOW,
   zero-handler adversarial DENY, four gates, JSON evidence, and a Windows path
   containing spaces.
+- Windows 10/11 x64 portable candidate with a chess-king launcher, user-owned
+  five-second cinematic, bilingual clickable controls, and bundled runtime.
+- Read-only intake and isolated verification for recognized Python, Node.js,
+  Go, Rust, .NET, and Maven projects:
+  CHECKMATE, scoped PolicyEngine authorization, explicit trusted-test consent,
+  fixed adapter build/test commands, bounded secret scan, documentation, and unchanged-source
+  evidence. Generated build trees are excluded and long paths use a short
+  per-user runtime root.
+- Redacted actionable diagnostics plus bounded single-point repair synthesis.
+  A repair is accepted only after every isolated gate passes; exact-byte source
+  application requires separate consent, a fresh baseline check, out-of-tree
+  backup, post-apply verification, and automatic rollback on failure.
 - Bilingual README and judge quickstart, contribution record, Devpost draft,
   evidence verifier, and video package.
 Codex performed inspection, adversarial design, implementation, AST analysis,
-RED→GREEN testing, regression, rollback preparation, and documentation. moli
+RED→GREEN testing, regression, rollback preparation, and documentation. usuario
 retained authority, scope, LIVE_E, push, merge, release, video, and submission
 decisions. Exact files, hashes, commands, and diff statistics are in the final
 manifest.
@@ -50,3 +62,9 @@ manifest.
   canonical demo path/hash and isolated workspace with production reuse denied;
   it is not a cryptographic human signature. Secret scanning is limited;
   Windows 11 is the verified Judge Mode platform.
+- The portable surface targets Windows 10/11 x64 and is exercised on Windows
+  11. Selected tests are trusted code; no dependency installation is attempted,
+  and unsupported or insufficiently evidenced projects are not called verified.
+- Automatic repair never changes tests or installs dependencies. Failures
+  outside its closed candidate set remain blocked and diagnosed; arbitrary
+  repair is not claimed.

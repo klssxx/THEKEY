@@ -40,14 +40,51 @@ plan, a CHECKMATE pre-action review, explicit human authority, a deterministic
 policy decision, physical handlers, four verification gates, and persisted
 evidence to one run and transaction.
 
-It provides workflow isolation, deterministic policy authorization, and
-fail-closed dispatch. It is not an operating-system sandbox. It is not a
-general-purpose repair agent, a cryptographic human-signature system, or an
-external attestation service.
+It provides workflow isolation, deterministic policy authorization,
+executable diagnostics, and fail-closed dispatch. It is not an operating-
+system sandbox, a cryptographic human-signature system, or an external
+attestation service. Automatic repair is deliberately bounded: it tries
+conservative single-point Python or JavaScript mutations and accepts one only if it compiles
+and passes the complete test suite and every gate.
 
-## Judge Mode in about three minutes
+## Two-click portable app
 
-Verified platform: Windows 11, PowerShell 7, Python 3.11 or newer, and Git.
+`THEKEY-Portable-Windows-x64.zip` targets Windows 10 x64 and Windows 11 x64.
+Extract it, open `THEKEY.exe`, select **SELECCIONAR Y ANALIZAR APLICACIÓN**, and
+choose a supported project. The first phase is read-only: it detects the profile,
+tests, and metadata; CHECKMATE reviews risk; and the `PolicyEngine` decides
+whether verification may proceed. **Verificar aplicación** requires explicit
+consent, copies only inspected files to a short isolated workspace, and runs
+the fixed checks and tests for its detected adapter, a limited secret scan, and the documentation gate there.
+It then re-hashes the source to prove whether the original stayed unchanged.
+
+**Scan and repair** turns compile and pytest failures into readable
+diagnostics, searches a closed mutation set, reruns every gate, and requests
+consent before applying the exact verified bytes. It rejects a stale source or
+test baseline, stores an out-of-tree backup, and rolls back if post-apply
+verification fails. Missing dependencies, projects without tests, secret or
+documentation failures, and unverified repairs are blocked instead of guessed.
+
+The working copy excludes `bin`, `obj`, `publish`, virtual environments, and
+other generated artifacts. Selected tests are trusted local code: they run in
+a copy, not an operating-system sandbox. The secondary **Demo para jueces**
+card retains the reproducible Build Week path. The runtime is included, so
+judges do not need Python, Git, or PowerShell 7.
+
+The ZIP includes `SAMPLE-PYTHON-APP` for the healthy path and
+`SAMPLE-REPAIRABLE-PYTHON-APP` for a transparent real detection, repair,
+application, and post-apply verification without preparing another repository.
+
+The package manifest hashes every distributed file and records the base commit
+plus whether the build came from a clean tree. A clean build records
+`source_commit_exact=true`; a local changed build reports
+`source_tree_state=DIRTY_BUILD` instead of claiming exact provenance. See the
+[portable guide](docs/build-week/PORTABLE_WINDOWS.md).
+
+## Judge Mode from source
+
+Verified source-install platform: Windows 11, PowerShell 7, Python 3.11 or
+newer, and Git.
 
 ```powershell
 git clone https://github.com/klssxx/THEKEY.git
@@ -115,7 +152,7 @@ created only after the gates and is never reused retroactively as authority.
   the `PolicyEngine`.
 - **CHECKMATE reviewer:** analyzes risk and emits a pre-action receipt for the
   bounded plan; it performs no physical writes.
-- **Sovereign grant binder:** binds moli's explicit, repository-visible Judge
+- **Sovereign grant binder:** binds usuario's explicit, repository-visible Judge
   Mode grant to one source, run, transaction, and isolated output scope.
 - **PolicyEngine:** returns `allowed`, a reason code, a decision ID, and the
   preserved policy-bundle hash.
@@ -135,6 +172,19 @@ created only after the gates and is never reused retroactively as authority.
 
 # Canonical lifecycle demo
 .\.venv\Scripts\python.exe -m thekey demo
+
+# Diagnose in an isolated copy (does not modify the source)
+.\.venv\Scripts\python.exe -m thekey project verify `
+  --source C:\path\app --consent execute_trusted_tests
+
+# Find a verified repair without applying it
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\path\app --consent execute_trusted_tests
+
+# Apply only the repair that passed every gate
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\path\app --consent execute_trusted_tests `
+  --apply-consent apply_verified_repairs
 
 # Equivalent after activating the environment
 python -m thekey demo
@@ -170,7 +220,7 @@ and clean-clone reproduction, and prepare judge materials. GPT-5.6 accelerated
 the security analysis and implementation work; it is development tooling, not
 a runtime dependency of THEKEY.
 
-moli retained the product and authority decisions: human sovereignty, bounded
+usuario retained the product and authority decisions: human sovereignty, bounded
 scope, no production reuse of the demo grant, no change to `LIVE_E`, and
 separate approval for push, merge, release, video publication, and Devpost
 submission.
@@ -192,7 +242,11 @@ submission.
 - SHA-256 makes the implemented evidence chain tamper-evident, not invulnerable
   and not externally attested.
 - The built-in secret scan is deliberately limited.
-- Judge Mode demonstrates a bounded action registry, not arbitrary repair.
+- Application repair covers Python and Node.js projects with detectable tests and
+  conservative single-point mutations; it does not install dependencies or
+  claim it can automatically solve every defect.
+- Judge Mode remains a separate declared-action scenario whose grant cannot be
+  reused in production.
 - Very deep Windows paths can exceed path-length limits; use a short clone path.
 - The Phase-B manifest retains the legacy
   `CANONICAL_SOURCE_STATUS=PROVENANCE_UNRESOLVED`; the provenance dossier uses

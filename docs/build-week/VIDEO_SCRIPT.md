@@ -3,104 +3,100 @@
 Target runtime: **2:40–2:55**. Hard stop before **3:00**. Spoken language:
 English.
 
-## 0:00–0:18 — The problem
+## 0:00–0:15 — Brand and problem
 
-**On screen:** use this exact title card, then the repository README.
-
-```text
-THEKEY
-THE KING OF CHECKMATE
-
-Governed Codex Transactions for Coding Agents
-```
+**On screen:** launch `THEKEY.exe`; let the five-second cinematic finish, then
+show the canonical header.
 
 **Narration:**
 
-> Coding agents can patch a repository quickly. The harder question is whether
-> anyone can prove which plan was reviewed, who authorized it, what actually
-> executed, and why the result was allowed to move forward.
+> Coding agents and project tests can change or execute code quickly. The hard
+> question is whether we can prove what was inspected, who authorized the next
+> step, what actually ran, and whether the original stayed unchanged.
 
-## 0:18–0:40 — The product
+## 0:15–0:35 — The governed roles
 
-**On screen:** the authorization flow in `README.en.md`.
+**On screen:** the application header and three-step guidance.
 
 **Narration:**
 
 > THEKEY is the governed-transaction core. THE KING coordinates phases and
 > context, but cannot self-approve or bypass the PolicyEngine. CHECKMATE reviews
-> risk before execution and issues a verdict without physical writes. Scoped
-> human authority and policy authorization are required before the EXECUTOR
-> reaches a declared handler.
+> risk and emits a pre-execution verdict without physical writes.
 
-## 0:40–1:32 — Live Judge Mode
+## 0:35–1:20 — Detect and repair a real application defect
 
-**On screen:** a clean PowerShell 7 terminal at the repository root. Run:
-
-```powershell
-pwsh -NoProfile -File .\scripts\build-week-demo.ps1
-```
-
-Keep the final summary visible and point to each result.
+**On screen:** select **SELECCIONAR Y ANALIZAR APLICACIÓN**, choose the bundled
+`SAMPLE-REPAIRABLE-PYTHON-APP`, and keep the read-only inspection visible. Then
+select **Escanear y reparar**, read the warning, and consent.
 
 **Narration:**
 
-> Judge Mode creates a temporary Git repository and an isolated workflow
-> workspace. It applies one bounded calculator repair through the governed
-> path, then attempts an adversarial action using a disallowed role. The ALLOW
-> path reports APPLIED and exactly one handler. The DENY path reports
-> ROLE_NOT_ALLOWED and zero handlers. Build, unit tests, limited secret scan,
-> and documentation all pass: four out of four. The resulting decision is
-> RELEASE_ELIGIBLE.
+> First, THEKEY only reads the selected Python application. It identifies the
+> profile and tests, records CHECKMATE PASS, and obtains a narrow read-only,
+> isolated-output PolicyEngine authorization. The second click is separate
+> because tests execute trusted project code. They expose a real arithmetic
+> failure. THEKEY tries only bounded single-point mutations in the copy. One
+> candidate passes compileall, the full pytest suite, the secret scan, and the
+> documentation gate. After separate consent, it rechecks the baseline, saves
+> a backup, applies the exact verified bytes, and verifies again. The result is
+> REPAIRED_AND_VERIFIED — not a prerecorded claim.
 
-## 1:32–2:02 — Evidence, not just output
+## 1:20–1:55 — Adversarial judge scenario
 
-**On screen:** show only the safe fields from the generated
-`judge-mode-evidence.json`: `run_id`, `transaction_id`, `plan_sha256`,
-`policy_bundle_hash`, `allow`, `deny`, `gates`, and `release_decision`. Do not
-show the absolute `run_path` or `workspace_path` fields.
-
-**Narration:**
-
-> This is structural evidence, not a screenshot-only claim. The receipts share
-> the same run, transaction, and plan hash. The policy bundle is recorded. The
-> evidence confirms one ALLOW handler, zero DENY handlers, and that the denied
-> attempt left the workspace hash unchanged. The demo grant is bound to this
-> bounded source and explicitly rejects production reuse.
-
-## 2:02–2:30 — Build Week contribution and Codex
-
-**On screen:** run `git rev-parse HEAD`, then show `BUILD_WEEK_DELTA.md` and the
-sanitized `CODEX_SESSION_EVIDENCE.md` record. The displayed commit must match
-the final candidate handoff.
+**On screen:** select **Demo para jueces** and hold on its final summary.
 
 **Narration:**
 
-> THEKEY is a declared preexisting project, and its public Git history begins
-> after the cutoff. Only the verified post-baseline delta is submitted. During
-> Build Week it was significantly extended with bound double receipts, a
-> fail-closed physical guard, five
-> governed callers, adversarial security tests, Judge Mode, and reproducibility
-> evidence. Codex with GPT-5.6 was the agent used to analyze, build, test, and
-> improve the project: it compared the five caller paths, designed denial cases,
-> implemented the governed boundary, and drove regression and clean-clone
-> checks. I, moli, retained authority, scope, and publication decisions. GPT-5.6
-> is development tooling here, not a runtime dependency.
+> The reproducible Judge Mode also shows the enforcement boundary. One bounded
+> repair reaches exactly one handler. An adversarial request using a disallowed
+> role is denied with zero handlers. All four release gates pass and the result
+> is RELEASE_ELIGIBLE.
 
-## 2:30–2:48 — Limits and close
+## 1:55–2:18 — Evidence
 
-**On screen:** the README limitations, then the exact opening title card.
+**On screen:** select **Ver resultados / View** and show safe fields from the
+latest project `verification-evidence.json`, then the judge summary. Hide local
+absolute paths.
 
 **Narration:**
 
-> The boundaries are deliberate: this is workflow isolation, not an operating-
-> system sandbox; the local grant is not a cryptographic human signature; and
-> the built-in secret scan and action set are bounded. Within those limits,
-> THEKEY — THE KING OF CHECKMATE. Governed Codex Transactions for Coding Agents.
+> These are persisted JSON records, not prerecorded output. The application
+> record contains the diagnostic, exact diff and repair hash, source hashes
+> before and after, backup, CHECKMATE and policy decisions, both gate runs, and
+> the final verdict. The Judge Mode receipts bind
+> run, transaction, plan, and policy bundle, including one ALLOW handler and
+> zero DENY handlers.
+
+## 2:18–2:40 — Build Week contribution and Codex
+
+**On screen:** show `git rev-parse HEAD`, `BUILD_WEEK_DELTA.md`, and the
+sanitized `CODEX_SESSION_EVIDENCE.md`.
+
+**Narration:**
+
+> THEKEY is a declared preexisting project and only its verified post-baseline
+> delta is submitted. Codex with GPT-5.6 helped analyze, build, test, and improve
+> the governed boundary, security cases, evidence and portable interface. I,
+> usuario, retained authority, scope and publication decisions. GPT-5.6 is
+> development tooling, not a runtime dependency.
+
+## 2:40–2:55 — Limits and close
+
+**On screen:** the warning text, then the canonical title.
+
+**Narration:**
+
+> Project tests must be trusted. THEKEY uses a read-only intake and isolated
+> copy, not an operating-system sandbox. Repair uses a closed candidate set,
+> never edits tests or installs dependencies, and blocks anything it cannot
+> prove fixed. THEKEY — THE KING OF CHECKMATE. Governed
+> Codex Transactions for Coding Agents.
 
 ## Timing discipline
 
 - Rehearse once at a conversational pace before recording.
-- Let the real command finish; do not speed up or splice its output.
-- If the take exceeds 2:55, shorten pauses rather than removing limitations or
-  provenance.
-- Never submit a cut that reaches 3:00.
+- Use the bundled sample so the displayed result is deterministic.
+- Show the real runs continuously; do not replace output with prerecorded
+  results.
+- Never submit a cut that reaches three minutes.

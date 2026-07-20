@@ -46,6 +46,28 @@ devuelve `status: VALID`, un handler ALLOW, cero DENY, cuatro gates,
 `RELEASE_ELIGIBLE`, fuente sin cambios y reutilización productiva desactivada.
 No confía en el resumen impreso.
 
+## Prueba funcional de escaneo y reparación
+
+La aplicación portable incluye `SAMPLE-PYTHON-APP` para verificar el recorrido
+saludable. Para demostrar una reparación real, usa un proyecto Python o Node.js
+de confianza con el adaptador de tests detectado y un fallo compatible, pulsa **Escanear y reparar**
+y acepta el consentimiento mostrado. La evidencia debe terminar en
+`NO_CHANGES_NEEDED`, `REPAIRED_AND_VERIFIED` o un `BLOCKED_*` explícito.
+
+Desde una instalación fuente, el mismo motor se ejecuta así:
+
+```powershell
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\ruta\al\proyecto `
+  --consent execute_trusted_tests `
+  --apply-consent apply_verified_repairs
+```
+
+THEKEY no cambia tests ni instala dependencias. Solo aplica el byte exacto que
+pasó el build/check del adaptador, la suite de tests detectada, el secret scan limitado y el gate
+documental; antes revalida hashes, crea un backup y después vuelve a verificar.
+Un fallo posterior provoca rollback.
+
 ## Qué hace Judge Mode
 
 1. Crea un Git temporal bajo el estado ignorado `.thekey/judge-mode`.

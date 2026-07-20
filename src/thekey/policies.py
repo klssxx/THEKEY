@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -181,7 +182,7 @@ class PolicyEngine:
             return deny("POLICY_VERSION_MISMATCH")
         if context.policy_bundle_hash != bundle_hash:
             return deny("POLICY_BUNDLE_HASH_MISMATCH")
-        if context.sovereign_receipt.sovereign_identity_id != "moli":
+        if context.sovereign_receipt.sovereign_identity_id != "usuario":
             return deny("SOVEREIGN_IDENTITY_MISMATCH")
         if (
             context.sovereign_receipt.authorization_scope != "JUDGE_MODE_DEMO_ONLY"
@@ -206,5 +207,134 @@ class PolicyEngine:
             allowed=True,
             reason_code="AUTHORIZED_BY_BOUND_RECEIPTS",
             decision_id=decision_id,
+            policy_bundle_hash=bundle_hash,
+        ).model_dump(mode="json")
+
+    def authorize_project_verification(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Authorize only read-only inspection plus isolated verification.
+
+        This does not authorize a product-source write and does not reuse the
+        demo sovereign grant. Test execution still requires separate explicit
+        consent from the local user because workflow isolation is not an OS
+        sandbox.
+        """
+        policy = self.load_default()
+        bundle_hash = self.bundle_hash(policy)
+
+        def deny(reason: str) -> dict[str, Any]:
+            return AuthorizationDecision(
+                allowed=False,
+                reason_code=reason,
+                policy_bundle_hash=bundle_hash,
+            ).model_dump(mode="json")
+
+        expected = {
+            "source_tree_hash",
+            "profile",
+            "access_mode",
+            "output_scope",
+            "checkmate_verdict",
+        }
+        if not isinstance(request, dict) or set(request) != expected:
+            return deny("PROJECT_VERIFICATION_REQUEST_INVALID")
+        tree_hash = request.get("source_tree_hash")
+        if not isinstance(tree_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", tree_hash):
+            return deny("PROJECT_TREE_HASH_INVALID")
+        if request.get("access_mode") != "READ_ONLY":
+            return deny("PROJECT_SOURCE_WRITE_DENIED")
+        if request.get("output_scope") != "THEKEY_ISOLATED_VERIFICATION_ONLY":
+            return deny("PROJECT_OUTPUT_SCOPE_DENIED")
+        if request.get("checkmate_verdict") != "PASS":
+            return deny("CHECKMATE_PROJECT_REVIEW_DENIED")
+        from .project_models import SUPPORTED_PROFILES
+
+        if request.get("profile") not in SUPPORTED_PROFILES:
+            return deny("PROJECT_PROFILE_UNSUPPORTED")
+        material = json.dumps(
+            request,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        return AuthorizationDecision(
+            allowed=True,
+            reason_code="READ_ONLY_ISOLATED_VERIFICATION_AUTHORIZED",
+            decision_id="project-policy-" + hashlib.sha256(material).hexdigest()[:32],
+            policy_bundle_hash=bundle_hash,
+        ).model_dump(mode="json")
+
+    def authorize_verified_project_repair(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Authorize one bounded repair only after it passes isolated gates."""
+        policy = self.load_default()
+        bundle_hash = self.bundle_hash(policy)
+
+        def deny(reason: str) -> dict[str, Any]:
+            return AuthorizationDecision(
+                allowed=False,
+                reason_code=reason,
+                policy_bundle_hash=bundle_hash,
+            ).model_dump(mode="json")
+
+        expected = {
+            "source_tree_hash",
+            "profile",
+            "checkmate_verdict",
+            "access_mode",
+            "output_scope",
+            "repair_sha256",
+            "changed_files",
+            "verification_verdict",
+        }
+        if not isinstance(request, dict) or set(request) != expected:
+            return deny("PROJECT_REPAIR_REQUEST_INVALID")
+        for field_name in ("source_tree_hash", "repair_sha256"):
+            value = request.get(field_name)
+            if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+                return deny("PROJECT_REPAIR_HASH_INVALID")
+        from .project_models import SUPPORTED_PROFILES
+
+        if request.get("profile") not in SUPPORTED_PROFILES:
+            return deny("PROJECT_PROFILE_UNSUPPORTED")
+        if request.get("checkmate_verdict") != "PASS":
+            return deny("CHECKMATE_PROJECT_REPAIR_DENIED")
+        if request.get("verification_verdict") != "VERIFIED":
+            return deny("UNVERIFIED_PROJECT_REPAIR_DENIED")
+        if request.get("output_scope") != "SINGLE_FILE_DETERMINISTIC_MUTATION":
+            return deny("PROJECT_REPAIR_SCOPE_DENIED")
+        if request.get("access_mode") not in {"ISOLATED_ONLY", "APPLY_VERIFIED_CHANGE"}:
+            return deny("PROJECT_REPAIR_ACCESS_MODE_DENIED")
+        changed_files = request.get("changed_files")
+        if not isinstance(changed_files, list) or len(changed_files) != 1:
+            return deny("PROJECT_REPAIR_FILE_COUNT_DENIED")
+        relative = changed_files[0]
+        allowed_suffixes = {
+            "node-javascript": (".js", ".mjs", ".cjs"),
+        }.get(request.get("profile"), (".py",))
+        if (
+            not isinstance(relative, str)
+            or not relative.endswith(allowed_suffixes)
+            or Path(relative).is_absolute()
+            or ".." in Path(relative).parts
+            or Path(relative).name.startswith("test_")
+            or any(part.casefold() in {"test", "tests"} for part in Path(relative).parts)
+        ):
+            return deny("PROJECT_REPAIR_TARGET_DENIED")
+        material = json.dumps(
+            request,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        ).encode("utf-8")
+        reason = (
+            "VERIFIED_PROJECT_REPAIR_APPLICATION_AUTHORIZED"
+            if request["access_mode"] == "APPLY_VERIFIED_CHANGE"
+            else "ISOLATED_PROJECT_REPAIR_AUTHORIZED"
+        )
+        return AuthorizationDecision(
+            allowed=True,
+            reason_code=reason,
+            decision_id="project-repair-policy-" + hashlib.sha256(material).hexdigest()[:32],
             policy_bundle_hash=bundle_hash,
         ).model_dump(mode="json")

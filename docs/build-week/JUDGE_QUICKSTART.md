@@ -3,14 +3,41 @@
 This is the shortest reproducible path for evaluating THEKEY without an API
 key, paid service, Docker, WSL, GPU, private dependency, or test account.
 
-## Verified platform
+## Two-click portable test build
 
-- Windows 11
+The primary judge path targets Windows 10 x64 and Windows 11 x64:
+
+1. Extract `THEKEY-Portable-Windows-x64.zip` to a short writable path.
+2. Double-click `THEKEY.exe`.
+3. Select **Demo para jueces**. That single action runs the governed demo and
+   verifies the persisted evidence.
+
+To evaluate the product flow instead, select **SELECCIONAR Y ANALIZAR
+APLICACIÓN**, choose a trusted local application, review the read-only
+inspection, and then select **Verificar aplicación**. The second action asks
+for explicit consent because project tests execute trusted local code in an
+isolated copy, not in an operating-system sandbox.
+
+Select **Escanear y reparar** for the complete product path: actionable
+diagnosis, bounded repair search, isolated gates, separate source-write
+consent, stale-input protection, backup, post-apply verification, and rollback.
+
+The package includes its Python runtime and does not require Python, Git, or
+PowerShell 7 on the judge's machine. Its `BUILD_MANIFEST.json` hashes every
+distributed file and identifies whether the recorded base commit came from an
+exact clean tree or an explicitly marked `DIRTY_BUILD`. See
+[Portable Windows test build](PORTABLE_WINDOWS.md) for the full button map and
+security boundary.
+
+## Source-install platform
+
+- Windows 11 (verified source-install platform)
 - PowerShell 7 (`pwsh`)
 - Python 3.11 or newer
 - Git
 
-Judge Mode is currently claimed only on that platform.
+The portable surface additionally targets Windows 10 x64 and Windows 11 x64;
+the current candidate is exercised on Windows 11 before publication.
 
 ## Install from a clean clone
 
@@ -45,6 +72,28 @@ The second command parses the generated JSON and persisted run artifacts. A
 valid run returns JSON with `status: VALID`, one ALLOW handler, zero DENY
 handlers, four gates, `RELEASE_ELIGIBLE`, unchanged source, and production
 reuse disabled. It does not trust the printed demo summary.
+
+## Functional scan-and-repair check
+
+The portable app includes `SAMPLE-PYTHON-APP` for the healthy path. To
+demonstrate a real repair, select a trusted Python or Node.js project with its
+detected test adapter and a compatible defect, choose **Escanear y reparar**,
+and accept the displayed consent. Evidence must end in `NO_CHANGES_NEEDED`,
+`REPAIRED_AND_VERIFIED`, or an explicit fail-closed `BLOCKED_*` result.
+
+The source-install equivalent is:
+
+```powershell
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\path\to\project `
+  --consent execute_trusted_tests `
+  --apply-consent apply_verified_repairs
+```
+
+THEKEY never changes tests or installs dependencies. It applies only the exact
+bytes that passed the adapter build/check, complete detected test suite, bounded
+secret scan, and documentation gate; it rechecks hashes first, stores a backup,
+and verifies again afterward. A post-apply failure triggers rollback.
 
 ## What Judge Mode does
 

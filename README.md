@@ -39,13 +39,54 @@ previa, autoridad humana explícita, política determinista, handlers físicos,
 cuatro gates y evidencia persistida a un único run y una transacción.
 
 Proporciona aislamiento de flujo de trabajo, autorización de política
-determinista y dispatch fail-closed. No es un sandbox de sistema operativo. No
-es un agente de reparación general, una firma humana criptográfica ni un
-servicio de atestación externo.
+determinista, diagnóstico ejecutable y dispatch fail-closed. No es un sandbox
+de sistema operativo, una firma humana criptográfica ni un servicio de
+atestación externo. Su reparación automática es deliberadamente acotada:
+prueba mutaciones conservadoras de un solo punto sobre Python y solo acepta una
+si compila y pasa la suite completa y todos los gates.
 
-## Judge Mode en unos tres minutos
+## Aplicación portable en dos clics
 
-Plataforma verificada: Windows 11, PowerShell 7, Python 3.11 o superior y Git.
+`THEKEY-Portable-Windows-x64.zip` está dirigido a Windows 10 x64 y Windows 11
+x64. Tras extraerlo, abre `THEKEY.exe`, pulsa **SELECCIONAR Y ANALIZAR
+APLICACIÓN** y elige un proyecto Python. La primera fase solo lee el proyecto:
+detecta su perfil, tests y metadatos; CHECKMATE revisa el riesgo y el
+`PolicyEngine` decide si puede continuar. **Verificar aplicación** exige
+consentimiento explícito, copia únicamente los archivos inspeccionados a un
+workspace corto y aislado, y ejecuta allí los checks y tests del adaptador,
+un escaneo limitado de secretos y el gate documental. Finalmente vuelve a hashear el
+origen y demuestra si permaneció intacto.
+
+**Escanear y reparar** convierte los fallos de compilación y pytest en
+diagnósticos legibles, busca una reparación dentro de un conjunto cerrado de
+mutaciones, vuelve a ejecutar todos los gates y solicita consentimiento para
+aplicar exactamente los bytes verificados. Antes de escribir comprueba que la
+fuente y los tests no hayan cambiado, conserva un backup fuera del proyecto y
+hace rollback si la verificación posterior falla. Dependencias ausentes,
+fallos sin tests, secretos o documentación incompleta se bloquean en vez de
+improvisarse.
+
+La copia de trabajo evita `bin`, `obj`, `publish`, entornos virtuales y otros
+artefactos generados. Los tests seleccionados son código local de confianza:
+se ejecutan en una copia, pero no en un sandbox del sistema operativo. La
+tarjeta secundaria **Demo para jueces** conserva el recorrido reproducible de
+Build Week. El paquete incluye el runtime y no exige Python, Git ni PowerShell
+7 en el equipo del juez.
+
+El ZIP incluye `SAMPLE-PYTHON-APP` para el recorrido saludable y
+`SAMPLE-REPAIRABLE-PYTHON-APP` para observar una detección, reparación,
+aplicación y reverificación reales sin preparar otro repositorio.
+
+El manifest del paquete hashea todos los archivos distribuidos y registra el
+commit base más si el build procede de un árbol limpio. Un build limpio marca
+`source_commit_exact=true`; uno local con cambios lo declara
+`source_tree_state=DIRTY_BUILD` en vez de fingir trazabilidad exacta. Consulta
+la [guía portable](docs/build-week/PORTABLE_WINDOWS.md).
+
+## Judge Mode desde el código fuente
+
+Plataforma de instalación fuente verificada: Windows 11, PowerShell 7, Python
+3.11 o superior y Git.
 
 ```powershell
 git clone https://github.com/klssxx/THEKEY.git
@@ -109,7 +150,7 @@ de los gates y nunca se reutiliza retroactivamente como autoridad.
   la transacción, sin autoaprobarse ni eludir el `PolicyEngine`.
 - **Revisor CHECKMATE:** analiza riesgos y emite el recibo previo del plan
   acotado; no realiza escrituras físicas.
-- **Binder soberano:** liga el grant visible de moli a una fuente, run,
+- **Binder soberano:** liga el grant visible de usuario a una fuente, run,
   transacción y salida aislada.
 - **PolicyEngine:** devuelve permiso, razón, decision ID y hash de policy bundle.
 - **Guard físico:** autoriza antes del lookup; no expone shell o rutas arbitrarias.
@@ -125,6 +166,19 @@ de los gates y nunca se reutiliza retroactivamente como autoridad.
 
 # Demo canónica
 .\.venv\Scripts\python.exe -m thekey demo
+
+# Diagnosticar en una copia aislada (no modifica el origen)
+.\.venv\Scripts\python.exe -m thekey project verify `
+  --source C:\ruta\app --consent execute_trusted_tests
+
+# Buscar una reparación verificada sin aplicarla
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\ruta\app --consent execute_trusted_tests
+
+# Aplicar únicamente la reparación que superó todos los gates
+.\.venv\Scripts\python.exe -m thekey project repair `
+  --source C:\ruta\app --consent execute_trusted_tests `
+  --apply-consent apply_verified_repairs
 
 # Equivalente tras activar el entorno
 python -m thekey demo
@@ -158,7 +212,7 @@ callers, tests adversariales, endurecimiento del grant no reutilizable,
 RED→GREEN, regresión, rollback, clon limpio y material de jueces. GPT-5.6 fue
 herramienta de desarrollo y no es una dependencia runtime.
 
-moli retuvo las decisiones de producto y autoridad: soberanía humana, scope
+usuario retuvo las decisiones de producto y autoridad: soberanía humana, scope
 acotado, reutilización productiva prohibida, `LIVE_E` intacto y permisos
 separados para push, merge, release, vídeo y Devpost.
 
@@ -177,7 +231,11 @@ separados para push, merge, release, vídeo y Devpost.
 - SHA-256 aporta evidencia tamper-evident dentro del sistema, no invulnerable ni
   atestada externamente.
 - El escaneo de secretos es limitado.
-- Judge Mode cubre acciones acotadas, no reparación arbitraria.
+- La reparación de aplicaciones cubre Python con tests pytest detectables y
+  mutaciones conservadoras de un punto; no instala dependencias ni promete
+  resolver automáticamente cualquier defecto.
+- Judge Mode sigue siendo un escenario separado de acción declarada y grant no
+  reutilizable en producción.
 - Rutas Windows muy profundas pueden superar el límite; usa un clon corto.
 - El manifiesto Phase-B conserva el flag legado
   `CANONICAL_SOURCE_STATUS=PROVENANCE_UNRESOLVED`; el dossier usa

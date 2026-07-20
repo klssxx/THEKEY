@@ -2,10 +2,17 @@ THEKEY — THE KING OF CHECKMATE
 
 Governed Codex Transactions for Coding Agents
 
-THEKEY is a developer tool for turning an agentic code change into a governed
-transaction. This Windows 11 Judge Mode demonstration shows one authorized
-physical action, one adversarial denial, four deterministic release gates, and
-JSON evidence tied to the same run, transaction, and plan SHA-256.
+THEKEY is a developer tool that turns detection and repair of a trusted Python
+application defect, or an agentic code change, into a governed transaction.
+This Windows portable demonstration shows read-only intake, a real failing
+pytest suite, redacted diagnosis, bounded repair synthesis, CHECKMATE and
+PolicyEngine authorization, explicit consent, deterministic gates, exact-byte
+application with backup, post-apply verification, rollback protection, and
+reviewable JSON evidence.
+
+The reproducible Judge Mode also shows one authorized physical action, one
+adversarial denial with zero handlers, four release gates, and evidence tied to
+the same run, transaction, and plan SHA-256.
 
 THEKEY is the product and governed-transaction core. THE KING orchestrates
 phases and context, but cannot self-approve or bypass the PolicyEngine.
@@ -14,22 +21,26 @@ physical writes.
 
 THEKEY is a declared preexisting project; its accessible public Git history
 begins after the event cutoff. Only the verified post-baseline delta is
-submitted. Build Week work significantly extended it with bound review and
-authorization receipts, fail-closed physical dispatch, five governed callers,
-adversarial security coverage, Judge Mode, and reproducibility evidence. Codex
-with GPT-5.6 assisted development and validation; GPT-5.6 is not a runtime
-dependency. moli retained authority, scope, and publication decisions.
+submitted. Codex with GPT-5.6 assisted development and validation; GPT-5.6 is
+not a runtime dependency. usuario retained authority, scope, and publication
+decisions.
 
 Candidate commit: the SHA shown by `git rev-parse HEAD` in the video must match
 the exact FINAL_CANDIDATE value supplied in Devpost.
 
-The demo requires no API key, paid service, Docker, WSL, or GPU.
+The Windows 10/11 x64 portable target includes its runtime and requires no API
+key, paid service, Docker, WSL, GPU, local Python installation, or automatic
+dependency download.
 
-Limitations: THEKEY provides workflow isolation, not an operating-system
-sandbox. Its local demonstration grant is not a cryptographic human signature.
-The included secret scan and action set are deliberately bounded, and SHA-256
-evidence is tamper-evident within the implemented chain rather than external
-attestation.
+Limitations: selected project tests are trusted local code. THEKEY provides a
+read-only intake and workflow-isolated copy, not an operating-system sandbox.
+Project verification currently supports recognized Python profiles and
+existing pytest tests. Unsupported or insufficiently evidenced projects do
+not receive a VERIFIED verdict. The included secret scan is deliberately
+bounded, and SHA-256 evidence is tamper-evident within the implemented chain
+rather than external attestation. Automatic repair is limited to a closed set
+of conservative single-point mutations; it never changes tests or installs
+dependencies, and it blocks defects it cannot prove fixed.
 
 Repository and testing instructions:
 https://github.com/klssxx/THEKEY

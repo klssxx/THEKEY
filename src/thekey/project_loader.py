@@ -19,16 +19,9 @@ import os
 import stat
 from pathlib import Path
 
-from .config import REAL_ROOT, RUNS_DIR, WORKSPACES_DIR, THEKEY_DIR
-from .errors import (
-    InvalidArgumentsError,
-    TheKeyError,
-    UnsupportedProjectProfileError,
-)
-from .project_models import (
-    ProjectInspection,
-    compute_tree_hash,
-)
+from .config import REAL_ROOT, RUNS_DIR, THEKEY_DIR, WORKSPACES_DIR
+from .errors import InvalidArgumentsError
+from .project_models import ProjectInspection, compute_tree_hash
 
 # Default excluded directories (section 9).
 DEFAULT_EXCLUDED_DIRS = {
@@ -44,6 +37,10 @@ DEFAULT_EXCLUDED_DIRS = {
     ".nox",
     "build",
     "dist",
+    "bin",
+    "obj",
+    "publish",
+    "artifacts",
     "site-packages",
     "node_modules",
     "runs",
@@ -240,7 +237,11 @@ class ProjectLoader:
             if Path(rel).name in ("__main__.py", "main.py", "cli.py", "app.py", "wsgi.py")
         )
         insp.test_roots = sorted(
-            set(rel.split("/")[0] for rel in rel_hashes if Path(rel).name.startswith("test_"))
+            set(
+                str(Path(rel).parts[0])
+                for rel in rel_hashes
+                if Path(rel).name.startswith("test_")
+            )
         )
         if file_count > max_files:
             insp.warnings.append("scan truncated at max_files")

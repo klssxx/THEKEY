@@ -37,7 +37,7 @@ Codex with GPT-5.6 was used to:
 - run RED→GREEN, focused, full-regression, rollback, and clean-clone checks;
 - prepare Judge Mode, evidence, and submission documentation.
 
-moli retained the authority and product decisions, including scope, the
+usuario retained the authority and product decisions, including scope, the
 non-reusable demo grant, keeping `LIVE_E` unchanged, and separate approval for
 push, merge, release, video publication, and Devpost submission.
 

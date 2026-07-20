@@ -43,6 +43,8 @@ ALLOWLIST = {
     # Common benign long literals used in docs/tests.
     "0123456789abcdef",
     "abcdef0123456789",
+    # Fixed public distributable name; not credential material.
+    "thekey-portable-windows-x64",
 }
 
 # Candidate secret shapes: long runs of hex / base64url / base62.
@@ -85,7 +87,17 @@ def scan_tree(root: Path, threshold: float, min_len: int) -> list[dict]:
     findings: list[dict] = []
     for ext in SCAN_GLOBS:
         for path in root.rglob(ext):
-            if any(part in EXCLUDE_DIRS for part in path.parts):
+            relative = path.relative_to(root)
+            relative_posix = relative.as_posix()
+            excluded = any(
+                (
+                    item in relative.parts
+                    if "/" not in item
+                    else relative_posix == item or relative_posix.startswith(item + "/")
+                )
+                for item in EXCLUDE_DIRS
+            )
+            if excluded:
                 continue
             if any(m in path.name for m in HASH_FILE_MARKERS):
                 continue
@@ -115,7 +127,7 @@ def scan_tree(root: Path, threshold: float, min_len: int) -> list[dict]:
                     if ent >= threshold:
                         findings.append(
                             {
-                                "path": str(path.relative_to(root)),
+                                "path": str(relative),
                                 "line": lineno,
                                 "length": len(token),
                                 "entropy": round(ent, 3),
