@@ -12,6 +12,14 @@ servicios de pago, Docker, WSL, GPU, dependencias privadas ni cuenta de prueba.
 
 Judge Mode solo se afirma actualmente sobre esa plataforma.
 
+## Acceso del jurado al repositorio
+
+Antes de enviar la candidatura, confirma en GitHub que el commit candidato es
+accesible para el jurado. El repositorio debe ser público o, si permanece
+privado, debe estar compartido con `testing@devpost.com` y
+`build-week-event@openai.com`. Comprobar el remoto desde Git solo confirma su
+URL: no demuestra la visibilidad ni los colaboradores configurados en GitHub.
+
 ## Instalación desde un clon limpio
 
 ```powershell
@@ -67,6 +75,24 @@ THEKEY no cambia tests ni instala dependencias. Solo aplica el byte exacto que
 pasó el build/check del adaptador, la suite de tests detectada, el secret scan limitado y el gate
 documental; antes revalida hashes, crea un backup y después vuelve a verificar.
 Un fallo posterior provoca rollback.
+
+## Perfiles adicionales y toolchains
+
+THEKEY reconoce manifiestos de Node.js, Go, Rust, .NET y Maven además de
+Python. El portable incluye el runtime de THEKEY, pero no incorpora los
+compiladores, linkers ni dependencias de cada proyecto seleccionado. Por eso:
+
+- Rust necesita un toolchain Rust funcional y un linker C/C++ compatible. Si
+  falta el linker, el resultado esperado es `RUST_LINKER_UNAVAILABLE`.
+- Maven necesita Java/JDK y Maven disponibles en `PATH`. Si faltan, el
+  resultado esperado incluye `TOOLCHAIN_UNAVAILABLE`; si no hay tests
+  detectables también puede incluir `TESTS_NOT_FOUND`.
+
+Estos resultados son bloqueos fail-closed, no verificaciones exitosas ni
+reparaciones. Para una evaluación sin requisitos externos usa los samples
+Python incluidos. Para probar Rust o Maven, instala primero sus toolchains,
+abre una terminal nueva y confirma `cargo --version`, `rustc --version`,
+`java -version` y `mvn -version` según corresponda.
 
 ## Qué hace Judge Mode
 

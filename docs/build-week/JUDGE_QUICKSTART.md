@@ -39,6 +39,14 @@ security boundary.
 The portable surface additionally targets Windows 10 x64 and Windows 11 x64;
 the current candidate is exercised on Windows 11 before publication.
 
+## Judge repository access
+
+Before submission, confirm in GitHub that the candidate commit is accessible
+to the judges. The repository must be public or, if it remains private, shared
+with `testing@devpost.com` and `build-week-event@openai.com`. Inspecting the Git
+remote confirms only its URL; it does not prove repository visibility or the
+collaborators configured in GitHub.
+
 ## Install from a clean clone
 
 ```powershell
@@ -94,6 +102,25 @@ THEKEY never changes tests or installs dependencies. It applies only the exact
 bytes that passed the adapter build/check, complete detected test suite, bounded
 secret scan, and documentation gate; it rechecks hashes first, stores a backup,
 and verifies again afterward. A post-apply failure triggers rollback.
+
+## Additional profiles and toolchains
+
+THEKEY recognizes Node.js, Go, Rust, .NET, and Maven manifests in addition to
+Python. The portable package includes THEKEY's runtime, but it does not bundle
+the compilers, linkers, or dependencies required by every selected project.
+Consequently:
+
+- Rust requires a working Rust toolchain and compatible C/C++ linker. When the
+  linker is unavailable, the expected result is `RUST_LINKER_UNAVAILABLE`.
+- Maven requires a JDK and Maven on `PATH`. When they are unavailable, the
+  expected result includes `TOOLCHAIN_UNAVAILABLE`; when no tests are detected,
+  it may also include `TESTS_NOT_FOUND`.
+
+These are fail-closed blocked results, not successful verification or repair.
+Use the bundled Python samples for an evaluation without external toolchains.
+To exercise Rust or Maven, install the relevant toolchains, open a new terminal,
+and confirm `cargo --version`, `rustc --version`, `java -version`, and
+`mvn -version` as applicable.
 
 ## What Judge Mode does
 

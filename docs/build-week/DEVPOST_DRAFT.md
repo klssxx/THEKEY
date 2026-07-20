@@ -61,6 +61,11 @@ tooling, not a runtime dependency; the sanitized session record is in
 `docs/build-week/CODEX_SESSION_EVIDENCE.md`.
 ## Judge instructions
 
+Submission owner checklist: the repository must be public or, if private,
+shared with `testing@devpost.com` and `build-week-event@openai.com`. This access
+setting must be confirmed in GitHub before submission; the repository contents
+and Git remote cannot prove it.
+
 Portable path for Windows 10/11 x64: extract
 `THEKEY-Portable-Windows-x64.zip`, open `THEKEY.exe`, and select **Demo para
 jueces** for the deterministic competition scenario. To exercise the product
@@ -98,9 +103,13 @@ Limits: workflow isolation is not an OS sandbox. The local grant is hard-bound
 to the canonical demo path/hash and isolated output, with production reuse
 denied; it is not a cryptographic signature. Secret scanning is limited; no
 paid service or secret is required for the main demo.
-Project verification supports recognized Python profiles and existing pytest
-tests. Consent runs trusted project tests in an isolated copy, not an OS
-sandbox; unsupported projects or missing evidence do not receive a VERIFIED
-verdict. Automatic repair covers only the documented closed single-point
-candidate set, never changes tests or installs dependencies, and blocks defects
-it cannot prove fixed.
+Project verification recognizes Python, Node.js, Go, Rust, .NET, and Maven
+profiles. The portable does not bundle third-party project toolchains: Rust can
+report `RUST_LINKER_UNAVAILABLE` without a compatible linker, while Maven can
+report `TOOLCHAIN_UNAVAILABLE` (and `TESTS_NOT_FOUND` when applicable) without
+Java/Maven and detectable tests. These are intentional fail-closed diagnostics,
+not successful verification. Consent runs trusted project tests in an isolated
+copy, not an OS sandbox; unsupported projects or missing evidence do not
+receive a VERIFIED verdict. Automatic repair covers only the documented closed
+Python/JavaScript single-point candidate set, never changes tests or installs
+dependencies, and blocks defects it cannot prove fixed.
