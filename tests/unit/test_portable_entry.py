@@ -9,11 +9,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ENTRY_PATH = ROOT / "scripts" / "portable_entry.py"
 LAUNCHER_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.cs"
+LAUNCHER_MANIFEST_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.manifest"
 PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
 HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
 ICON_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_app_icon.png"
 UI_REFERENCE_PATH = ROOT / "assets" / "reference" / "THEKEY_UI_REFERENCE.png"
 HOTSPOT_MAP_PATH = ROOT / "docs" / "build-week" / "PIXEL_PERFECT_HOTSPOTS.json"
+PIXEL_VERIFIER_PATH = ROOT / "scripts" / "verify-pixel-ui.ps1"
 
 
 def _load_entry():
@@ -113,6 +115,11 @@ def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
     assert "SystemParameters.WorkArea" in launcher
     assert "WindowStartupLocation.Manual" in launcher
     assert "100%" not in launcher
+    assert "AddLiveSystemPanel(actions);" in launcher
+    assert "AddLiveActivityPanel(actions);" in launcher
+    assert "ACTIVIDAD DE ESTA SESIÓN / THIS SESSION'S ACTIVITY" in launcher
+    assert "Manifiesto presente / Manifest present" in launcher
+    assert "No usada / Not used" in launcher
 
 
 def test_pixel_perfect_reference_is_exact_and_packaged_without_transformation():
@@ -131,7 +138,27 @@ def test_pixel_perfect_reference_is_exact_and_packaged_without_transformation():
     assert "reference.PixelHeight" in launcher
     assert "BitmapCreateOptions.PreservePixelFormat" in launcher
     assert "scaler.Stretch = Stretch.Uniform" in launcher
+    assert "RenderOptions.SetBitmapScalingMode(scaler, BitmapScalingMode.HighQuality);" in launcher
+    assert "ResizeMode = ResizeMode.NoResize" in launcher
+    assert "TheKeyLauncher.manifest" in build
+    assert '"/win32manifest:$launcherManifest"' in build
     assert "Copy-Item -LiteralPath $sourceUiReference -Destination $packageRoot" in build
+
+
+def test_portable_launcher_declares_per_monitor_dpi_awareness():
+    manifest = LAUNCHER_MANIFEST_PATH.read_text(encoding="utf-8")
+
+    assert "PerMonitorV2" in manifest
+    assert "true/pm" in manifest
+
+
+def test_pixel_verifier_excludes_only_live_data_regions():
+    verifier = PIXEL_VERIFIER_PATH.read_text(encoding="utf-8")
+
+    assert "ignoredRegions" in verifier
+    assert "ignored_dynamic_regions" in verifier
+    assert "Rectangle]::new(1168, 335, 256, 455)" in verifier
+    assert "Rectangle]::new(265, 833, 1159, 233)" in verifier
 
 
 def test_pixel_perfect_hotspots_cover_every_visible_action():

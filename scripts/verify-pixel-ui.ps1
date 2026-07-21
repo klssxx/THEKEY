@@ -59,7 +59,7 @@ public static class TheKeyPixelVerifier
         return new Size(width, height);
     }
 
-    public static double[] Compare(string referencePath, string capturePath, string diffPath)
+    public static double[] Compare(string referencePath, string capturePath, string diffPath, Rectangle[] ignoredRegions)
     {
         using (Bitmap reference = new Bitmap(referencePath))
         using (Bitmap capture = new Bitmap(capturePath))
@@ -69,7 +69,7 @@ public static class TheKeyPixelVerifier
                     "Dimension mismatch: reference {0}x{1}, capture {2}x{3}",
                     reference.Width, reference.Height, capture.Width, capture.Height));
 
-            long pixelCount = (long)reference.Width * reference.Height;
+            long pixelCount = 0;
             long differingPixels = 0;
             int maximumDifference = 0;
             double absoluteSum = 0;
@@ -83,8 +83,23 @@ public static class TheKeyPixelVerifier
                 {
                     for (int x = 0; x < reference.Width; x++)
                     {
+                        bool ignored = false;
+                        foreach (Rectangle region in ignoredRegions)
+                        {
+                            if (region.Contains(x, y))
+                            {
+                                ignored = true;
+                                break;
+                            }
+                        }
+                        if (ignored)
+                        {
+                            diff.SetPixel(x, y, Color.Black);
+                            continue;
+                        }
                         Color a = reference.GetPixel(x, y);
                         Color b = capture.GetPixel(x, y);
+                        pixelCount++;
                         int dr = Math.Abs(a.R - b.R);
                         int dg = Math.Abs(a.G - b.G);
                         int db = Math.Abs(a.B - b.B);
@@ -146,11 +161,11 @@ $process.StartInfo = $startInfo
 try {
     if (-not $process.Start()) { throw 'THEKEY failed to start' }
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
-        throw 'Timed out waiting for THEKEY to create the native capture'
+        throw 'Timed out waiting for THEKEY to create the native composition capture'
     }
     if ($process.ExitCode -ne 0) { throw "THEKEY capture exited with code $($process.ExitCode)" }
     if (-not (Test-Path -LiteralPath $capturePath -PathType Leaf)) {
-        throw 'THEKEY did not create the native capture'
+        throw 'THEKEY did not create the native composition capture'
     }
 } finally {
     if (-not $process.HasExited) {
@@ -160,7 +175,13 @@ try {
     $process.Dispose()
 }
 
-$metrics = [TheKeyPixelVerifier]::Compare($referencePath, $capturePath, $diffPath)
+[System.Drawing.Rectangle[]]$dynamicRegions = @(
+    # The live system panel and session activity panel intentionally replace
+    # illustrative artwork with facts collected from the running launcher.
+    [System.Drawing.Rectangle]::new(1168, 335, 256, 455),
+    [System.Drawing.Rectangle]::new(265, 833, 1159, 233)
+)
+$metrics = [TheKeyPixelVerifier]::Compare($referencePath, $capturePath, $diffPath, $dynamicRegions)
 $referenceBitmap = [Drawing.Bitmap]::FromFile($referencePath)
 $captureBitmap = [Drawing.Bitmap]::FromFile($capturePath)
 try {
@@ -177,10 +198,14 @@ $result = [ordered]@{
     reference = $referencePath
     capture = $capturePath
     difference = $diffPath
+    capture_method = 'WPF RenderTargetBitmap of the live canonical composition'
     reference_sha256 = (Get-FileHash -LiteralPath $referencePath -Algorithm SHA256).Hash.ToLowerInvariant()
     capture_sha256 = (Get-FileHash -LiteralPath $capturePath -Algorithm SHA256).Hash.ToLowerInvariant()
     reference_dimensions = [ordered]@{ width = $referenceWidth; height = $referenceHeight }
     captured_window_dimensions = [ordered]@{ width = $captureWidth; height = $captureHeight }
+    ignored_dynamic_regions = @($dynamicRegions | ForEach-Object {
+        [ordered]@{ x = $_.X; y = $_.Y; width = $_.Width; height = $_.Height }
+    })
     differing_pixels = [long]$metrics[0]
     maximum_channel_difference = [int]$metrics[1]
     mean_absolute_error = $metrics[2]

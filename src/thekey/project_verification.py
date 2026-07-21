@@ -624,7 +624,10 @@ def verify_application(
         )
         compile_gate = "DOTNET_BUILD_PASSED"
     elif profile_name == "node-javascript":
-        npm = "npm.cmd" if os.name == "nt" and shutil.which("npm.cmd") else "npm"
+        # On Windows npm is a command script. Invoke the explicit `.cmd`
+        # entrypoint so subprocess does not depend on shell resolution or an
+        # incidental `npm` shim being present on PATH.
+        npm = "npm.cmd" if os.name == "nt" else "npm"
         compile_result = _run_bounded_command(
             [npm, "run", "build", "--if-present"], workspace,
         )

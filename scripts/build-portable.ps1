@@ -14,6 +14,7 @@ $sourceHero = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_chess.png
 $sourceIcon = Join-Path $repoRoot 'portable\windows\assets\THEKEY_app_icon.png'
 $sourceUiReference = Join-Path $repoRoot 'assets\reference\THEKEY_UI_REFERENCE.png'
 $launcherSource = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.cs'
+$launcherManifest = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.manifest'
 $quickGuide = Join-Path $repoRoot 'portable\windows\README-FIRST.txt'
 
 function Assert-ChildPath {
@@ -54,7 +55,7 @@ if ($LASTEXITCODE -ne 0 -or $version[-1] -ne '64') {
     throw "The portable build requires 64-bit Python 3.11+. Observed: $($version -join ', ')"
 }
 
-foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $sourceUiReference, $launcherSource, $quickGuide)) {
+foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $sourceUiReference, $launcherSource, $launcherManifest, $quickGuide)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Required portable source is missing: $required"
     }
@@ -151,6 +152,7 @@ $compilerArguments = @(
     '/optimize+'
     '/utf8output'
     "/win32icon:$iconPath"
+    "/win32manifest:$launcherManifest"
     "/out:$launcher"
     "/reference:$(Join-Path $framework 'System.dll')"
     "/reference:$(Join-Path $framework 'System.Core.dll')"

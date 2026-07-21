@@ -175,7 +175,12 @@ namespace TheKeyPortable
             Left = workAreaBounds.Left + Math.Max(0, (workAreaBounds.Width - Width) / 2);
             Top = workAreaBounds.Top + Math.Max(0, (workAreaBounds.Height - Height) / 2);
             WindowStyle = WindowStyle.None;
-            ResizeMode = ResizeMode.CanResize;
+            // A resizable borderless WPF window still receives a seven-pixel
+            // non-client resize frame.  That silently shrinks the client area
+            // and prevents the canonical bitmap from rendering one-to-one at
+            // 1448x1086.  The in-image maximize control still provides the
+            // uniform, letterboxed alternate-resolution view.
+            ResizeMode = ResizeMode.NoResize;
             UseLayoutRounding = true;
             SnapsToDevicePixels = true;
             Background = new SolidColorBrush(Color.FromRgb(4, 7, 12));
@@ -195,6 +200,10 @@ namespace TheKeyPortable
             scaler.StretchDirection = StretchDirection.Both;
             scaler.HorizontalAlignment = HorizontalAlignment.Stretch;
             scaler.VerticalAlignment = VerticalAlignment.Stretch;
+            // The canonical dashboard is a packaged raster reference.  When a
+            // smaller display requires a uniform fit, explicitly request WPF's
+            // best bitmap resampler instead of its DPI-dependent default.
+            RenderOptions.SetBitmapScalingMode(scaler, BitmapScalingMode.HighQuality);
             letterbox.Children.Add(scaler);
 
             Canvas composition = new Canvas();
@@ -270,6 +279,10 @@ namespace TheKeyPortable
             output.Text = "THEKEY listo / ready. Selecciona una aplicación para comenzar / Select an application to begin.\r\n";
             status = new TextBlock();
             status.Text = File.Exists(backend) ? "LISTO / READY" : "FALTA EL MOTOR / BACKEND MISSING";
+            status.Foreground = new SolidColorBrush(
+                File.Exists(backend) ? Color.FromRgb(83, 231, 126) : Color.FromRgb(255, 126, 126));
+            AddLiveSystemPanel(actions);
+            AddLiveActivityPanel(actions);
 
             string verificationCapture = Environment.GetEnvironmentVariable("THEKEY_CAPTURE_PATH");
             if (!String.IsNullOrWhiteSpace(verificationCapture))
@@ -316,6 +329,133 @@ namespace TheKeyPortable
             {
                 encoder.Save(stream);
             }
+        }
+
+        // The dashboard artwork is intentionally static, but operational data
+        // must always come from this running process. These opaque panels hide
+        // the illustrative values in the artwork and expose only facts the
+        // launcher can establish locally.
+        private void AddLiveSystemPanel(Panel host)
+        {
+            Border panel = new Border
+            {
+                Width = 256,
+                Height = 455,
+                Padding = new Thickness(22, 20, 22, 16),
+                CornerRadius = new CornerRadius(12),
+                Background = new SolidColorBrush(Color.FromRgb(5, 15, 28)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(111, 82, 35)),
+                BorderThickness = new Thickness(1),
+                IsHitTestVisible = false
+            };
+            StackPanel content = new StackPanel();
+            content.Children.Add(new TextBlock
+            {
+                Text = "ESTADO DEL SISTEMA\nSYSTEM STATUS",
+                FontSize = 12,
+                Foreground = new SolidColorBrush(Color.FromRgb(226, 182, 84)),
+                LineHeight = 18
+            });
+            status.FontSize = 17;
+            status.FontWeight = FontWeights.SemiBold;
+            status.TextAlignment = TextAlignment.Center;
+            status.HorizontalAlignment = HorizontalAlignment.Stretch;
+            status.Margin = new Thickness(0, 34, 0, 5);
+            content.Children.Add(status);
+            content.Children.Add(new TextBlock
+            {
+                Text = File.Exists(backend)
+                    ? "Motor local disponible\nLocal engine available"
+                    : "Motor local no disponible\nLocal engine unavailable",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(161, 174, 195)),
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 20)
+            });
+            content.Children.Add(CreateLiveStatusLine(
+                "Motor / Engine", File.Exists(backend) ? "Disponible / Available" : "No disponible / Unavailable"));
+            string manifest = Path.Combine(root, "BUILD_MANIFEST.json");
+            content.Children.Add(CreateLiveStatusLine(
+                "Paquete / Package", File.Exists(manifest) ? "Manifiesto presente / Manifest present" : "Sin manifiesto / No manifest"));
+            content.Children.Add(CreateLiveStatusLine(
+                "Red / Network", "No usada / Not used"));
+            sourceState = CreateLiveStatusLine("Aplicación / Application", "Sin seleccionar / Not selected");
+            content.Children.Add(sourceState);
+            panel.Child = content;
+            Canvas.SetLeft(panel, 1168);
+            Canvas.SetTop(panel, 335);
+            Panel.SetZIndex(panel, 2);
+            host.Children.Add(panel);
+        }
+
+        private TextBlock CreateLiveStatusLine(string label, string value)
+        {
+            return new TextBlock
+            {
+                Text = label + "\n" + value,
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromRgb(153, 169, 194)),
+                Margin = new Thickness(0, 7, 0, 3),
+                LineHeight = 15
+            };
+        }
+
+        private void AddLiveActivityPanel(Panel host)
+        {
+            Border panel = new Border
+            {
+                Width = 1159,
+                Height = 233,
+                CornerRadius = new CornerRadius(10),
+                Background = new SolidColorBrush(Color.FromRgb(7, 19, 33)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(44, 62, 88)),
+                BorderThickness = new Thickness(1),
+                IsHitTestVisible = false
+            };
+            Grid layout = new Grid();
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Border header = new Border
+            {
+                Padding = new Thickness(16, 9, 16, 9),
+                Background = new SolidColorBrush(Color.FromRgb(13, 29, 49)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(43, 60, 86)),
+                BorderThickness = new Thickness(0, 0, 0, 1),
+                Child = new TextBlock
+                {
+                    Text = "ACTIVIDAD DE ESTA SESIÓN / THIS SESSION'S ACTIVITY",
+                    FontSize = 11,
+                    Foreground = new SolidColorBrush(Color.FromRgb(191, 202, 220))
+                }
+            };
+            layout.Children.Add(header);
+            Grid columns = CreateActivityGrid();
+            columns.Background = new SolidColorBrush(Color.FromRgb(9, 22, 38));
+            columns.Children.Add(CreateActivityCell("Hora / Time", 0, true));
+            columns.Children.Add(CreateActivityCell("Tipo / Type", 1, true));
+            columns.Children.Add(CreateActivityCell("Actividad / Activity", 2, true));
+            columns.Children.Add(CreateActivityCell("Estado / Status", 3, true));
+            Grid.SetRow(columns, 1);
+            layout.Children.Add(columns);
+            Grid row = CreateActivityGrid();
+            row.Margin = new Thickness(0, 1, 0, 0);
+            recentTime = CreateActivityCell("--:--:--", 0, false);
+            recentType = CreateActivityCell("Sesión / Session", 1, false);
+            recentActivity = CreateActivityCell("Sin actividad todavía / No activity yet", 2, false);
+            recentState = CreateActivityCell("Esperando / Waiting", 3, false);
+            recentState.Foreground = new SolidColorBrush(Color.FromRgb(216, 177, 83));
+            row.Children.Add(recentTime);
+            row.Children.Add(recentType);
+            row.Children.Add(recentActivity);
+            row.Children.Add(recentState);
+            Grid.SetRow(row, 2);
+            layout.Children.Add(row);
+            panel.Child = layout;
+            Canvas.SetLeft(panel, 265);
+            Canvas.SetTop(panel, 833);
+            Panel.SetZIndex(panel, 2);
+            host.Children.Add(panel);
         }
 
         private static Button AddHotspot(
@@ -801,8 +941,8 @@ namespace TheKeyPortable
                 TextAlignment = TextAlignment.Center,
                 Margin = new Thickness(0, 7, 0, 18)
             });
-            content.Children.Add(CreateStatusLine("✓", "Integridad / Integrity", "Verificada / Verified"));
-            content.Children.Add(CreateStatusLine("✓", "Red / Network", "No requerida / Not required"));
+            content.Children.Add(CreateStatusLine("○", "Paquete / Package", "Manifiesto presente / Manifest present"));
+            content.Children.Add(CreateStatusLine("○", "Red / Network", "No usada / Not used"));
             sourceState = CreateStatusLine("○", "Aplicación / Application", "Sin seleccionar / Not selected");
             content.Children.Add(sourceState);
             panel.Child = content;

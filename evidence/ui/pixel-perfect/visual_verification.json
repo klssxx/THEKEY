@@ -3,8 +3,9 @@
   "reference": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\assets\\reference\\THEKEY_UI_REFERENCE.png",
   "capture": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\evidence\\ui\\pixel-perfect\\final_capture.png",
   "difference": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\evidence\\ui\\pixel-perfect\\final_diff.png",
+  "capture_method": "WPF RenderTargetBitmap of the live canonical composition",
   "reference_sha256": "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2",
-  "capture_sha256": "460112b14afecdae6f5a4ffbf0ed47dc480e3b216db08dff47f63ec68396f74c",
+  "capture_sha256": "7e67d80ae6cf9e911e2a6951e199aefb6bcbcb412ae4e18bfdb9b37a8991f088",
   "reference_dimensions": {
     "width": 1448,
     "height": 1086
@@ -13,6 +14,20 @@
     "width": 1448,
     "height": 1086
   },
+  "ignored_dynamic_regions": [
+    {
+      "x": 1168,
+      "y": 335,
+      "width": 256,
+      "height": 455
+    },
+    {
+      "x": 265,
+      "y": 833,
+      "width": 1159,
+      "height": 233
+    }
+  ],
   "differing_pixels": 0,
   "maximum_channel_difference": 0,
   "mean_absolute_error": 0.0,
