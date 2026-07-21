@@ -1,0 +1,13 @@
+{
+  "actor_id": "thekey-executor-v1",
+  "authorization_id": "auth-b7968461f88e46a4927c855963b48aa1",
+  "plan_sha256": "53fe1b5b941caf569863d2f78543b31475fad66403a08a5c50be04333a8c1e9f",
+  "policy_bundle_hash": "7366c4761f6192e144fac66663791729ef780f3a57cd9f36ce205672e6b7883c",
+  "policy_version": "1.0",
+  "protocol_version": "v1",
+  "requested_at": "2026-07-21T09:43:39.058126Z",
+  "review_receipt_id": "review-2cdbcefb310c43bfa968337d78b04abe",
+  "run_id": "TK-20260721-094338-7P7CMJ",
+  "schema_version": "v1",
+  "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c"
+}

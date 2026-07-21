@@ -1,0 +1,103 @@
+{
+  "schema_version": "v1",
+  "recorded_at_utc": "2026-07-21T09:45:00Z",
+  "scope": "Final executable smoke test and package provenance check",
+  "precondition": {
+    "head": "5cbab680c59ef3c0c1f2709f6540bf2b520c6495",
+    "git_status_before_rebuild": "",
+    "package_before_rebuild": {
+      "manifest_source_commit": "f96bae18878595ec19082c5c92f7d891dca8dd53",
+      "manifest_source_commit_exact": false,
+      "manifest_source_tree_state": "DIRTY_BUILD",
+      "exe_last_write_utc": "2026-07-21T09:21:05.9163979Z",
+      "exe_sha256": "73e775a48229edd999c0dc57f929057d3af4e381b5d316e1eb73c78361e0c57e",
+      "zip_sha256": "34cb794bae380f04cec2f2dc342824f74ef15896f454269555ef5246ab2f3c8b"
+    },
+    "action": "Rebuilt with scripts/build-portable.ps1 using .thekey/portable-build-venv/Scripts/python.exe.",
+    "package_after_rebuild": {
+      "manifest_source_commit": "5cbab680c59ef3c0c1f2709f6540bf2b520c6495",
+      "manifest_source_commit_exact": true,
+      "manifest_source_tree_state": "CLEAN",
+      "manifest_file_count": 124,
+      "exe_path": "dist/THEKEY-Portable-Windows-x64/THEKEY.exe",
+      "exe_last_write_utc": "2026-07-21T09:36:52.1855196Z",
+      "exe_sha256": "63e8a3f6a11ddda1ddff9e09d96475facde6e3f55856da90aa85146adfc70938",
+      "zip_path": "dist/THEKEY-Portable-Windows-x64.zip",
+      "zip_sha256": "589cdb85a7c478148b72d0337cfdb8b8454acc4e4c7c782b6e9a05b3969e2f0f",
+      "manifest_hash_failures": 0,
+      "zip_manifest_matches_package": true
+    }
+  },
+  "actual_wpf_executable": {
+    "path": "dist/THEKEY-Portable-Windows-x64/THEKEY.exe",
+    "first_open": {
+      "started_at_utc": "2026-07-21T09:40:22.2566686Z",
+      "input_idle": true,
+      "window_title": "THEKEY — THE KING OF CHECKMATE",
+      "responsive": true,
+      "clean_close_requested": true,
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    "second_open": {
+      "started_at_utc": "2026-07-21T09:43:58.7293303Z",
+      "input_idle": true,
+      "window_title": "THEKEY — THE KING OF CHECKMATE",
+      "responsive": true,
+      "clean_close_requested": true,
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    "interactive_ui_control": {
+      "status": "BLOCKED",
+      "reason": "The required native Windows-control channel was unavailable: Computer Use native pipe is unavailable (system pipe not found).",
+      "effect": "Folder-picker selection and in-window button navigation were not claimed as UI-executed."
+    }
+  },
+  "actual_packaged_backend_flows": {
+    "engine": "dist/THEKEY-Portable-Windows-x64/core/THEKEY-Core/THEKEY-Core.exe",
+    "runtime_root": "artifacts/build-week/final-smoke-2026-07-21/runtime",
+    "read_only_inspection": {
+      "status": "PASS",
+      "source": "dist/THEKEY-Portable-Windows-x64/SAMPLE-PYTHON-APP",
+      "evidence": "runtime/.thekey/project-verification/PV-20260721-094238-d84ac8bf/inspection.json"
+    },
+    "isolated_verification": {
+      "status": "PASS",
+      "source_unchanged": true,
+      "evidence": "runtime/.thekey/project-verification/PV-20260721-094252-ad04ec3e/verification-evidence.json"
+    },
+    "repair_preview": {
+      "status": "PASS",
+      "outcome": "REPAIR_READY",
+      "source_unchanged": true,
+      "evidence": "runtime/.thekey/project-repair/PR-20260721-094306-9be571ba/repair-evidence.json"
+    },
+    "repair_apply": {
+      "status": "PASS",
+      "outcome": "REPAIRED_AND_VERIFIED",
+      "working_copy": "repairable-working-copy",
+      "backup": "runtime/.thekey/project-repair/PR-20260721-094323-3a2a8d59/backups/calculator.py",
+      "evidence": "runtime/.thekey/project-repair/PR-20260721-094323-3a2a8d59/repair-evidence.json"
+    },
+    "judge_demo": {
+      "status": "PASS",
+      "gates": "4/4 PASS",
+      "decision": "RELEASE_ELIGIBLE",
+      "receipts_bound": true,
+      "evidence": "runtime/.thekey/portable/Portable Demo 71ed967bc96d4ad6a9939339b807732e/judge-mode-evidence.json"
+    },
+    "persisted_evidence_validation": {
+      "status": "PASS",
+      "command": "portable-verify",
+      "result": "EVIDENCE VERIFY: VALID"
+    }
+  },
+  "automated_regression": {
+    "status": "PASS",
+    "command": ".thekey/portable-build-venv/Scripts/python.exe -m pytest -q tests/unit/test_portable_entry.py",
+    "result": "14 passed in 0.08s",
+    "note": "This regression result does not substitute for the real executable observations above."
+  },
+  "final_ui_smoke_status": "FAIL_INCOMPLETE: startup and second open passed, but required real in-window interaction could not be performed in this environment; no unexecuted UI flow is marked PASS."
+}

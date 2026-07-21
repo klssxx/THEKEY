@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "52a88d480583ff10927ba40c7010a867c690e642ec5fc9bc56e76c1274aac4a4",
+  "artifact_path": "gates.json",
+  "evidence_id": "EVID-GATES",
+  "kind": "command-result",
+  "producer": "verifier",
+  "signature": "1cce5a1fee90891247cfd54089d9cb0db129530d03af6d15574dfcd07357ee14",
+  "summary": "4/4 gates passed",
+  "verified": false
+}

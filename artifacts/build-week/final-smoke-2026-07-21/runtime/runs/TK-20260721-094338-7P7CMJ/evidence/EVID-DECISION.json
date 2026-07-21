@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "038a7290fbc8d6b3e05df3d79b58c36c452d1cc87406b74bd6ee448d347ac73d",
+  "artifact_path": "decision.json",
+  "evidence_id": "EVID-DECISION",
+  "kind": "state-file",
+  "producer": "approver",
+  "signature": "43f328fd5ff7c71eb9f788572dbde5dae8971cd14b26dab5b30b02b907c0e603",
+  "summary": "Decision: RELEASE_ELIGIBLE",
+  "verified": false
+}

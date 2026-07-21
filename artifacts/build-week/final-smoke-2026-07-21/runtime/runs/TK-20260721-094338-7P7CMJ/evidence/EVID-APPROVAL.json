@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "bd0ed6c3dcedc4b0945c1d239957e50dd051bdbd4d971f85552321dc22464026",
+  "artifact_path": "approvals.json",
+  "evidence_id": "EVID-APPROVAL",
+  "kind": "state-file",
+  "producer": "approver",
+  "signature": "dc5bc97a02cf01e886852930a057c0caff34ee02ff0f6e937bc82ad83304b3b4",
+  "summary": "Plan bound to explicit grant by usuario (persisted explicit grant)",
+  "verified": false
+}

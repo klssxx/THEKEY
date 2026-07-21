@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-07-21T09:43:41Z",
+  "hashes": {
+    "approvals.json": "bd0ed6c3dcedc4b0945c1d239957e50dd051bdbd4d971f85552321dc22464026",
+    "baseline.json": "20d40a088d9176735428e664b205d544594ae7769ec56d3031473c279f0e205e",
+    "changes.diff": "b8c7975542b15b4ebfffd6ace107d8b725a20b5d803c7d1bc0ff6fb3762fb084",
+    "decision.json": "038a7290fbc8d6b3e05df3d79b58c36c452d1cc87406b74bd6ee448d347ac73d",
+    "gates.json": "52a88d480583ff10927ba40c7010a867c690e642ec5fc9bc56e76c1274aac4a4",
+    "manifest.json": "abf5809d481717190cdf2e9487551c6a8bcb7f6afe5026d5eb095d7707727199",
+    "plan.json": "5ec608e56f26e6f1919316bc4713b37a021a2420600bb42b9c3324888fb19457",
+    "request.json": "03f0ec2691c47bd4b6103938d0668cd50e3d4854e6b22595c091c63b1e548ce4"
+  }
+}

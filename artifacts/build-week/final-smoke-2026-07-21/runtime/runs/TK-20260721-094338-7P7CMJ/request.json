@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-07-21T09:43:38Z",
+  "description": "Governed change with explicit denial",
+  "source_inputs": [
+    {
+      "input_id": "APP_SOURCE",
+      "path": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\dist\\THEKEY-Portable-Windows-x64\\core\\THEKEY-Core\\examples\\demo_app\\calculator.py"
+    }
+  ],
+  "title": "THEKEY Build Week Judge Mode"
+}

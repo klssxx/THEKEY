@@ -1,0 +1,58 @@
+{
+  "judge_mode": "THEKEY Build Week Judge Mode",
+  "run_id": "TK-20260721-094338-7P7CMJ",
+  "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c",
+  "plan_sha256": "53fe1b5b941caf569863d2f78543b31475fad66403a08a5c50be04333a8c1e9f",
+  "authorization_id": "auth-b7968461f88e46a4927c855963b48aa1",
+  "policy_bundle_hash": "7366c4761f6192e144fac66663791729ef780f3a57cd9f36ce205672e6b7883c",
+  "allow": {
+    "status": "APPLIED",
+    "handler_call_count": 1,
+    "decision_id": "policy-decision-3db0a36807b5bde475ee323a48db58af"
+  },
+  "deny": {
+    "reason_code": "ROLE_NOT_ALLOWED",
+    "handler_call_count": 0,
+    "workspace_hash_unchanged": true
+  },
+  "source": {
+    "sha256_before": "ca3d99f787cb349aa2acff2c31ac6cad9ef9a8c68152e48ace7d4c32dafda7b7",
+    "sha256_after": "ca3d99f787cb349aa2acff2c31ac6cad9ef9a8c68152e48ace7d4c32dafda7b7",
+    "hash_unchanged": true
+  },
+  "receipt_binding": {
+    "run_id_match": true,
+    "transaction_id_match": true,
+    "plan_sha256_match": true
+  },
+  "production_reuse": false,
+  "gates": [
+    {
+      "gate": "BUILD_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "detail": "compileall returncode=0"
+    },
+    {
+      "gate": "UNIT_TESTS_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "detail": "pytest returncode=0"
+    },
+    {
+      "gate": "SECURITY_GATE_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "detail": "findings=0"
+    },
+    {
+      "gate": "DOCUMENTATION_GATE_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "detail": "missing=[]"
+    }
+  ],
+  "release_decision": "RELEASE_ELIGIBLE",
+  "run_path": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\final-smoke-2026-07-21\\runtime\\runs\\TK-20260721-094338-7P7CMJ",
+  "workspace_path": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\final-smoke-2026-07-21\\runtime\\workspaces\\TK-20260721-094338-7P7CMJ"
+}

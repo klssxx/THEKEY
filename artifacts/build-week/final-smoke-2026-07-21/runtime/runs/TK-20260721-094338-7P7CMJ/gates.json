@@ -1,0 +1,36 @@
+{
+  "all_passed": true,
+  "policy_id": "local-python-demo",
+  "required_gates": [
+    "BUILD_PASSED",
+    "UNIT_TESTS_PASSED",
+    "SECURITY_GATE_PASSED",
+    "DOCUMENTATION_GATE_PASSED"
+  ],
+  "results": [
+    {
+      "detail": "compileall returncode=0",
+      "gate": "BUILD_PASSED",
+      "passed": true,
+      "status": "PASSED"
+    },
+    {
+      "detail": "pytest returncode=0",
+      "gate": "UNIT_TESTS_PASSED",
+      "passed": true,
+      "status": "PASSED"
+    },
+    {
+      "detail": "findings=0",
+      "gate": "SECURITY_GATE_PASSED",
+      "passed": true,
+      "status": "PASSED"
+    },
+    {
+      "detail": "missing=[]",
+      "gate": "DOCUMENTATION_GATE_PASSED",
+      "passed": true,
+      "status": "PASSED"
+    }
+  ]
+}

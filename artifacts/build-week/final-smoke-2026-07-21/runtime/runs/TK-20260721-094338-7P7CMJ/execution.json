@@ -1,0 +1,30 @@
+{
+  "plan_sha256": "53fe1b5b941caf569863d2f78543b31475fad66403a08a5c50be04333a8c1e9f",
+  "results": [
+    {
+      "action_id": "REPLACE_EXACT_TEXT",
+      "authorization": {
+        "allowed": true,
+        "decision_id": "policy-decision-3db0a36807b5bde475ee323a48db58af",
+        "policy_bundle_hash": "7366c4761f6192e144fac66663791729ef780f3a57cd9f36ce205672e6b7883c",
+        "reason_code": "AUTHORIZED_BY_BOUND_RECEIPTS"
+      },
+      "result": {
+        "authorization": {
+          "allowed": true,
+          "decision_id": "policy-decision-3db0a36807b5bde475ee323a48db58af",
+          "policy_bundle_hash": "7366c4761f6192e144fac66663791729ef780f3a57cd9f36ce205672e6b7883c",
+          "reason_code": "AUTHORIZED_BY_BOUND_RECEIPTS"
+        },
+        "path": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\final-smoke-2026-07-21\\runtime\\workspaces\\TK-20260721-094338-7P7CMJ\\src\\demo_app\\calculator.py",
+        "sha256_after": "0ad827bacafecf9266f049cbdad51880765d1b7c0b529438a591fe983442772a",
+        "sha256_before": "ca3d99f787cb349aa2acff2c31ac6cad9ef9a8c68152e48ace7d4c32dafda7b7",
+        "status": "APPLIED",
+        "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c"
+      },
+      "status": "APPLIED",
+      "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c"
+    }
+  ],
+  "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c"
+}

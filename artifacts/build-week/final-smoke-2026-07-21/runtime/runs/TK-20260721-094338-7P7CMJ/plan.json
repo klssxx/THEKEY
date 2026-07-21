@@ -1,0 +1,18 @@
+{
+  "approved": true,
+  "change_size": "1 line, 1 file",
+  "operations": [
+    {
+      "action_id": "REPLACE_EXACT_TEXT",
+      "expected": "def add(a: int, b: int) -> int:\n    return a - b",
+      "op_id": "OP-REPLACE-1",
+      "reason": "Fix subtraction used where addition is required by the test.",
+      "replacement": "def add(a: int, b: int) -> int:\n    return a + b",
+      "target_id": "DEMO_CALCULATOR"
+    }
+  ],
+  "problem": "calculator.add implements 'def add(a: int, b: int) -> int:\n    return a - b' at line 9; the test requires add(2, 3) == 5.",
+  "risk": "LOW",
+  "run_id": "TK-20260721-094338-7P7CMJ",
+  "title": "Fix calculator.add to use addition"
+}

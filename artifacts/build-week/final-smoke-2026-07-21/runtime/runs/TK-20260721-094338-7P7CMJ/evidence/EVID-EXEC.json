@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "b8c7975542b15b4ebfffd6ace107d8b725a20b5d803c7d1bc0ff6fb3762fb084",
+  "artifact_path": "changes.diff",
+  "evidence_id": "EVID-EXEC",
+  "kind": "command-result",
+  "producer": "executor",
+  "signature": "7a251b1434be3c9addf44b593fd500eeb3dd93c3155eda1475136b1576b427b6",
+  "summary": "Applied 1 operation(s) in workspace",
+  "verified": false
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": "v1",
+  "verification_id": "PV-20260721-094252-ad04ec3e",
+  "created_at": "2026-07-21T09:42:53.978381Z",
+  "source": {
+    "path": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\dist\\THEKEY-Portable-Windows-x64\\SAMPLE-PYTHON-APP",
+    "access_mode": "READ_ONLY",
+    "tree_sha256_before": "e7bae9a95e188f61d8a3514ce6ca664a40f132a89a076260095095a486b64b25",
+    "tree_sha256_after": "e7bae9a95e188f61d8a3514ce6ca664a40f132a89a076260095095a486b64b25",
+    "unchanged": true,
+    "external_tests": null
+  },
+  "profile": {
+    "schema_version": "1.0",
+    "project_id": "PROJECT-SAMPLE_PYTHON_APP-c137dd",
+    "project_name": "SAMPLE-PYTHON-APP",
+    "source_root": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\dist\\THEKEY-Portable-Windows-x64\\SAMPLE-PYTHON-APP",
+    "source_access": "READ_ONLY",
+    "language": "python",
+    "detected_profile": "python-cli",
+    "profile_confidence": 0.95,
+    "profile_evidence": [
+      "cli_proj\\main.py:import:argparse",
+      "cli_proj\\main.py:marker:def main(",
+      "cli_proj\\main.py:marker:if __name__ ==",
+      "pyproject.toml:[project.scripts]"
+    ],
+    "packaging": {
+      "pyproject_project": true,
+      "build_system": true
+    },
+    "entrypoints": [
+      "cli_proj\\main.py"
+    ],
+    "test_configuration": {
+      "test_roots": [
+        "tests"
+      ]
+    },
+    "frameworks": [
+      "argparse"
+    ],
+    "python_requirement": "",
+    "git": {
+      "detected": false,
+      "head": null,
+      "dirty": false
+    },
+    "warnings": [],
+    "unsupported_reasons": []
+  },
+  "plan_sha256": "91812e08ffc5036b9331793c63e6882a79e3bd5eecc5dd81c98fa4b464a0ac8c",
+  "checkmate_review": {
+    "verdict": "PASS",
+    "risk": "LOW",
+    "physical_writes_to_source": false,
+    "reasons": [
+      "supported project profile",
+      "no unsafe links",
+      "tests detected"
+    ]
+  },
+  "policy_decision": {
+    "allowed": true,
+    "reason_code": "READ_ONLY_ISOLATED_VERIFICATION_AUTHORIZED",
+    "decision_id": "project-policy-091d32aaa81c1df9c039c2ccd7a61dce",
+    "policy_bundle_hash": "7366c4761f6192e144fac66663791729ef780f3a57cd9f36ce205672e6b7883c"
+  },
+  "test_execution": {
+    "explicit_consent": true,
+    "operating_system_sandbox": false,
+    "network_install_performed": false,
+    "workspace": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\final-smoke-2026-07-21\\runtime\\.thekey\\project-verification\\PV-20260721-094252-ad04ec3e\\isolated-workspace"
+  },
+  "gates": [
+    {
+      "gate": "CHECKMATE_PRECHECK_PASSED",
+      "passed": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "PYTHON_COMPILE_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "evidence": {
+        "returncode": 0,
+        "timed_out": false,
+        "duration_ms": 351,
+        "output_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "output_bytes": 1,
+        "output_excerpt": ""
+      }
+    },
+    {
+      "gate": "UNIT_TESTS_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "evidence": {
+        "returncode": 0,
+        "timed_out": false,
+        "duration_ms": 689,
+        "output_sha256": "726101edd965baa72e745b86643a69886ff0b888509976e55aa73596bd4972ab",
+        "output_bytes": 99,
+        "output_excerpt": ".                                                                        [100%]\n1 passed in 0.03s"
+      }
+    },
+    {
+      "gate": "LIMITED_SECRET_SCAN_PASSED",
+      "passed": true,
+      "status": "PASSED",
+      "evidence": {
+        "passed": true,
+        "finding_count": 0,
+        "findings": []
+      }
+    },
+    {
+      "gate": "DOCUMENTATION_PRESENT",
+      "passed": true,
+      "status": "PASSED"
+    },
+    {
+      "gate": "SOURCE_UNCHANGED",
+      "passed": true,
+      "status": "PASSED"
+    }
+  ],
+  "diagnostics": [],
+  "final_verdict": "VERIFIED"
+}

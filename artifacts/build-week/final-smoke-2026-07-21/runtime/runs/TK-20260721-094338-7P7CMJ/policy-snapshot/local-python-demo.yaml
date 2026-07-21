@@ -1,0 +1,35 @@
+description: Minimal policy for the canonical deterministic Python demo. Requires
+  a clean build, full unit tests, a limited secret scan, and required documentation.
+  Bounds the size of any accepted change so the governance surface stays small.
+excluded_directories:
+- .git
+- .venv
+- __pycache__
+- .pytest_cache
+- .ruff_cache
+- build
+- dist
+max_files_changed: 3
+max_lines_changed: 50
+max_new_dependencies: 0
+policy_id: local-python-demo
+policy_version: '1.0'
+required_evidence:
+- plan.json
+- approvals.json
+- changes.diff
+- gates.json
+- artifact-hashes.json
+required_gates:
+- BUILD_PASSED
+- UNIT_TESTS_PASSED
+- SECURITY_GATE_PASSED
+- DOCUMENTATION_GATE_PASSED
+secret_scan_scope:
+  paths:
+  - workspaces
+  patterns:
+  - (?i)(api[_-]?key|secret|token|password|passwd|credential)\s*[:=]
+  - AKIA[0-9A-Z]{16}
+  - sk-[A-Za-z0-9]{20,}
+  - '[0-9a-f]{32,}'

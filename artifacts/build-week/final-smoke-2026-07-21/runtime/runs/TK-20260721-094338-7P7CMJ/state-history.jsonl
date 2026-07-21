@@ -1,0 +1,7 @@
+{"kind": "transition", "sequence": 1, "run_id": "TK-20260721-094338-7P7CMJ", "state": "BASELINED", "role": "orchestrator", "timestamp": "2026-07-21T09:43:38+0000"}
+{"kind": "transition", "sequence": 2, "run_id": "TK-20260721-094338-7P7CMJ", "state": "ANALYZED", "role": "orchestrator", "timestamp": "2026-07-21T09:43:39+0000"}
+{"kind": "transition", "sequence": 3, "run_id": "TK-20260721-094338-7P7CMJ", "state": "PLAN_PROPOSED", "role": "planner", "timestamp": "2026-07-21T09:43:39+0000"}
+{"kind": "transition", "sequence": 4, "run_id": "TK-20260721-094338-7P7CMJ", "state": "PLAN_APPROVED", "role": "approver", "timestamp": "2026-07-21T09:43:39+0000"}
+{"kind": "transition", "sequence": 5, "run_id": "TK-20260721-094338-7P7CMJ", "state": "IMPLEMENTED", "role": "executor", "timestamp": "2026-07-21T09:43:39+0000"}
+{"kind": "transition", "sequence": 6, "run_id": "TK-20260721-094338-7P7CMJ", "state": "TESTED", "role": "verifier", "timestamp": "2026-07-21T09:43:40+0000"}
+{"kind": "transition", "sequence": 7, "run_id": "TK-20260721-094338-7P7CMJ", "state": "RELEASE_ELIGIBLE", "role": "approver", "timestamp": "2026-07-21T09:43:41+0000"}

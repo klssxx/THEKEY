@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "20d40a088d9176735428e664b205d544594ae7769ec56d3031473c279f0e205e",
+  "artifact_path": "baseline.json",
+  "evidence_id": "EVID-BASELINE",
+  "kind": "state-file",
+  "producer": "orchestrator",
+  "signature": "3d2e3f4f910a82f131f29fe62abdd23e14d81a817dd64c6251b8ce6e55d22c21",
+  "summary": "Original demo hash ca3d99f787cb",
+  "verified": false
+}

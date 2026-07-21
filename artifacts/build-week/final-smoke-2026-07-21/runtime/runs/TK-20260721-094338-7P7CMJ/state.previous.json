@@ -1,0 +1,20 @@
+{
+  "action_context_path": "governed-transaction.json",
+  "active_authorization_id": "auth-b7968461f88e46a4927c855963b48aa1",
+  "active_phase": "",
+  "active_role": "",
+  "active_transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c",
+  "approved_plan_hash": "53fe1b5b941caf569863d2f78543b31475fad66403a08a5c50be04333a8c1e9f",
+  "blockers": [],
+  "current_state_hash": "09223f16f4dc2d1214ad248aa918b6adb2cb75f364bf603b8b97553df3626f64",
+  "internal_mode": "NORMAL",
+  "last_completed_action": "PLAN_PROPOSED",
+  "last_verified_command_result": "",
+  "next_action": "",
+  "phase_contract_hash": "",
+  "previous_state_hash": "4ec5e1c33dd04cf8850feca28e48f8263d895f1fc805e5806fb802e9369cc471",
+  "run_id": "TK-20260721-094338-7P7CMJ",
+  "run_state": "TESTED",
+  "state_version": 9,
+  "updated_at": "2026-07-21T09:43:40+0000"
+}

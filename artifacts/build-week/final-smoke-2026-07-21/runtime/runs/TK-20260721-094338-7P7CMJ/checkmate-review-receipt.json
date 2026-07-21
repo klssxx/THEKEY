@@ -1,0 +1,11 @@
+{
+  "issued_at": "2026-07-21T09:43:39.051376Z",
+  "plan_sha256": "53fe1b5b941caf569863d2f78543b31475fad66403a08a5c50be04333a8c1e9f",
+  "protocol_version": "v1",
+  "receipt_id": "review-2cdbcefb310c43bfa968337d78b04abe",
+  "reviewer_id": "checkmate-local-v1",
+  "run_id": "TK-20260721-094338-7P7CMJ",
+  "schema_version": "v1",
+  "transaction_id": "tx-b95d46cb3353468f94e9c66abc74637c",
+  "verdict": "PASS"
+}

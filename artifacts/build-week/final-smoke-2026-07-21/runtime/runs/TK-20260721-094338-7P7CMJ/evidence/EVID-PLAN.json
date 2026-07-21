@@ -1,0 +1,10 @@
+{
+  "artifact_hash": "7ce6ff1878be7038020be5304011a4eb3103f70994b54cebc72ae5308a1cc863",
+  "artifact_path": "plan.json",
+  "evidence_id": "EVID-PLAN",
+  "kind": "generated-proposal",
+  "producer": "planner",
+  "signature": "a9b03bbdb6d5642cba75d31640d0158d6e7be3afc39330ceac80498f32698a3d",
+  "summary": "Plan with 1 operation(s)",
+  "verified": false
+}
