@@ -10,6 +10,10 @@ $buildRoot = Join-Path $repoRoot 'build\portable'
 $packageRoot = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64'
 $zipPath = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64.zip'
 $sourceHero = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_chess.png'
+$sourceCanonicalHeroDecor = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_canonical_decor.png'
+$sourceCanonicalSidebarDecor = Join-Path $repoRoot 'portable\windows\assets\THEKEY_sidebar_canonical_decor.png'
+$sourceCanonicalKingModeDecor = Join-Path $repoRoot 'portable\windows\assets\THEKEY_mode_king_canonical_decor.png'
+$sourceCanonicalCheckmateModeDecor = Join-Path $repoRoot 'portable\windows\assets\THEKEY_mode_checkmate_canonical_decor.png'
 $sourceIcon = Join-Path $repoRoot 'portable\windows\assets\THEKEY_app_icon.png'
 $launcherSource = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.cs'
 $launcherManifest = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.manifest'
@@ -53,7 +57,7 @@ if ($LASTEXITCODE -ne 0 -or $version[-1] -ne '64') {
     throw "The portable build requires 64-bit Python 3.11+. Observed: $($version -join ', ')"
 }
 
-foreach ($required in @($sourceHero, $sourceIcon, $launcherSource, $launcherManifest, $quickGuide)) {
+foreach ($required in @($sourceHero, $sourceCanonicalHeroDecor, $sourceCanonicalSidebarDecor, $sourceCanonicalKingModeDecor, $sourceCanonicalCheckmateModeDecor, $sourceIcon, $launcherSource, $launcherManifest, $quickGuide)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Required portable source is missing: $required"
     }
@@ -177,6 +181,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Copy-Item -LiteralPath $sourceHero -Destination $packageRoot
+Copy-Item -LiteralPath $sourceCanonicalHeroDecor -Destination $packageRoot
+Copy-Item -LiteralPath $sourceCanonicalSidebarDecor -Destination $packageRoot
+Copy-Item -LiteralPath $sourceCanonicalKingModeDecor -Destination $packageRoot
+Copy-Item -LiteralPath $sourceCanonicalCheckmateModeDecor -Destination $packageRoot
 Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot
 Copy-Item -LiteralPath $quickGuide -Destination $packageRoot
 

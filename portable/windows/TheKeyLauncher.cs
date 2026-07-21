@@ -77,6 +77,36 @@ namespace TheKeyPortable
         }
     }
 
+    internal struct NormalizedRect
+    {
+        internal readonly double X;
+        internal readonly double Y;
+        internal readonly double Width;
+        internal readonly double Height;
+
+        internal NormalizedRect(double x, double y, double width, double height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
+
+        internal static NormalizedRect FromPixels(double x, double y, double width, double height, double canvasWidth, double canvasHeight)
+        {
+            return new NormalizedRect(x / canvasWidth, y / canvasHeight, width / canvasWidth, height / canvasHeight);
+        }
+
+        internal Rect Resolve(double canvasWidth, double canvasHeight)
+        {
+            return new Rect(
+                Math.Round(X * canvasWidth),
+                Math.Round(Y * canvasHeight),
+                Math.Round(Width * canvasWidth),
+                Math.Round(Height * canvasHeight));
+        }
+    }
+
     internal sealed class MainWindow : Window
     {
         private readonly string root;
@@ -166,11 +196,8 @@ namespace TheKeyPortable
 
         private FrameworkElement BuildShell()
         {
-            Grid viewport = new Grid { Background = Theme.Brush(Theme.Canvas) };
             Grid rootGrid = new Grid
             {
-                Width = 1448,
-                Height = 1086,
                 Background = Theme.Brush(Theme.Canvas),
                 ClipToBounds = true
             };
@@ -181,10 +208,30 @@ namespace TheKeyPortable
             Grid workspace = new Grid();
             workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(270) });
             workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            workspace.Children.Add(BuildSidebar());
-            contentHost = new Grid { Background = Theme.Brush(Theme.CanvasBlue) };
-            Grid.SetColumn(contentHost, 1);
-            workspace.Children.Add(contentHost);
+            ScrollViewer sidebarViewport = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll = false,
+                Content = BuildSidebar()
+            };
+            workspace.Children.Add(sidebarViewport);
+            contentHost = new Grid
+            {
+                Width = 1178,
+                Height = 1038,
+                Background = Theme.Brush(Theme.CanvasBlue)
+            };
+            ScrollViewer contentViewport = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll = false,
+                Background = Theme.Brush(Theme.CanvasBlue),
+                Content = contentHost
+            };
+            Grid.SetColumn(contentViewport, 1);
+            workspace.Children.Add(contentViewport);
             Grid.SetRow(workspace, 1);
             rootGrid.Children.Add(workspace);
             rootGrid.Children.Add(new Border
@@ -195,16 +242,17 @@ namespace TheKeyPortable
                 IsHitTestVisible = false
             });
 
-            Viewbox scaler = new Viewbox
-            {
-                Stretch = Stretch.Uniform,
-                StretchDirection = StretchDirection.Both,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Child = rootGrid
-            };
-            viewport.Children.Add(scaler);
-            return viewport;
+            return rootGrid;
+        }
+
+        private static void PlaceNormalized(Canvas canvas, FrameworkElement child, NormalizedRect normalized, double canvasWidth, double canvasHeight)
+        {
+            Rect bounds = normalized.Resolve(canvasWidth, canvasHeight);
+            child.Width = bounds.Width;
+            child.Height = bounds.Height;
+            Canvas.SetLeft(child, bounds.X);
+            Canvas.SetTop(child, bounds.Y);
+            canvas.Children.Add(child);
         }
 
         private Border BuildTitleBar()
@@ -302,39 +350,40 @@ namespace TheKeyPortable
             layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(205) });
             layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
-            string artPath = Path.Combine(root, "THEKEY_hero_chess.png");
-            if (File.Exists(artPath))
+            string canonicalDecorPath = Path.Combine(root, "THEKEY_sidebar_canonical_decor.png");
+            if (File.Exists(canonicalDecorPath))
             {
-                Image lowArt = new Image
+                Image canonicalDecor = new Image
                 {
-                    Source = new BitmapImage(new Uri(artPath, UriKind.Absolute)),
-                    Stretch = Stretch.UniformToFill,
-                    Opacity = 0.30,
-                    Width = 580,
-                    Height = 330,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Bottom
+                    // Exact reference pixels only for the non-interactive crown,
+                    // halo, texture, and landscape. Native UI areas are alpha
+                    // masked in the asset and rendered by WPF above it.
+                    Source = new BitmapImage(new Uri(canonicalDecorPath, UriKind.Absolute)),
+                    Width = 270,
+                    Height = 1038,
+                    Stretch = Stretch.None,
+                    SnapsToDevicePixels = true,
+                    IsHitTestVisible = false
                 };
-                Grid.SetRow(lowArt, 1);
-                layout.Children.Add(lowArt);
+                // Canvas measures to zero, so this fixed-pixel background
+                // cannot change the header/navigation row geometry.
+                Canvas canonicalDecorLayer = new Canvas
+                {
+                    ClipToBounds = true,
+                    IsHitTestVisible = false
+                };
+                canonicalDecorLayer.Children.Add(canonicalDecor);
+                Grid.SetRowSpan(canonicalDecorLayer, 2);
+                layout.Children.Add(canonicalDecorLayer);
             }
-            Grid landscape = CreateSidebarLandscape();
-            Grid.SetRow(landscape, 1);
-            layout.Children.Add(landscape);
 
             StackPanel identity = new StackPanel { Margin = new Thickness(20, 24, 20, 0) };
             Border emblem = new Border
             {
                 Width = 96,
                 Height = 96,
-                CornerRadius = new CornerRadius(48),
-                BorderBrush = Theme.Brush(Theme.Gold),
-                BorderThickness = new Thickness(1),
-                Background = Theme.Brush(Color.FromArgb(70, 62, 43, 12)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Effect = new DropShadowEffect { Color = Theme.Gold, BlurRadius = 24, ShadowDepth = 0, Opacity = 0.24 }
+                HorizontalAlignment = HorizontalAlignment.Center
             };
-            emblem.Child = CreateIcon("chessking", 68, Theme.Brush(Theme.GoldLight));
             identity.Children.Add(emblem);
             identity.Children.Add(new TextBlock
             {
@@ -455,10 +504,12 @@ namespace TheKeyPortable
 
         private FrameworkElement BuildHome()
         {
+            const double canvasWidth = 1178;
+            const double canvasHeight = 1038;
             Grid home = new Grid
             {
-                Width = 1178,
-                Height = 1038,
+                Width = canvasWidth,
+                Height = canvasHeight,
                 Background = Theme.Brush(Theme.CanvasBlue),
                 ClipToBounds = true
             };
@@ -509,63 +560,37 @@ namespace TheKeyPortable
                     IsHitTestVisible = false
                 });
             }
-            StackPanel body = new StackPanel { Width = 1178, HorizontalAlignment = HorizontalAlignment.Stretch };
-            body.Children.Add(BuildHero());
-            body.Children.Add(BuildOperationCards());
-            body.Children.Add(BuildUpcomingModes());
-            body.Children.Add(BuildActivityPanel());
-            home.Children.Add(body);
+            Canvas regions = new Canvas { Width = canvasWidth, Height = canvasHeight, ClipToBounds = true };
+            PlaceNormalized(regions, BuildHero(), NormalizedRect.FromPixels(0, 0, 1178, 372, canvasWidth, canvasHeight), canvasWidth, canvasHeight);
+            PlaceNormalized(regions, BuildOperationCards(), NormalizedRect.FromPixels(42, 384, 1078, 252, canvasWidth, canvasHeight), canvasWidth, canvasHeight);
+            PlaceNormalized(regions, BuildUpcomingModes(), NormalizedRect.FromPixels(42, 651, 1078, 134, canvasWidth, canvasHeight), canvasWidth, canvasHeight);
+            PlaceNormalized(regions, BuildActivityPanel(), NormalizedRect.FromPixels(18, 800, 1132, 211, canvasWidth, canvasHeight), canvasWidth, canvasHeight);
+            home.Children.Add(regions);
             return home;
         }
 
         private FrameworkElement BuildHero()
         {
             Grid hero = new Grid { Height = 372, ClipToBounds = true, Background = Theme.Brush(Theme.Canvas) };
-            string heroPath = Path.Combine(root, "THEKEY_hero_chess.png");
-            if (File.Exists(heroPath))
+            string canonicalDecorPath = Path.Combine(root, "THEKEY_hero_canonical_decor.png");
+            if (File.Exists(canonicalDecorPath))
             {
-                Image art = new Image
+                // This is a transparent, exact-pixel crop of only the canonical
+                // hero's non-interactive art.  The text, local-mode control and
+                // CTA intentionally remain native WPF elements above it.
+                Image canonicalDecor = new Image
                 {
-                    Source = new BitmapImage(new Uri(heroPath, UriKind.Absolute)),
-                    Width = 1000,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Stretch = Stretch.UniformToFill,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    RenderTransform = new TranslateTransform(-150, 0)
+                    Source = new BitmapImage(new Uri(canonicalDecorPath, UriKind.Absolute)),
+                    Width = 1178,
+                    Height = 254,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Stretch = Stretch.None,
+                    SnapsToDevicePixels = true,
+                    IsHitTestVisible = false
                 };
-                hero.Children.Add(art);
+                hero.Children.Add(canonicalDecor);
             }
-            RadialGradientBrush heroGlow = new RadialGradientBrush
-            {
-                Center = new Point(0.52, 0.47),
-                GradientOrigin = new Point(0.52, 0.47),
-                RadiusX = 0.52,
-                RadiusY = 0.64
-            };
-            heroGlow.GradientStops.Add(new GradientStop(Color.FromArgb(58, 151, 91, 28), 0));
-            heroGlow.GradientStops.Add(new GradientStop(Color.FromArgb(0, 151, 91, 28), 1));
-            hero.Children.Add(new Border
-            {
-                Width = 650,
-                Height = 410,
-                Margin = new Thickness(500, 0, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-                Background = heroGlow,
-                IsHitTestVisible = false
-            });
-            hero.Children.Add(new Border
-            {
-                Background = new LinearGradientBrush(
-                    Color.FromArgb(252, 3, 10, 18), Color.FromArgb(20, 3, 10, 18), 0)
-            });
-            hero.Children.Add(new Border
-            {
-                Background = new LinearGradientBrush(
-                    Color.FromArgb(130, 3, 10, 18), Color.FromArgb(0, 3, 10, 18), 90),
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Height = 170
-            });
 
             StackPanel copy = new StackPanel
             {
@@ -675,7 +700,6 @@ namespace TheKeyPortable
 
         private FrameworkElement BuildOperationCards()
         {
-            StackPanel section = new StackPanel { Margin = new Thickness(42, 12, 58, 0) };
             Grid cards = new Grid { Height = 252 };
             cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(260) });
             cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(263) });
@@ -685,8 +709,7 @@ namespace TheKeyPortable
             cards.Children.Add(CreateCard("repair", "Reparar / Repair", "Escanea, repara y\nrestaura archivos.\nScan, repair and\nrestore files.", RepairSelectedApplication, 1, new Thickness(7, 0, 7, 0), !operationRunning));
             cards.Children.Add(CreateCard("demo", "Demo para jueces /\nJudge demo", "Genera demostraciones\ngubernamentales.\nGenerate government\ndemonstrations.", RunDemo, 2, new Thickness(7, 0, 7, 0), !operationRunning));
             cards.Children.Add(CreateCard("results", "Ver resultados /\nView results", "Revisa resultados, recibos\ny decisiones.\nReview results, receipts\nand decisions.", ShowResults, 3, new Thickness(10, 0, 0, 0), true));
-            section.Children.Add(cards);
-            return section;
+            return cards;
         }
 
         private Button CreateCard(string icon, string title, string detail, RoutedEventHandler action, int column, Thickness margin, bool isEnabled)
@@ -719,11 +742,12 @@ namespace TheKeyPortable
                 BorderBrush = Theme.Brush(Theme.Gold),
                 BorderThickness = new Thickness(1),
                 Background = Theme.Brush(Color.FromArgb(45, 92, 62, 12)),
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
             };
             ring.Child = CreateIcon(icon, 43, Theme.Brush(Theme.GoldLight));
             layout.Children.Add(ring);
-            StackPanel heading = new StackPanel { VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 3, 0, 0) };
+            StackPanel heading = new StackPanel { VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, -1, 0, 0) };
             heading.Children.Add(new TextBlock
             {
                 Text = title,
@@ -774,19 +798,19 @@ namespace TheKeyPortable
 
         private FrameworkElement BuildUpcomingModes()
         {
-            StackPanel section = new StackPanel { Margin = new Thickness(42, 15, 58, 0) };
+            StackPanel section = new StackPanel();
             section.Children.Add(new TextBlock
             {
                 Text = "MODOS PRÓXIMOS / UPCOMING MODES",
                 FontSize = 15,
                 Foreground = Theme.Brush(Theme.Gold),
-                Margin = new Thickness(2, 0, 0, 5)
+                Margin = new Thickness(2, 0, 0, 4)
             });
             Grid modes = new Grid { Height = 111 };
-            modes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(525) });
+            modes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(513) });
             modes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             modes.Children.Add(CreateUpcomingCard("THE KING", "Construcción orquestada /\nOrchestrated build", true, 0, new Thickness(0, 0, 8, 0)));
-            modes.Children.Add(CreateUpcomingCard("CHECKMATE", "Revisión adversarial /\nAdversarial review", false, 1, new Thickness(8, 0, 0, 0)));
+            modes.Children.Add(CreateUpcomingCard("CHECKMATE", "Revisión adversarial /\nAdversarial review", false, 1, new Thickness(21, 0, 0, 0)));
             section.Children.Add(modes);
             return section;
         }
@@ -795,7 +819,10 @@ namespace TheKeyPortable
         {
             Button button = new Button
             {
-                IsEnabled = false,
+                // Keep the future modes visibly native without accepting input;
+                // IsEnabled=false would dim their WPF text and decorations.
+                IsHitTestVisible = false,
+                Focusable = false,
                 Margin = margin,
                 Padding = new Thickness(28, 10, 24, 10),
                 Background = new LinearGradientBrush(
@@ -810,14 +837,21 @@ namespace TheKeyPortable
             layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(140) });
             layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            string artPath = Path.Combine(root, "THEKEY_hero_chess.png");
-            if (File.Exists(artPath))
+            string canonicalDecorPath = Path.Combine(
+                root, gold ? "THEKEY_mode_king_canonical_decor.png" : "THEKEY_mode_checkmate_canonical_decor.png");
+            if (File.Exists(canonicalDecorPath))
             {
+                // Transparent exact-pixel crops retain only the interior
+                // decoration and emblems; the card, badge, and all text stay WPF.
                 Image texture = new Image
                 {
-                    Source = new BitmapImage(new Uri(artPath, UriKind.Absolute)),
-                    Stretch = Stretch.UniformToFill,
-                    Opacity = gold ? 0.11 : 0.08,
+                    Source = new BitmapImage(new Uri(canonicalDecorPath, UriKind.Absolute)),
+                    Width = gold ? 453 : 492,
+                    Height = 90,
+                    Stretch = Stretch.None,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    SnapsToDevicePixels = true,
                     IsHitTestVisible = false
                 };
                 Grid.SetColumnSpan(texture, 4);
@@ -828,20 +862,9 @@ namespace TheKeyPortable
             {
                 Width = emblemSize,
                 Height = emblemSize,
-                CornerRadius = new CornerRadius(gold ? 41 : 3),
-                BorderBrush = Theme.Brush(Theme.Gold),
-                BorderThickness = new Thickness(1),
-                Background = Theme.Brush(Color.FromArgb(32, 120, 78, 12)),
-                RenderTransformOrigin = new Point(0.5, 0.5),
-                RenderTransform = gold ? Transform.Identity : new RotateTransform(45)
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
             };
-            FrameworkElement modeIcon = CreateIcon(gold ? "chessking" : "checkmate", 54, Theme.Brush(Theme.GoldLight));
-            if (!gold)
-            {
-                modeIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-                modeIcon.RenderTransform = new RotateTransform(-45);
-            }
-            emblem.Child = modeIcon;
             layout.Children.Add(emblem);
             StackPanel text = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
             text.Children.Add(new TextBlock
@@ -889,7 +912,6 @@ namespace TheKeyPortable
         {
             Border panel = new Border
             {
-                Margin = new Thickness(18, 15, 28, 0),
                 Height = 211,
                 CornerRadius = new CornerRadius(11),
                 BorderBrush = Theme.Brush(Color.FromRgb(65, 83, 102)),
@@ -1022,7 +1044,7 @@ namespace TheKeyPortable
             Button button = new Button
             {
                 Height = 112,
-                Padding = new Thickness(70, 0, 34, 0),
+                Padding = new Thickness(69, 0, 34, 0),
                 Background = CreateMetallicGoldBrush(),
                 BorderBrush = Theme.Brush(Theme.GoldLight),
                 BorderThickness = new Thickness(1),
@@ -1032,13 +1054,13 @@ namespace TheKeyPortable
                 Effect = new DropShadowEffect { Color = Theme.Gold, BlurRadius = 22, ShadowDepth = 3, Opacity = 0.23 }
             };
             Grid content = new Grid();
-            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(98) });
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(97) });
             content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             Border target = new Border
             {
-                Width = 68,
-                Height = 68,
-                CornerRadius = new CornerRadius(34),
+                Width = 66,
+                Height = 66,
+                CornerRadius = new CornerRadius(33),
                 BorderBrush = Theme.Brush(Theme.GoldLight),
                 BorderThickness = new Thickness(2),
                 HorizontalAlignment = HorizontalAlignment.Left,

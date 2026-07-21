@@ -10,9 +10,22 @@ LAUNCHER_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.cs"
 LAUNCHER_MANIFEST_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.manifest"
 PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
 HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
+CANONICAL_HERO_DECOR_PATH = (
+    ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_canonical_decor.png"
+)
+CANONICAL_SIDEBAR_DECOR_PATH = (
+    ROOT / "portable" / "windows" / "assets" / "THEKEY_sidebar_canonical_decor.png"
+)
+CANONICAL_KING_MODE_DECOR_PATH = (
+    ROOT / "portable" / "windows" / "assets" / "THEKEY_mode_king_canonical_decor.png"
+)
+CANONICAL_CHECKMATE_MODE_DECOR_PATH = (
+    ROOT / "portable" / "windows" / "assets" / "THEKEY_mode_checkmate_canonical_decor.png"
+)
 ICON_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_app_icon.png"
 HOTSPOT_MAP_PATH = ROOT / "docs" / "build-week" / "PIXEL_PERFECT_HOTSPOTS.json"
 PIXEL_VERIFIER_PATH = ROOT / "scripts" / "verify-pixel-ui.ps1"
+VISUAL_COMPARATOR_PATH = ROOT / "scripts" / "compare-build-week-visual.py"
 
 
 def _load_entry():
@@ -96,6 +109,14 @@ def test_premium_launcher_uses_native_adaptive_layout_and_real_activity_state():
 
     assert HERO_PATH.is_file()
     assert HERO_PATH.stat().st_size > 100_000
+    assert CANONICAL_HERO_DECOR_PATH.is_file()
+    assert CANONICAL_HERO_DECOR_PATH.stat().st_size > 100_000
+    assert CANONICAL_SIDEBAR_DECOR_PATH.is_file()
+    assert CANONICAL_SIDEBAR_DECOR_PATH.stat().st_size > 100_000
+    assert CANONICAL_KING_MODE_DECOR_PATH.is_file()
+    assert CANONICAL_KING_MODE_DECOR_PATH.stat().st_size > 20_000
+    assert CANONICAL_CHECKMATE_MODE_DECOR_PATH.is_file()
+    assert CANONICAL_CHECKMATE_MODE_DECOR_PATH.stat().st_size > 20_000
     assert ICON_PATH.is_file()
     assert ICON_PATH.stat().st_size > 100_000
     assert "BuildSidebar()" in launcher
@@ -105,10 +126,18 @@ def test_premium_launcher_uses_native_adaptive_layout_and_real_activity_state():
     assert "BuildSystemPanel()" not in launcher
     assert "Sin actividad todavía / No activity yet" in launcher
     assert 'sourceHero = Join-Path $repoRoot' in build
+    assert 'sourceCanonicalHeroDecor = Join-Path $repoRoot' in build
+    assert 'sourceCanonicalSidebarDecor = Join-Path $repoRoot' in build
+    assert 'sourceCanonicalKingModeDecor = Join-Path $repoRoot' in build
+    assert 'sourceCanonicalCheckmateModeDecor = Join-Path $repoRoot' in build
     assert 'sourceIcon = Join-Path $repoRoot' in build
     assert "sourceVideo" not in build
     assert "cinematic_sha256" not in build
     assert "Copy-Item -LiteralPath $sourceHero -Destination $packageRoot" in build
+    assert "Copy-Item -LiteralPath $sourceCanonicalHeroDecor -Destination $packageRoot" in build
+    assert "Copy-Item -LiteralPath $sourceCanonicalSidebarDecor -Destination $packageRoot" in build
+    assert "Copy-Item -LiteralPath $sourceCanonicalKingModeDecor -Destination $packageRoot" in build
+    assert "Copy-Item -LiteralPath $sourceCanonicalCheckmateModeDecor -Destination $packageRoot" in build
     assert "Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot" in build
     assert "-Filter '__pycache__'" in build
     assert "SystemParameters.WorkArea" in launcher
@@ -125,17 +154,41 @@ def test_premium_launcher_uses_native_adaptive_layout_and_real_activity_state():
     assert 'Arguments = "/PID " + processId + " /T /F"' in launcher
 
 
-def test_native_dashboard_scales_real_controls_without_a_screenshot_dependency():
+def test_native_dashboard_uses_normalized_regions_without_a_screenshot_dependency():
     launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
     build = PORTABLE_BUILD_PATH.read_text(encoding="utf-8")
     assert "THEKEY_UI_REFERENCE.png" not in launcher
-    assert "Viewbox scaler" in launcher
-    assert "Child = rootGrid" in launcher
-    assert "Stretch = Stretch.Uniform" in launcher
+    assert "Viewbox scaler" not in launcher
+    assert "NormalizedRect.FromPixels" in launcher
+    assert "PlaceNormalized" in launcher
+    assert "ScrollViewer contentViewport" in launcher
     assert "CaptureComposition(canonicalShell, 1448, 1086, capturePath, captureDpi)" in launcher
     assert "TheKeyLauncher.manifest" in build
     assert '"/win32manifest:$launcherManifest"' in build
     assert "$sourceUiReference" not in build
+
+
+def test_hero_uses_only_a_transparent_canonical_decoration_crop():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+
+    assert "THEKEY_hero_canonical_decor.png" in launcher
+    assert "exact-pixel crop of only the canonical" in launcher
+    assert "The text, local-mode control and" in launcher
+
+
+def test_sidebar_uses_only_a_transparent_canonical_decoration_crop():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+
+    assert "THEKEY_sidebar_canonical_decor.png" in launcher
+    assert "Native UI areas are alpha" in launcher
+
+
+def test_modes_use_only_transparent_canonical_decoration_crops():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+
+    assert "THEKEY_mode_king_canonical_decor.png" in launcher
+    assert "THEKEY_mode_checkmate_canonical_decor.png" in launcher
+    assert "the card, badge, and all text stay WPF" in launcher
 
 
 def test_launcher_structures_real_results_and_streams_backend_progress():
@@ -168,6 +221,21 @@ def test_native_visual_verifier_captures_the_adaptive_dashboard():
     assert "the same native visual tree is rendered at the requested device-pixel density" in verifier
     assert "[ValidateSet(96, 120, 144, 192)]" in verifier
     assert "THEKEY_NATIVE_UI" not in verifier
+
+
+def test_visual_comparator_enforces_every_strict_regional_gate():
+    comparator = VISUAL_COMPARATOR_PATH.read_text(encoding="utf-8")
+
+    for region in ("sidebar", "hero", "cta", "cards", "modes", "activity"):
+        assert f'"{region}":' in comparator
+    assert '"edge_distance_p95_px_max": 4.0' in comparator
+    assert '"edge_distance_max_px_max": 8.0' in comparator
+    assert '"ssim_min": 0.95' in comparator
+    assert '"rgb_changed_percent_max": 5.0' in comparator
+    assert '"overlay-50.png"' in comparator
+    assert "save_region_artifacts" in comparator
+    assert 'region_dir = output_dir / "regions" / name' in comparator
+    assert 'all(region["passed"] for region in regions.values())' in comparator
 
 
 def test_pixel_perfect_hotspots_cover_every_visible_action():
