@@ -11,6 +11,7 @@ $packageRoot = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64'
 $zipPath = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64.zip'
 $sourceVideo = Join-Path $repoRoot 'portable\windows\assets\THEKEY_cinematic_loop_5s.mp4'
 $sourceHero = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_chess.png'
+$sourceIcon = Join-Path $repoRoot 'portable\windows\assets\THEKEY_app_icon.png'
 $launcherSource = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.cs'
 $quickGuide = Join-Path $repoRoot 'portable\windows\README-FIRST.txt'
 
@@ -52,7 +53,7 @@ if ($LASTEXITCODE -ne 0 -or $version[-1] -ne '64') {
     throw "The portable build requires 64-bit Python 3.11+. Observed: $($version -join ', ')"
 }
 
-foreach ($required in @($sourceVideo, $sourceHero, $launcherSource, $quickGuide)) {
+foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $launcherSource, $quickGuide)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Required portable source is missing: $required"
     }
@@ -124,25 +125,16 @@ $repairSampleTarget = Join-Path $packageRoot 'SAMPLE-REPAIRABLE-PYTHON-APP'
 Copy-Item -LiteralPath (Join-Path $repoRoot 'portable\windows\sample-repairable-app') `
     -Destination $repairSampleTarget -Recurse
 
-# Create an original deterministic chess-king icon.  It is rendered from
-# geometric primitives and a platform glyph; no third-party logo is used.
+# Convert the project-owned premium chess icon into the executable icon.
 $iconPath = Join-Path $buildRoot 'thekey-king.ico'
 Add-Type -AssemblyName System.Drawing
-$bitmap = New-Object System.Drawing.Bitmap 256, 256
-$graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-$graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-$graphics.Clear([System.Drawing.Color]::FromArgb(8, 13, 26))
-$gold = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(232, 190, 82))
-$font = New-Object System.Drawing.Font 'Segoe UI Symbol', 176, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
-$format = New-Object System.Drawing.StringFormat
-$format.Alignment = [System.Drawing.StringAlignment]::Center
-$format.LineAlignment = [System.Drawing.StringAlignment]::Center
-$graphics.DrawString([char]0x265A, $font, $gold, (New-Object System.Drawing.RectangleF 0, 0, 256, 256), $format)
+$sourceIconBitmap = [System.Drawing.Image]::FromFile($sourceIcon)
+$bitmap = New-Object System.Drawing.Bitmap $sourceIconBitmap, 256, 256
 $handle = $bitmap.GetHicon()
 $icon = [System.Drawing.Icon]::FromHandle($handle)
 $stream = [IO.File]::Open($iconPath, [IO.FileMode]::Create)
 try { $icon.Save($stream) } finally { $stream.Dispose() }
-$icon.Dispose(); $font.Dispose(); $gold.Dispose(); $graphics.Dispose(); $bitmap.Dispose()
+$icon.Dispose(); $bitmap.Dispose(); $sourceIconBitmap.Dispose()
 
 $framework = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
 $csc = Join-Path $framework 'csc.exe'
@@ -176,6 +168,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Copy-Item -LiteralPath $sourceVideo -Destination $packageRoot
 Copy-Item -LiteralPath $sourceHero -Destination $packageRoot
+Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot
 Copy-Item -LiteralPath $quickGuide -Destination $packageRoot
 
 $manifestPath = Join-Path $packageRoot 'BUILD_MANIFEST.json'

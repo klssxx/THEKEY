@@ -9,6 +9,7 @@ ENTRY_PATH = ROOT / "scripts" / "portable_entry.py"
 LAUNCHER_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.cs"
 PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
 HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
+ICON_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_app_icon.png"
 
 
 def _load_entry():
@@ -95,10 +96,16 @@ def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
 
     assert HERO_PATH.is_file()
     assert HERO_PATH.stat().st_size > 100_000
+    assert ICON_PATH.is_file()
+    assert ICON_PATH.stat().st_size > 100_000
     assert "BuildSidebar()" in launcher
     assert "BuildHero()" in launcher
     assert "BuildSystemPanel()" in launcher
     assert "Sin actividad todavía / No activity yet" in launcher
     assert 'sourceHero = Join-Path $repoRoot' in build
+    assert 'sourceIcon = Join-Path $repoRoot' in build
     assert "Copy-Item -LiteralPath $sourceHero -Destination $packageRoot" in build
+    assert "Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot" in build
+    assert "SystemParameters.WorkArea" in launcher
+    assert "WindowStartupLocation.Manual" in launcher
     assert "100%" not in launcher

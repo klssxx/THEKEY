@@ -122,6 +122,9 @@ namespace TheKeyPortable
         private readonly TextBlock status;
         private TextBlock sourceState;
         private TextBlock recentActivity;
+        private TextBlock recentTime;
+        private TextBlock recentType;
+        private TextBlock recentState;
         private readonly Panel actions;
         private readonly Button verifyProjectButton;
         private readonly Button repairProjectButton;
@@ -133,11 +136,16 @@ namespace TheKeyPortable
             backend = Path.Combine(root, "core", "THEKEY-Core", "THEKEY-Core.exe");
 
             Title = "THEKEY — THE KING OF CHECKMATE";
-            Width = 1440;
-            Height = 900;
-            MinWidth = 1180;
-            MinHeight = 720;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            Rect workAreaBounds = SystemParameters.WorkArea;
+            Width = Math.Min(1440, Math.Max(980, workAreaBounds.Width - 40));
+            Height = Math.Min(900, Math.Max(600, workAreaBounds.Height - 40));
+            MinWidth = 980;
+            MinHeight = 600;
+            MaxWidth = workAreaBounds.Width;
+            MaxHeight = workAreaBounds.Height;
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = workAreaBounds.Left + Math.Max(0, (workAreaBounds.Width - Width) / 2);
+            Top = workAreaBounds.Top + Math.Max(0, (workAreaBounds.Height - Height) / 2);
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.CanResizeWithGrip;
             FontFamily = new FontFamily("Segoe UI Variable Text, Segoe UI");
@@ -146,6 +154,11 @@ namespace TheKeyPortable
             Background = new LinearGradientBrush(
                 Color.FromRgb(6, 14, 26), Color.FromRgb(2, 8, 17), 90);
             Foreground = Brushes.White;
+            string appIconPath = Path.Combine(root, "THEKEY_app_icon.png");
+            if (File.Exists(appIconPath))
+            {
+                Icon = BitmapFrame.Create(new Uri(appIconPath, UriKind.Absolute));
+            }
 
             Grid shell = new Grid();
             shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
@@ -301,14 +314,7 @@ namespace TheKeyPortable
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             StackPanel brand = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(18, 0, 0, 0) };
-            TextBlock crown = new TextBlock
-            {
-                Text = "\u265A",
-                FontSize = 23,
-                Foreground = new SolidColorBrush(Color.FromRgb(230, 179, 69)),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            brand.Children.Add(crown);
+            brand.Children.Add(CreateBrandIcon(25));
             TextBlock title = new TextBlock
             {
                 Text = "THEKEY  —  THE KING OF CHECKMATE",
@@ -376,14 +382,7 @@ namespace TheKeyPortable
                 Background = new SolidColorBrush(Color.FromArgb(80, 32, 24, 11)),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-            seal.Child = new TextBlock
-            {
-                Text = "\u265A",
-                FontSize = 50,
-                Foreground = new SolidColorBrush(Color.FromRgb(231, 180, 70)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
+            seal.Child = CreateBrandIcon(68);
             identity.Children.Add(seal);
             identity.Children.Add(new TextBlock
             {
@@ -455,6 +454,31 @@ namespace TheKeyPortable
             layout.Children.Add(health);
             sidebar.Child = layout;
             return sidebar;
+        }
+
+        private FrameworkElement CreateBrandIcon(double size)
+        {
+            string path = Path.Combine(root, "THEKEY_app_icon.png");
+            if (File.Exists(path))
+            {
+                return new Image
+                {
+                    Source = new BitmapImage(new Uri(path, UriKind.Absolute)),
+                    Width = size,
+                    Height = size,
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+            }
+            return new TextBlock
+            {
+                Text = "\u265A",
+                FontSize = size * 0.72,
+                Foreground = new SolidColorBrush(Color.FromRgb(231, 180, 70)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
         }
 
         private Button CreateNavButton(string symbol, string label, bool selected, RoutedEventHandler action)
@@ -610,16 +634,41 @@ namespace TheKeyPortable
                 Foreground = new SolidColorBrush(Color.FromRgb(226, 182, 84)),
                 LineHeight = 18
             });
+            Grid gauge = new Grid
+            {
+                Width = 146,
+                Height = 146,
+                Margin = new Thickness(0, 15, 0, 5),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            Canvas ticks = new Canvas { Width = 146, Height = 146 };
+            for (int i = 0; i < 25; i++)
+            {
+                Border tick = new Border
+                {
+                    Width = 3,
+                    Height = 11,
+                    CornerRadius = new CornerRadius(1.5),
+                    Background = new SolidColorBrush(
+                        i < 18 ? Color.FromRgb(86, 220, 108) : Color.FromRgb(209, 183, 61)),
+                    Opacity = i < 22 ? 0.85 : 0.28
+                };
+                Canvas.SetLeft(tick, 71.5);
+                Canvas.SetTop(tick, 4);
+                tick.RenderTransform = new RotateTransform(-120 + (240.0 * i / 24.0), 1.5, 69);
+                ticks.Children.Add(tick);
+            }
+            gauge.Children.Add(ticks);
             Border ring = new Border
             {
-                Width = 106,
-                Height = 106,
-                CornerRadius = new CornerRadius(53),
+                Width = 94,
+                Height = 94,
+                CornerRadius = new CornerRadius(47),
                 BorderBrush = File.Exists(backend) ? new SolidColorBrush(Color.FromRgb(101, 220, 112)) : new SolidColorBrush(Color.FromRgb(255, 126, 126)),
                 BorderThickness = new Thickness(3),
                 Background = new SolidColorBrush(Color.FromArgb(55, 61, 150, 85)),
-                Margin = new Thickness(0, 22, 0, 12),
                 HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
                 Effect = new DropShadowEffect { Color = Color.FromRgb(99, 220, 111), BlurRadius = 22, ShadowDepth = 0, Opacity = 0.3 }
             };
             ring.Child = new TextBlock
@@ -630,7 +679,8 @@ namespace TheKeyPortable
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            content.Children.Add(ring);
+            gauge.Children.Add(ring);
+            content.Children.Add(gauge);
             content.Children.Add(new TextBlock
             {
                 Text = File.Exists(backend) ? "LISTO / READY" : "BLOQUEADO / BLOCKED",
@@ -679,6 +729,7 @@ namespace TheKeyPortable
             Grid layout = new Grid();
             layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             Border header = new Border
             {
                 Padding = new Thickness(16, 9, 16, 9),
@@ -693,17 +744,56 @@ namespace TheKeyPortable
                 Foreground = new SolidColorBrush(Color.FromRgb(191, 202, 220))
             };
             layout.Children.Add(header);
-            recentActivity = new TextBlock
-            {
-                Text = "—   Sin actividad todavía / No activity yet. Selecciona una aplicación o ejecuta la demo.",
-                Padding = new Thickness(16, 13, 16, 13),
-                Foreground = new SolidColorBrush(Color.FromRgb(142, 158, 184)),
-                FontSize = 11
-            };
-            Grid.SetRow(recentActivity, 1);
-            layout.Children.Add(recentActivity);
+            Grid columns = CreateActivityGrid();
+            columns.Background = new SolidColorBrush(Color.FromRgb(9, 22, 38));
+            columns.Children.Add(CreateActivityCell("Hora / Time", 0, true));
+            columns.Children.Add(CreateActivityCell("Tipo / Type", 1, true));
+            columns.Children.Add(CreateActivityCell("Actividad / Activity", 2, true));
+            columns.Children.Add(CreateActivityCell("Estado / Status", 3, true));
+            Grid.SetRow(columns, 1);
+            layout.Children.Add(columns);
+
+            Grid row = CreateActivityGrid();
+            row.Margin = new Thickness(0, 1, 0, 0);
+            recentTime = CreateActivityCell("--:--:--", 0, false);
+            recentType = CreateActivityCell("Sistema / System", 1, false);
+            recentActivity = CreateActivityCell("Sin actividad todavía / No activity yet", 2, false);
+            recentState = CreateActivityCell("Esperando / Waiting", 3, false);
+            recentState.Foreground = new SolidColorBrush(Color.FromRgb(216, 177, 83));
+            row.Children.Add(recentTime);
+            row.Children.Add(recentType);
+            row.Children.Add(recentActivity);
+            row.Children.Add(recentState);
+            Grid.SetRow(row, 2);
+            layout.Children.Add(row);
             panel.Child = layout;
             return panel;
+        }
+
+        private Grid CreateActivityGrid()
+        {
+            Grid grid = new Grid { MinHeight = 34 };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(125) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) });
+            return grid;
+        }
+
+        private TextBlock CreateActivityCell(string text, int column, bool header)
+        {
+            TextBlock cell = new TextBlock
+            {
+                Text = text,
+                Padding = new Thickness(14, 9, 10, 8),
+                FontSize = header ? 10 : 11,
+                FontWeight = header ? FontWeights.SemiBold : FontWeights.Normal,
+                Foreground = new SolidColorBrush(
+                    header ? Color.FromRgb(139, 156, 182) : Color.FromRgb(185, 197, 216)),
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+            Grid.SetColumn(cell, column);
+            return cell;
         }
 
         private Border BuildHeader()
@@ -1140,9 +1230,11 @@ namespace TheKeyPortable
             }
             if (recentActivity != null)
             {
-                recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
-                    "   ANÁLISIS / ANALYSIS   " + Path.GetFileName(selectedProject) +
-                    "   En curso / Running";
+                recentTime.Text = DateTime.Now.ToString("HH:mm:ss");
+                recentType.Text = "Análisis / Analysis";
+                recentActivity.Text = Path.GetFileName(selectedProject);
+                recentState.Text = "En curso / Running";
+                recentState.Foreground = new SolidColorBrush(Color.FromRgb(216, 177, 83));
             }
             RunBackend(
                 "project inspect --source " + QuoteArgument(selectedProject),
@@ -1330,8 +1422,11 @@ namespace TheKeyPortable
             SetStatus(runningStatus, true);
             if (recentActivity != null)
             {
-                recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
-                    "   " + runningStatus + "   En curso / Running";
+                recentTime.Text = DateTime.Now.ToString("HH:mm:ss");
+                recentType.Text = arguments.Split(' ')[0].ToUpperInvariant();
+                recentActivity.Text = runningStatus;
+                recentState.Text = "En curso / Running";
+                recentState.Foreground = new SolidColorBrush(Color.FromRgb(216, 177, 83));
             }
             output.Text = "> THEKEY-Core.exe " + arguments + "\r\n\r\n";
 
@@ -1372,11 +1467,11 @@ namespace TheKeyPortable
                     SetStatus(exitCode == 0 ? "PASS · VERIFICADO / VERIFIED" : "FALLO / FAILED", exitCode == 0);
                     if (recentActivity != null)
                     {
-                        recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
-                            "   " + arguments.Split(' ')[0].ToUpperInvariant() +
-                            "   " + (exitCode == 0 ? "Éxito / Success" : "Bloqueado / Blocked") +
-                            "   Exit " + exitCode;
-                        recentActivity.Foreground = new SolidColorBrush(
+                        recentTime.Text = DateTime.Now.ToString("HH:mm:ss");
+                        recentType.Text = arguments.Split(' ')[0].ToUpperInvariant();
+                        recentActivity.Text = "Exit " + exitCode + " · " + arguments;
+                        recentState.Text = exitCode == 0 ? "Éxito / Success" : "Bloqueado / Blocked";
+                        recentState.Foreground = new SolidColorBrush(
                             exitCode == 0 ? Color.FromRgb(91, 221, 126) : Color.FromRgb(255, 126, 126));
                     }
                     SetActionsEnabled(true);
