@@ -1,0 +1,18 @@
+{
+  "artifact": "THEKEY-Portable-Windows-x64.zip",
+  "verification_utc": "2026-07-21T22:45:58Z",
+  "bytes": 22846085,
+  "sha256": "589cdb85a7c478148b72d0337cfdb8b8454acc4e4c7c782b6e9a05b3969e2f0f",
+  "zip_entries": 135,
+  "uncompressed_bytes": 40471901,
+  "manifest_file_count": 124,
+  "manifest_mismatch_count": 0,
+  "manifest_source_commit": "5cbab680c59ef3c0c1f2709f6540bf2b520c6495",
+  "manifest_source_tree_state": "CLEAN",
+  "manifest_source_commit_exact": true,
+  "required_paths_present": true,
+  "unsafe_path_count": 0,
+  "limited_obvious_secret_match_count": 0,
+  "authenticode_status": "NotSigned",
+  "reproducible_command": "Get-FileHash .\\dist\\THEKEY-Portable-Windows-x64.zip -Algorithm SHA256"
+}

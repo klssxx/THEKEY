@@ -7,9 +7,9 @@ OWNER-ONLY SUBMISSION ACTIONS PENDING.**
 
 The Windows application, governed backend, clean package, deterministic demo,
 tests, DPI captures, security scans and visual comparison pass. The remaining
-work is external to the repository: record/upload the video, invoke a new
-Codex `/feedback` from the signed-in UI if desired, configure judge access, and
-submit Devpost before the deadline.
+work is external to the repository: record/upload the video, confirm the
+already-recorded primary Codex `/feedback` Session ID, configure judge access,
+and submit Devpost before the deadline.
 
 ## Final smoke evidence categories
 
@@ -133,5 +133,5 @@ python .\scripts\compare-build-week-visual.py --reference .\design\reference\THE
 
 No remaining technical blocker in the repository or portable package.
 The final in-window WPF smoke is complete. Remaining owner-only actions are to
-create the video, invoke new `/feedback` in the Codex UI, confirm public/private
-judge access and artifact hosting, then submit Devpost.
+create the video, confirm the recorded primary `/feedback` ID, confirm
+public/private judge access and artifact hosting, then submit Devpost.

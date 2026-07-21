@@ -64,5 +64,5 @@ These are inherited from the Build Week baseline only. Their existence before
 | `f27a70a8d7e37f2b938bdb09f044dde0d18fb6fb` | Final verification report and evidence documentation. |
 | `f96bae18878595ec19082c5c92f7d891dca8dd53` | Complementary visual-alignment checkpoint. |
 | `5cbab680c59ef3c0c1f2709f6540bf2b520c6495` | Interactive dashboard work-area functional adaptation. |
-| `019f82e5-5a39-7901-946f-24ddbe1e528f` | Principal Devpost session: majority functional development. |
-| Secondary visual session | Not registered and not required; no `/feedback` ID is invented. Later visual iterations are complementary. |
+| `019f79f2-6a7e-74f0-b1fa-d65335b29a7c` | Primary Devpost session: majority core Build Week implementation; see `docs/build-week/CODEX_SESSIONS.md`. |
+| `019f82e5-5a39-7901-946f-24ddbe1e528f` | Supplementary later visual handoff; it is not the Devpost primary ID. |

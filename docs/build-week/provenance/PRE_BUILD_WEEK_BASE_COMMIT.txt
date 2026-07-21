@@ -1,0 +1,11 @@
+Status: NO_REACHABLE_PRE_SUBMISSION_PERIOD_COMMIT
+Submission Period start: 2026-07-13T16:00:00Z
+Command: git rev-list -1 --before="2026-07-13T16:00:00Z" HEAD
+Output: <empty>
+
+The earliest reachable repository commit is:
+b7b6c32cf3a2621d29ef2c5856db50d116d8dff6
+Author and committer timestamp: 2026-07-15T06:34:40+02:00
+Subject: THEKEY Core Governed Run MVP 0.1.0
+
+This working copy therefore cannot use Git history as proof that THEKEY existed before the Submission Period. The owner reports pre-existing work; authentic, dated chat exports or other owner-supplied records remain required as supplementary evidence. No date is reconstructed or inferred here.

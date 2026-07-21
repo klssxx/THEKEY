@@ -12,7 +12,12 @@ Do not start Devpost or PRIOR_ART work from this checkpoint.
 
 - Visible name: `THEKEY The King of Checkmate`
 - Slug: `thekey`
-- Feedback Session ID: `019f82e5-5a39-7901-946f-24ddbe1e528f`
+- Visual-handoff Session ID (supplementary; not the Devpost primary ID):
+  `019f82e5-5a39-7901-946f-24ddbe1e528f`
+
+The verified primary Devpost `/feedback` Session ID is
+`019f79f2-6a7e-74f0-b1fa-d65335b29a7c`; see
+`docs/build-week/CODEX_SESSIONS.md`.
 
 ## Scope completed in this continuation
 

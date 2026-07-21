@@ -1,0 +1,41 @@
+{
+  "verdict": "READY_WITH_MANUAL_STEPS",
+  "prepared_utc": "2026-07-21T22:57:48Z",
+  "initial_checkout_commit": "67ffe6862b9f4c03463f2f06afd31ac313b22105",
+  "branch_before_freeze": "implementation/portable-windows-app",
+  "remote": "https://github.com/klssxx/THEKEY.git",
+  "pre_build_week_base_commit": null,
+  "pre_build_week_status": "BLOCKED_NO_PRE_PERIOD_COMMIT",
+  "first_reachable_commit": "b7b6c32cf3a2621d29ef2c5856db50d116d8dff6",
+  "primary_feedback_session_id": "019f79f2-6a7e-74f0-b1fa-d65335b29a7c",
+  "portable": {
+    "path": "dist/THEKEY-Portable-Windows-x64.zip",
+    "bytes": 22846085,
+    "sha256": "589cdb85a7c478148b72d0337cfdb8b8454acc4e4c7c782b6e9a05b3969e2f0f",
+    "manifest_source_commit": "5cbab680c59ef3c0c1f2709f6540bf2b520c6495",
+    "manifest_source_tree_state": "CLEAN",
+    "manifest_source_commit_exact": true,
+    "manifest_mismatch_count": 0,
+    "authenticode_status": "NotSigned"
+  },
+  "verification": {
+    "focused_portable_tests": "14 passed",
+    "entropy_secret_scan": "PASS",
+    "archive_text_secret_scan": "0 findings",
+    "markdown_relative_link_check": "PASS",
+    "release_json_parse": "PASS",
+    "smoke_test": "Not re-executed in this finalization; retained owner-verified Windows WPF smoke is documented in artifacts/build-week/FINAL_REPORT.md"
+  },
+  "submission_freeze_tag": "openai-build-week-2026-submission",
+  "release_url": "PENDING_GITHUB_AUTHENTICATION",
+  "asset_url": "PENDING_GITHUB_AUTHENTICATION",
+  "tag_pinned_artifact_fallback": "releases/openai-build-week-2026/THEKEY-Portable-Windows-x64.zip",
+  "chat_evidence": "PENDING_OWNER_SUPPLIED_AUTHENTIC_EXPORTS",
+  "manual_steps": [
+    "Authenticate GitHub CLI or use an authenticated GitHub session.",
+    "Commit, push, tag, and publish the GitHub Release with ZIP and checksum.",
+    "Publish the YouTube video and paste its URL into Devpost.",
+    "Select Developer Tools and verify Devpost shows Submitted.",
+    "Optionally add only authentic sanitized pre-period chat exports."
+  ]
+}

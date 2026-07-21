@@ -1,0 +1,6 @@
+Reproduce the current frozen diff after checkout:
+
+git diff --stat b7b6c32cf3a2621d29ef2c5856db50d116d8dff6..HEAD
+git diff --name-status b7b6c32cf3a2621d29ef2c5856db50d116d8dff6..HEAD
+
+The diff must be read with PRE_BUILD_WEEK_BASE_COMMIT.txt: the range begins on 2026-07-15 because no earlier reachable commit exists. It is audit evidence for the visible Build Week history, not proof that the reported earlier project did not exist.

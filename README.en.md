@@ -8,7 +8,7 @@ Official public name: **THEKEY — THE KING OF CHECKMATE**.
 > Every agentic change gets a plan identity, explicit authorization,
 > deterministic gates, and reviewable evidence.
 
-[Español](README.md) · [Judge quickstart](docs/build-week/JUDGE_QUICKSTART.md) ·
+[Español](README.es.md) · [Judge quickstart](docs/build-week/JUDGE_QUICKSTART.md) ·
 [Build Week contribution](BUILD_WEEK_CONTRIBUTION.md) ·
 [Build Week delta](docs/build-week/BUILD_WEEK_DELTA.md) ·
 [Security](SECURITY.md) · [MIT License](LICENSE)
