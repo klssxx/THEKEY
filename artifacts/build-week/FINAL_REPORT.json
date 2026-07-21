@@ -1,7 +1,7 @@
 {
   "schema_version": "v2",
   "status": "PARTIAL",
-  "status_reason": "Product and repository ready; owner-only video, new Codex feedback, judge-access and Devpost actions remain.",
+  "status_reason": "The owner-verified final UI smoke passed in the real WPF application. Product and repository are ready; owner-only video, new Codex feedback, judge-access and Devpost actions remain.",
   "branch": "implementation/portable-windows-app",
   "baseline_commit": "d1c37b9ec2d43289fd9db123e1450dc625e4b305",
   "verified_implementation_commit": "3038bd82c6cc1916f93c74d96b7c26a88d094274",
@@ -22,6 +22,48 @@
     "passed": 192,
     "failed": 0,
     "duration_seconds": 46.4
+  },
+  "evidence_categories": {
+    "AUTOMATED_TESTED": {
+      "status": "PASS",
+      "scope": "Focused portable-entry regression is recorded in the final smoke execution evidence."
+    },
+    "PACKAGED_BACKEND_EXECUTED": {
+      "status": "PASS",
+      "scope": "Packaged backend inspection, isolated verification, repair preview/apply with backup and re-test, Judge demo, and persisted-evidence validation."
+    },
+    "OWNER_VERIFIED_UI": {
+      "status": "PASS",
+      "execution_surface": "Real THEKEY WPF window",
+      "scope": "Owner manually completed launch, sample selection, inspection, verification, repair with backup and re-test, Judge demo, results, clean close, and second open.",
+      "evidence_index": "artifacts/build-week/final-smoke-2026-07-21/EVIDENCE_INDEX.json",
+      "captures": [
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/01-home.png",
+          "sha256": "7cfab6ee19556173cdcd445802f7c0cbf8e39d1812c45074a0409d1b54cd42dc"
+        },
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/02-inspection-pass.png",
+          "sha256": "db678f8856bea991f024313113b3de092b30e86f870b16109b77b1cdf82c4db4"
+        },
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/03-verification-pass.png",
+          "sha256": "ea3796ce6e4677d1f068e4f9a81bde1a28db9d122f9afbbce1ebe764f1d5c643"
+        },
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/04-repair-pass.png",
+          "sha256": "53aeb19cd86c5ea5744f0be90d0730bf1cbc1b3b49b82b6b463f452ad98b9c61"
+        },
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/05-judge-demo-pass.png",
+          "sha256": "0ae5fc244c5eb303fc79f23ca0fe7853b44553a1c4135d9f22e09c4d45660c55"
+        },
+        {
+          "path": "artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/06-results.png",
+          "sha256": "31a344cb80a1253d95368ebd5f4288b6e882c661ca51b65d41bbbc17d6a9cc5a"
+        }
+      ]
+    }
   },
   "functional": {
     "startup": "PASS",

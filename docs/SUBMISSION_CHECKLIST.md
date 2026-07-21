@@ -101,6 +101,12 @@ and independently understandable even though a runnable build is supplied.
 
 - [x] Final package launches on the declared Windows version without a
   developer toolchain.
+- [x] `OWNER_VERIFIED_UI` final smoke completed manually in the real THEKEY
+  WPF window: usable launch, sample selection, read-only inspection, isolated
+  verification, repair with backup and re-test, Judge demo, persisted results,
+  clean close and second open. The six screenshots under
+  `artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/` are
+  SHA-256-indexed in the adjacent `EVIDENCE_INDEX.json`.
 - [x] Main window renders without clipping at 100%, 125%, 150% and 200% DPI.
 - [x] Canonical screen is visually compared against the reference; final
   capture, diff and measured similarity are retained as evidence.

@@ -48,10 +48,10 @@
       "exit_code": 0,
       "status": "PASS"
     },
-    "interactive_ui_control": {
+    "assistant_interactive_ui_control": {
       "status": "BLOCKED",
       "reason": "The required native Windows-control channel was unavailable: Computer Use native pipe is unavailable (system pipe not found).",
-      "effect": "Folder-picker selection and in-window button navigation were not claimed as UI-executed."
+      "effect": "This automated-control limitation did not execute or claim folder-picker selection and in-window button navigation."
     }
   },
   "actual_packaged_backend_flows": {
@@ -99,5 +99,30 @@
     "result": "14 passed in 0.08s",
     "note": "This regression result does not substitute for the real executable observations above."
   },
-  "final_ui_smoke_status": "FAIL_INCOMPLETE: startup and second open passed, but required real in-window interaction could not be performed in this environment; no unexecuted UI flow is marked PASS."
+  "validation_categories": {
+    "AUTOMATED_TESTED": {
+      "status": "PASS",
+      "scope": "Focused portable-entry regression.",
+      "evidence": "automated_regression"
+    },
+    "PACKAGED_BACKEND_EXECUTED": {
+      "status": "PASS",
+      "scope": "Packaged backend inspection, isolated verification, repair, Judge demo, and persisted-evidence validation.",
+      "evidence": "actual_packaged_backend_flows"
+    },
+    "OWNER_VERIFIED_UI": {
+      "status": "PASS",
+      "scope": "Manual smoke completed by the owner in the real THEKEY WPF window: usable launch, sample selection, inspection, isolated verification, repair with backup and re-test, Judge demo, results, clean close, and second open.",
+      "evidence_index": "EVIDENCE_INDEX.json",
+      "captures": [
+        "owner-ui-smoke/01-home.png",
+        "owner-ui-smoke/02-inspection-pass.png",
+        "owner-ui-smoke/03-verification-pass.png",
+        "owner-ui-smoke/04-repair-pass.png",
+        "owner-ui-smoke/05-judge-demo-pass.png",
+        "owner-ui-smoke/06-results.png"
+      ]
+    }
+  },
+  "final_ui_smoke_status": "PASS: OWNER_VERIFIED_UI completed the required in-window smoke flow manually in the real THEKEY WPF executable; the automated-control limitation remains separately recorded above."
 }

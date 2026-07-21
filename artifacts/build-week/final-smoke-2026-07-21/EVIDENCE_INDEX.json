@@ -4,8 +4,38 @@
   "files": [
     {
       "path": "SMOKE_EXECUTION.json",
-      "sha256": "03f9b5a47a0995a76cb67f46aaa31d830d6bf29915de315251eee0f52ec35447",
+      "sha256": "7c85324b47da1eb214c99ddd786ebd7b5c4888a3433ff58e7730ca677f0f0cc5",
       "purpose": "Package precondition, two real WPF launches, flow statuses, and relevant regression result."
+    },
+    {
+      "path": "owner-ui-smoke/01-home.png",
+      "sha256": "7cfab6ee19556173cdcd445802f7c0cbf8e39d1812c45074a0409d1b54cd42dc",
+      "purpose": "Owner-verified UI capture of the usable THEKEY WPF home screen."
+    },
+    {
+      "path": "owner-ui-smoke/02-inspection-pass.png",
+      "sha256": "db678f8856bea991f024313113b3de092b30e86f870b16109b77b1cdf82c4db4",
+      "purpose": "Owner-verified UI capture confirming the read-only inspection flow passed."
+    },
+    {
+      "path": "owner-ui-smoke/03-verification-pass.png",
+      "sha256": "ea3796ce6e4677d1f068e4f9a81bde1a28db9d122f9afbbce1ebe764f1d5c643",
+      "purpose": "Owner-verified UI capture confirming isolated verification and persisted evidence passed."
+    },
+    {
+      "path": "owner-ui-smoke/04-repair-pass.png",
+      "sha256": "53aeb19cd86c5ea5744f0be90d0730bf1cbc1b3b49b82b6b463f452ad98b9c61",
+      "purpose": "Owner-verified UI capture confirming repair, backup, and re-test passed."
+    },
+    {
+      "path": "owner-ui-smoke/05-judge-demo-pass.png",
+      "sha256": "0ae5fc244c5eb303fc79f23ca0fe7853b44553a1c4135d9f22e09c4d45660c55",
+      "purpose": "Owner-verified UI capture confirming the Judge demo completed with the expected result."
+    },
+    {
+      "path": "owner-ui-smoke/06-results.png",
+      "sha256": "31a344cb80a1253d95368ebd5f4288b6e882c661ca51b65d41bbbc17d6a9cc5a",
+      "purpose": "Owner-verified UI capture of persisted real results after the smoke flows."
     },
     {
       "path": "runtime/.thekey/events.db",

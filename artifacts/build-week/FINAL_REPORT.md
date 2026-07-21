@@ -2,13 +2,33 @@
 
 ## Final status
 
-**PARTIAL — PRODUCT AND REPOSITORY READY; OWNER-ONLY SUBMISSION ACTIONS PENDING.**
+**PARTIAL — FINAL REAL-WPF UI SMOKE PASS; PRODUCT AND REPOSITORY READY;
+OWNER-ONLY SUBMISSION ACTIONS PENDING.**
 
 The Windows application, governed backend, clean package, deterministic demo,
 tests, DPI captures, security scans and visual comparison pass. The remaining
 work is external to the repository: record/upload the video, invoke a new
 Codex `/feedback` from the signed-in UI if desired, configure judge access, and
 submit Devpost before the deadline.
+
+## Final smoke evidence categories
+
+| Category | Result | Scope and retained evidence |
+| --- | --- | --- |
+| `AUTOMATED_TESTED` | PASS | Focused portable-entry regression recorded in `artifacts/build-week/final-smoke-2026-07-21/SMOKE_EXECUTION.json`. |
+| `PACKAGED_BACKEND_EXECUTED` | PASS | The packaged backend completed inspection, isolated verification, repair preview/apply with backup and re-test, Judge demo, and persisted-evidence validation. |
+| `OWNER_VERIFIED_UI` | PASS | The owner manually completed the full smoke in the real THEKEY WPF window. Six content-addressed captures are retained under `artifacts/build-week/final-smoke-2026-07-21/owner-ui-smoke/`. |
+
+The owner-verified sequence covered usable launch, `SAMPLE-PYTHON-APP`
+selection, read-only inspection, isolated verification with evidence, repair of
+`SAMPLE-REPAIRABLE-PYTHON-APP` through `REPAIRED_AND_VERIFIED` with backup and
+re-test, Judge demo, persisted results, clean close, and a second open. This
+owner confirmation is distinct from both automated tests and direct packaged
+backend execution.
+
+The indexed capture set is `01-home.png`, `02-inspection-pass.png`,
+`03-verification-pass.png`, `04-repair-pass.png`, `05-judge-demo-pass.png`, and
+`06-results.png`; `EVIDENCE_INDEX.json` binds their SHA-256 values.
 
 ## Provenance
 
@@ -51,6 +71,9 @@ submit Devpost before the deadline.
 
 ## Functional validation
 
+- `OWNER_VERIFIED_UI`: PASS in the real WPF window for the complete final
+  smoke sequence described above; screenshots are indexed separately from the
+  automated and backend-executed evidence.
 - Valid inspection and isolated verification: PASS.
 - Missing path: rejected with `INVALID_ARGUMENTS` and exit 2.
 - Unsupported/no-test project: blocked with `NO_VERIFICABLE` and exit 5.
@@ -109,5 +132,6 @@ python .\scripts\compare-build-week-visual.py --reference .\design\reference\THE
 ## Remaining blockers
 
 No remaining technical blocker in the repository or portable package.
-Owner-only actions: create the video, invoke new `/feedback` in the Codex UI,
-confirm public/private judge access and artifact hosting, then submit Devpost.
+The final in-window WPF smoke is complete. Remaining owner-only actions are to
+create the video, invoke new `/feedback` in the Codex UI, confirm public/private
+judge access and artifact hosting, then submit Devpost.
