@@ -9,10 +9,8 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $buildRoot = Join-Path $repoRoot 'build\portable'
 $packageRoot = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64'
 $zipPath = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64.zip'
-$sourceVideo = Join-Path $repoRoot 'portable\windows\assets\THEKEY_cinematic_loop_5s.mp4'
 $sourceHero = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_chess.png'
 $sourceIcon = Join-Path $repoRoot 'portable\windows\assets\THEKEY_app_icon.png'
-$sourceUiReference = Join-Path $repoRoot 'assets\reference\THEKEY_UI_REFERENCE.png'
 $launcherSource = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.cs'
 $launcherManifest = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.manifest'
 $quickGuide = Join-Path $repoRoot 'portable\windows\README-FIRST.txt'
@@ -55,7 +53,7 @@ if ($LASTEXITCODE -ne 0 -or $version[-1] -ne '64') {
     throw "The portable build requires 64-bit Python 3.11+. Observed: $($version -join ', ')"
 }
 
-foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $sourceUiReference, $launcherSource, $launcherManifest, $quickGuide)) {
+foreach ($required in @($sourceHero, $sourceIcon, $launcherSource, $launcherManifest, $quickGuide)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Required portable source is missing: $required"
     }
@@ -127,6 +125,15 @@ $repairSampleTarget = Join-Path $packageRoot 'SAMPLE-REPAIRABLE-PYTHON-APP'
 Copy-Item -LiteralPath (Join-Path $repoRoot 'portable\windows\sample-repairable-app') `
     -Destination $repairSampleTarget -Recurse
 
+# Test execution may create bytecode caches inside source fixtures. They are
+# neither source nor needed by the bundled test gate, so exclude them from the
+# distributable sample deterministically.
+Get-ChildItem -LiteralPath $sampleTarget -Directory -Filter '__pycache__' -Recurse |
+    ForEach-Object {
+        Assert-ChildPath -Path $_.FullName -Parent $packageRoot
+        Remove-Item -LiteralPath $_.FullName -Recurse -Force
+    }
+
 # Convert the project-owned premium chess icon into the executable icon.
 $iconPath = Join-Path $buildRoot 'thekey-king.ico'
 Add-Type -AssemblyName System.Drawing
@@ -169,10 +176,8 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Windows launcher compilation failed.'
 }
 
-Copy-Item -LiteralPath $sourceVideo -Destination $packageRoot
 Copy-Item -LiteralPath $sourceHero -Destination $packageRoot
 Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot
-Copy-Item -LiteralPath $sourceUiReference -Destination $packageRoot
 Copy-Item -LiteralPath $quickGuide -Destination $packageRoot
 
 $manifestPath = Join-Path $packageRoot 'BUILD_MANIFEST.json'
@@ -208,7 +213,6 @@ $files = Get-ChildItem -LiteralPath $packageRoot -File -Recurse |
     source_tree_state = $sourceTreeState
     source_status_sha256 = $sourceStatusSha256
     source_changed_path_count = $sourceStatus.Count
-    cinematic_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceVideo).Hash.ToLowerInvariant()
     files = @($files)
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding utf8
 

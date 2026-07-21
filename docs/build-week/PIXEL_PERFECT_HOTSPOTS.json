@@ -1,7 +1,7 @@
 {
   "schema_version": "v1",
-  "reference": "assets/reference/THEKEY_UI_REFERENCE.png",
-  "reference_sha256": "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2",
+  "reference": "design/reference/THEKEY_BUILD_WEEK_CANONICAL.png",
+  "reference_sha256": "2564470ff48b76695b8be175e4eabce1ac9e0f3c71718530e8f5b676e9f7b603",
   "canvas": {
     "width": 1448,
     "height": 1086

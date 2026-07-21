@@ -69,8 +69,8 @@ and Git remote cannot prove it.
 Portable path for Windows 10/11 x64: extract
 `THEKEY-Portable-Windows-x64.zip`, open `THEKEY.exe`, and select **Demo para
 jueces** for the deterministic competition scenario. To exercise the product
-flow, select **SELECCIONAR Y ANALIZAR APLICACIÓN**, choose the included
-`SAMPLE-REPAIRABLE-PYTHON-APP`, then select **Escanear y reparar** and approve
+flow, select **Seleccionar y analizar / Select & Analyze**, choose the included
+`SAMPLE-REPAIRABLE-PYTHON-APP`, then select **Reparar / Repair** and approve
 execution of that trusted sample's tests plus application of only a fully
 verified repair. The visible result is `REPAIRED_AND_VERIFIED`, with the exact
 diff, policy decision, backup, and post-apply gates in JSON. No Python, Git,

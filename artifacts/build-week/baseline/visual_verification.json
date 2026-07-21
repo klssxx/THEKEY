@@ -1,0 +1,11 @@
+{
+  "status": "NATIVE_RENDER_CAPTURED",
+  "capture": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\baseline\\final_capture.png",
+  "capture_method": "WPF RenderTargetBitmap of the adaptive native dashboard",
+  "capture_sha256": "c959cfe51d154dc4a116383425d8e0e9f06eae19c55ff12af5855fc4c2725d71",
+  "captured_dashboard_dimensions": {
+    "width": 1322,
+    "height": 682
+  },
+  "dpi_strategy": "PerMonitorV2 WPF layout; no scaled UI screenshot"
+}

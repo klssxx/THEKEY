@@ -50,15 +50,15 @@ and passes the complete test suite and every gate.
 ## Two-click portable app
 
 `THEKEY-Portable-Windows-x64.zip` targets Windows 10 x64 and Windows 11 x64.
-Extract it, open `THEKEY.exe`, select **SELECCIONAR Y ANALIZAR APLICACIÓN**, and
+Extract it, open `THEKEY.exe`, select **Seleccionar y analizar / Select & Analyze**, and
 choose a supported project. The first phase is read-only: it detects the profile,
 tests, and metadata; CHECKMATE reviews risk; and the `PolicyEngine` decides
-whether verification may proceed. **Verificar aplicación** requires explicit
+whether verification may proceed. **Verificar / Verify** requires explicit
 consent, copies only inspected files to a short isolated workspace, and runs
 the fixed checks and tests for its detected adapter, a limited secret scan, and the documentation gate there.
 It then re-hashes the source to prove whether the original stayed unchanged.
 
-**Scan and repair** turns compile and pytest failures into readable
+**Reparar / Repair** turns compile and pytest failures into readable
 diagnostics, searches a closed mutation set, reruns every gate, and requests
 consent before applying the exact verified bytes. It rejects a stale source or
 test baseline, stores an out-of-tree backup, and rolls back if post-apply
@@ -74,6 +74,22 @@ judges do not need Python, Git, or PowerShell 7.
 The ZIP includes `SAMPLE-PYTHON-APP` for the healthy path and
 `SAMPLE-REPAIRABLE-PYTHON-APP` for a transparent real detection, repair,
 application, and post-apply verification without preparing another repository.
+
+The home view is real WPF UI: native-rendered controls, text, keyboard focus,
+and vector icons. The canonical reference image is never loaded as a fake UI
+background. See the [visual contract](docs/THEKEY_VISUAL_CONTRACT.md),
+[function map](docs/BUILD_WEEK_FUNCTION_MAP.md),
+[three-minute script](docs/DEMO_SCRIPT_3_MINUTES.md), and repeatable
+[visual comparison](scripts/compare-build-week-visual.py).
+
+![THEKEY — final native capture](artifacts/build-week/visual/iteration-12/actual.png)
+
+The final 1448 × 1086 comparison records **94.336%** global similarity,
+**93.906%** equal-weight regional similarity, and **92.222%** edge similarity.
+The [capture](artifacts/build-week/visual/iteration-12/actual.png),
+[diff](artifacts/build-week/visual/iteration-12/diff.png), and
+[report](artifacts/build-week/visual/iteration-12/report.json) come from the
+same native WPF visual tree; mathematical identity is not claimed.
 
 The package manifest hashes every distributed file and records the base commit
 plus whether the build came from a clean tree. A clean build records
@@ -152,7 +168,7 @@ created only after the gates and is never reused retroactively as authority.
   the `PolicyEngine`.
 - **CHECKMATE reviewer:** analyzes risk and emits a pre-action receipt for the
   bounded plan; it performs no physical writes.
-- **Sovereign grant binder:** binds usuario's explicit, repository-visible Judge
+- **Sovereign grant binder:** binds the user's explicit, repository-visible Judge
   Mode grant to one source, run, transaction, and isolated output scope.
 - **PolicyEngine:** returns `allowed`, a reason code, a decision ID, and the
   preserved policy-bundle hash.
@@ -220,7 +236,7 @@ and clean-clone reproduction, and prepare judge materials. GPT-5.6 accelerated
 the security analysis and implementation work; it is development tooling, not
 a runtime dependency of THEKEY.
 
-usuario retained the product and authority decisions: human sovereignty, bounded
+The user retained the product and authority decisions: human sovereignty, bounded
 scope, no production reuse of the demo grant, no change to `LIVE_E`, and
 separate approval for push, merge, release, video publication, and Devpost
 submission.

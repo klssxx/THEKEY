@@ -5,8 +5,7 @@ English.
 
 ## 0:00–0:15 — Brand and problem
 
-**On screen:** launch `THEKEY.exe`; let the five-second cinematic finish, then
-show the canonical header.
+**On screen:** launch `THEKEY.exe` and hold briefly on the canonical home view.
 
 **Narration:**
 
@@ -26,9 +25,9 @@ show the canonical header.
 
 ## 0:35–1:20 — Detect and repair a real application defect
 
-**On screen:** select **SELECCIONAR Y ANALIZAR APLICACIÓN**, choose the bundled
+**On screen:** select **Seleccionar y analizar / Select & Analyze**, choose the bundled
 `SAMPLE-REPAIRABLE-PYTHON-APP`, and keep the read-only inspection visible. Then
-select **Escanear y reparar**, read the warning, and consent.
+select **Reparar / Repair**, read the warning, and consent.
 
 **Narration:**
 
@@ -55,7 +54,7 @@ select **Escanear y reparar**, read the warning, and consent.
 
 ## 1:55–2:18 — Evidence
 
-**On screen:** select **Ver resultados / View** and show safe fields from the
+**On screen:** select **Ver resultados / View results** and show safe fields from the
 latest project `verification-evidence.json`, then the judge summary. Hide local
 absolute paths.
 

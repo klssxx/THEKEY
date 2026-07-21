@@ -12,13 +12,13 @@ The primary judge path targets Windows 10 x64 and Windows 11 x64:
 3. Select **Demo para jueces**. That single action runs the governed demo and
    verifies the persisted evidence.
 
-To evaluate the product flow instead, select **SELECCIONAR Y ANALIZAR
-APLICACIÓN**, choose a trusted local application, review the read-only
-inspection, and then select **Verificar aplicación**. The second action asks
+To evaluate the product flow instead, select **Seleccionar y analizar / Select
+& Analyze**, choose a trusted local application, review the read-only
+inspection, and then select **Verificar / Verify**. The second action asks
 for explicit consent because project tests execute trusted local code in an
 isolated copy, not in an operating-system sandbox.
 
-Select **Escanear y reparar** for the complete product path: actionable
+Select **Reparar / Repair** for the complete product path: actionable
 diagnosis, bounded repair search, isolated gates, separate source-write
 consent, stale-input protection, backup, post-apply verification, and rollback.
 
@@ -85,7 +85,7 @@ reuse disabled. It does not trust the printed demo summary.
 
 The portable app includes `SAMPLE-PYTHON-APP` for the healthy path. To
 demonstrate a real repair, select a trusted Python or Node.js project with its
-detected test adapter and a compatible defect, choose **Escanear y reparar**,
+detected test adapter and a compatible defect, choose **Reparar / Repair**,
 and accept the displayed consent. Evidence must end in `NO_CHANGES_NEEDED`,
 `REPAIRED_AND_VERIFIED`, or an explicit fail-closed `BLOCKED_*` result.
 

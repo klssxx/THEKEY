@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
-import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,7 +11,6 @@ LAUNCHER_MANIFEST_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.manifes
 PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
 HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
 ICON_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_app_icon.png"
-UI_REFERENCE_PATH = ROOT / "assets" / "reference" / "THEKEY_UI_REFERENCE.png"
 HOTSPOT_MAP_PATH = ROOT / "docs" / "build-week" / "PIXEL_PERFECT_HOTSPOTS.json"
 PIXEL_VERIFIER_PATH = ROOT / "scripts" / "verify-pixel-ui.ps1"
 
@@ -69,34 +66,31 @@ def test_portable_evidence_verifier_rejects_printed_summary_without_artifacts(tm
 def test_launcher_cards_keep_explicit_dark_contrast_when_disabled():
     source = LAUNCHER_PATH.read_text(encoding="utf-8")
 
-    assert "button.Template = CreateCardTemplate();" in source
-    assert "disabled.Property = UIElement.IsEnabledProperty;" in source
-    assert "Color.FromRgb(24, 35, 58)" in source
-    assert "heading.Foreground = Brushes.White;" in source
-    assert "description.Foreground = new SolidColorBrush(Color.FromRgb(161, 176, 204));" in source
+    assert "Template = CreateCardTemplate()" in source
+    assert "disabled = new Trigger { Property = UIElement.IsEnabledProperty, Value = false }" in source
+    assert "disabled.Setters.Add(new Setter(UIElement.OpacityProperty, 0.68));" in source
+    assert "Foreground = Theme.Brush(Theme.Text)" in source
+    assert "Foreground = Theme.Brush(Theme.MutedText)" in source
 
 
 def test_launcher_buttons_are_bilingual():
     source = LAUNCHER_PATH.read_text(encoding="utf-8")
 
     labels = (
-        "OMITIR / SKIP",
-        "SELECCIONAR Y ANALIZAR / SELECT & ANALYZE",
+        "Seleccionar y analizar / Select & Analyze",
         "Verificar / Verify",
         "Reparar / Repair",
         "Demo para jueces / Judge demo",
-        "Ver resultados / View results",
-        "Verificar evidencia / Verify evidence",
+        "Ver resultados /\\nView results",
+        "Resultados / Results",
         "Ajustes / Settings",
-        "Crear acceso / Create shortcut",
-        "Ayuda CLI / CLI help",
         "PRÓXIMAMENTE / SOON",
     )
     for label in labels:
         assert label in source
 
 
-def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
+def test_premium_launcher_uses_native_adaptive_layout_and_real_activity_state():
     launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
     build = PORTABLE_BUILD_PATH.read_text(encoding="utf-8")
 
@@ -106,43 +100,57 @@ def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
     assert ICON_PATH.stat().st_size > 100_000
     assert "BuildSidebar()" in launcher
     assert "BuildHero()" in launcher
-    assert "BuildSystemPanel()" in launcher
+    assert "BuildOperationCards()" in launcher
+    assert "BuildActivityPanel()" in launcher
+    assert "BuildSystemPanel()" not in launcher
     assert "Sin actividad todavía / No activity yet" in launcher
     assert 'sourceHero = Join-Path $repoRoot' in build
     assert 'sourceIcon = Join-Path $repoRoot' in build
+    assert "sourceVideo" not in build
+    assert "cinematic_sha256" not in build
     assert "Copy-Item -LiteralPath $sourceHero -Destination $packageRoot" in build
     assert "Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot" in build
+    assert "-Filter '__pycache__'" in build
     assert "SystemParameters.WorkArea" in launcher
-    assert "WindowStartupLocation.Manual" in launcher
-    assert "100%" not in launcher
-    assert "AddLiveSystemPanel(actions);" in launcher
-    assert "AddLiveActivityPanel(actions);" in launcher
-    assert "ACTIVIDAD DE ESTA SESIÓN / THIS SESSION'S ACTIVITY" in launcher
-    assert "Manifiesto presente / Manifest present" in launcher
-    assert "No usada / Not used" in launcher
+    assert "WindowStartupLocation.CenterScreen" in launcher
+    assert "BuildShell()" in launcher
+    assert "ResizeMode = ResizeMode.CanResize" in launcher
+    assert 'CreateUpcomingCard("THE KING"' in launcher
+    assert "ShowModes" in launcher
+    assert "ACTIVIDAD RECIENTE / RECENT ACTIVITY" in launcher
+    assert "REPAIR_READY" in launcher
+    assert "apply-consent apply_verified_repairs" in launcher
+    assert "Reiniciar demo / Restart demo" in launcher
+    assert "Cancelar operación aislada / Cancel isolated operation" in launcher
+    assert 'Arguments = "/PID " + processId + " /T /F"' in launcher
 
 
-def test_pixel_perfect_reference_is_exact_and_packaged_without_transformation():
-    source = UI_REFERENCE_PATH.read_bytes()
-    assert source[:8] == b"\x89PNG\r\n\x1a\n"
-    width, height = struct.unpack(">II", source[16:24])
-    assert (width, height) == (1448, 1086)
-    assert hashlib.sha256(source).hexdigest() == (
-        "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2"
-    )
-
+def test_native_dashboard_scales_real_controls_without_a_screenshot_dependency():
     launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
     build = PORTABLE_BUILD_PATH.read_text(encoding="utf-8")
-    assert 'Path.Combine(root, "THEKEY_UI_REFERENCE.png")' in launcher
-    assert "reference.PixelWidth" in launcher
-    assert "reference.PixelHeight" in launcher
-    assert "BitmapCreateOptions.PreservePixelFormat" in launcher
-    assert "scaler.Stretch = Stretch.Uniform" in launcher
-    assert "RenderOptions.SetBitmapScalingMode(scaler, BitmapScalingMode.HighQuality);" in launcher
-    assert "ResizeMode = ResizeMode.NoResize" in launcher
+    assert "THEKEY_UI_REFERENCE.png" not in launcher
+    assert "Viewbox scaler" in launcher
+    assert "Child = rootGrid" in launcher
+    assert "Stretch = Stretch.Uniform" in launcher
+    assert "CaptureComposition(canonicalShell, 1448, 1086, capturePath, captureDpi)" in launcher
     assert "TheKeyLauncher.manifest" in build
     assert '"/win32manifest:$launcherManifest"' in build
-    assert "Copy-Item -LiteralPath $sourceUiReference -Destination $packageRoot" in build
+    assert "$sourceUiReference" not in build
+
+
+def test_launcher_structures_real_results_and_streams_backend_progress():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+
+    assert "BuildEvidenceResultCard" in launcher
+    assert "PROYECTO / PROJECT" in launcher
+    assert "HALLAZGOS / FINDINGS" in launcher
+    assert "DECISIÓN / DECISION" in launcher
+    assert "EVIDENCIA / EVIDENCE" in launcher
+    assert "BeginOutputReadLine" in launcher
+    assert "BeginErrorReadLine" in launcher
+    assert "ReadToEnd()" not in launcher
+    assert "HandleWindowClosing" in launcher
+    assert "TerminateProcessTree" in launcher
 
 
 def test_portable_launcher_declares_per_monitor_dpi_awareness():
@@ -152,13 +160,14 @@ def test_portable_launcher_declares_per_monitor_dpi_awareness():
     assert "true/pm" in manifest
 
 
-def test_pixel_verifier_excludes_only_live_data_regions():
+def test_native_visual_verifier_captures_the_adaptive_dashboard():
     verifier = PIXEL_VERIFIER_PATH.read_text(encoding="utf-8")
 
-    assert "ignoredRegions" in verifier
-    assert "ignored_dynamic_regions" in verifier
-    assert "Rectangle]::new(1168, 335, 256, 455)" in verifier
-    assert "Rectangle]::new(265, 833, 1159, 233)" in verifier
+    assert "NATIVE_RENDER_CAPTURED" in verifier
+    assert "native canonical dashboard composition" in verifier
+    assert "the same native visual tree is rendered at the requested device-pixel density" in verifier
+    assert "[ValidateSet(96, 120, 144, 192)]" in verifier
+    assert "THEKEY_NATIVE_UI" not in verifier
 
 
 def test_pixel_perfect_hotspots_cover_every_visible_action():

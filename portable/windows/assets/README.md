@@ -11,4 +11,5 @@ taskbar/application mark. It combines a chess king and keyhole shield without
 third-party text or logos and is converted into the embedded Windows icon by
 the portable build script.
 
-`THEKEY_cinematic_loop_5s.mp4` remains the existing portable intro asset.
+`THEKEY_cinematic_loop_5s.mp4` is retained as a legacy project-owned asset but
+is not packaged or rendered by the canonical desktop experience.

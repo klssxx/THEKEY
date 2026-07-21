@@ -48,16 +48,16 @@ si compila y pasa la suite completa y todos los gates.
 ## Aplicación portable en dos clics
 
 `THEKEY-Portable-Windows-x64.zip` está dirigido a Windows 10 x64 y Windows 11
-x64. Tras extraerlo, abre `THEKEY.exe`, pulsa **SELECCIONAR Y ANALIZAR
-APLICACIÓN** y elige un proyecto Python. La primera fase solo lee el proyecto:
+x64. Tras extraerlo, abre `THEKEY.exe`, pulsa **Seleccionar y analizar / Select
+& Analyze** y elige un proyecto Python. La primera fase solo lee el proyecto:
 detecta su perfil, tests y metadatos; CHECKMATE revisa el riesgo y el
-`PolicyEngine` decide si puede continuar. **Verificar aplicación** exige
+`PolicyEngine` decide si puede continuar. **Verificar / Verify** exige
 consentimiento explícito, copia únicamente los archivos inspeccionados a un
 workspace corto y aislado, y ejecuta allí los checks y tests del adaptador,
 un escaneo limitado de secretos y el gate documental. Finalmente vuelve a hashear el
 origen y demuestra si permaneció intacto.
 
-**Escanear y reparar** convierte los fallos de compilación y pytest en
+**Reparar / Repair** convierte los fallos de compilación y pytest en
 diagnósticos legibles, busca una reparación dentro de un conjunto cerrado de
 mutaciones, vuelve a ejecutar todos los gates y solicita consentimiento para
 aplicar exactamente los bytes verificados. Antes de escribir comprueba que la
@@ -76,6 +76,22 @@ Build Week. El paquete incluye el runtime y no exige Python, Git ni PowerShell
 El ZIP incluye `SAMPLE-PYTHON-APP` para el recorrido saludable y
 `SAMPLE-REPAIRABLE-PYTHON-APP` para observar una detección, reparación,
 aplicación y reverificación reales sin preparar otro repositorio.
+
+La pantalla de inicio es UI WPF real: controles, texto, foco de teclado y
+vectores se renderizan de forma nativa. La imagen de referencia nunca se carga
+como fondo de interfaz. Consulta el [contrato visual](docs/THEKEY_VISUAL_CONTRACT.md),
+el [mapa funcional](docs/BUILD_WEEK_FUNCTION_MAP.md), el
+[guion de tres minutos](docs/DEMO_SCRIPT_3_MINUTES.md) y la
+[comparación visual reproducible](scripts/compare-build-week-visual.py).
+
+![THEKEY — captura nativa final](artifacts/build-week/visual/iteration-12/actual.png)
+
+La comparación final a 1448 × 1086 registra **94,336 %** de similitud global,
+**93,906 %** con peso equivalente por regiones y **92,222 %** de similitud de
+bordes. La [captura](artifacts/build-week/visual/iteration-12/actual.png), el
+[diff](artifacts/build-week/visual/iteration-12/diff.png) y el
+[informe](artifacts/build-week/visual/iteration-12/report.json) corresponden al
+mismo árbol visual WPF nativo; no se declara identidad matemática.
 
 El manifest del paquete hashea todos los archivos distribuidos y registra el
 commit base más si el build procede de un árbol limpio. Un build limpio marca
@@ -212,7 +228,7 @@ callers, tests adversariales, endurecimiento del grant no reutilizable,
 RED→GREEN, regresión, rollback, clon limpio y material de jueces. GPT-5.6 fue
 herramienta de desarrollo y no es una dependencia runtime.
 
-usuario retuvo las decisiones de producto y autoridad: soberanía humana, scope
+El usuario retuvo las decisiones de producto y autoridad: soberanía humana, scope
 acotado, reutilización productiva prohibida, `LIVE_E` intacto y permisos
 separados para push, merge, release, vídeo y Devpost.
 

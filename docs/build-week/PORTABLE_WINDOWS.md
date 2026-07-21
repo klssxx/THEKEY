@@ -11,16 +11,15 @@ or a test account.
 1. Download and extract `THEKEY-Portable-Windows-x64.zip` to a short writable
    path.
 2. Double-click `THEKEY.exe` without moving it out of the extracted directory.
-3. Watch the five-second user-owned cinematic or select **SKIP**.
-4. Select **SELECCIONAR Y ANALIZAR APLICACIÓN** and choose a supported project.
+3. Select **Seleccionar y analizar / Select & Analyze** and choose a supported project.
    The included `SAMPLE-PYTHON-APP` is the safe healthy first run, while
    `SAMPLE-REPAIRABLE-PYTHON-APP` transparently demonstrates a real repair.
-5. Review the read-only profile, CHECKMATE verdict, PolicyEngine decision, and
+4. Review the read-only profile, CHECKMATE verdict, PolicyEngine decision, and
    detected tests.
-6. Select **Verificar aplicación** for diagnosis without changing the source,
-   or **Escanear y reparar** to search for a bounded repair and explicitly
+5. Select **Verificar / Verify** for diagnosis without changing the source,
+   or **Reparar / Repair** to search for a bounded repair and explicitly
    authorize applying it only after every isolated gate passes.
-7. Review `NO_CHANGES_NEEDED`, `REPAIRED_AND_VERIFIED`, or the fail-closed
+6. Review `NO_CHANGES_NEEDED`, `REPAIRED_AND_VERIFIED`, or the fail-closed
    `BLOCKED_*` result, then open the JSON evidence with **Ver resultados /
    View**.
 
@@ -59,20 +58,19 @@ dispatch authorization, or mandatory gates.
 
 ## Available cards
 
-- **SELECCIONAR Y ANALIZAR APLICACIÓN:** read-only project intake and policy
+- **Seleccionar y analizar / Select & Analyze:** read-only project intake and policy
   decision; it executes no selected-project code.
-- **Verificar aplicación:** after explicit consent, verifies an isolated copy
+- **Verificar / Verify:** after explicit consent, verifies an isolated copy
   and confirms whether the source stayed unchanged.
-- **Escanear y reparar:** diagnoses failures, proves one bounded repair in the
+- **Reparar / Repair:** diagnoses failures, proves one bounded repair in the
   isolated copy, and applies it only with explicit consent, backup, stale-input
   protection, post-apply verification, and rollback.
-- **Demo para jueces:** runs and independently verifies the canonical Build
+- **Demo para jueces / Judge demo:** runs and independently verifies the canonical Build
   Week scenario.
-- **Ver resultados / View:** opens local JSON evidence and run artifacts.
-- **Ayuda / Help:** opens the bilingual testing instructions.
-- **Acceso / Shortcut:** creates an optional desktop shortcut.
-- **Opciones avanzadas / Advanced:** rechecks judge evidence or displays CLI
-  help.
+- **Ver resultados / View results:** renders structured fields from persisted
+  local evidence and provides a real demo restart action.
+- The sidebar opens real Analyze, Tools, Results, Modes, Logs, and Settings
+  views; unavailable future modes remain honestly marked **Soon**.
 
 ## Build from source
 
@@ -91,7 +89,8 @@ The output contains:
 ```text
 dist/THEKEY-Portable-Windows-x64/
   THEKEY.exe
-  THEKEY_cinematic_loop_5s.mp4
+  THEKEY_hero_chess.png
+  THEKEY_app_icon.png
   README-FIRST.txt
   BUILD_MANIFEST.json
   SAMPLE-PYTHON-APP/...

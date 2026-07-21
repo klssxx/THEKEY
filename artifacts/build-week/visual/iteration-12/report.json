@@ -1,0 +1,58 @@
+{
+  "schema_version": "v2",
+  "reference": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\visual\\iteration-12\\reference.png",
+  "actual": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\visual\\iteration-12\\actual.png",
+  "diff": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\visual\\iteration-12\\diff.png",
+  "dimensions": {
+    "width": 1448,
+    "height": 1086
+  },
+  "metric": {
+    "method": "RGB normalized mean absolute error; changed pixels use channel delta > 12",
+    "mae": 0.056639,
+    "similarity_percent": 94.336,
+    "changed_pixel_ratio_percent": 26.026,
+    "foreground_similarity_percent": 85.571,
+    "foreground_pixel_ratio_percent": 32.541,
+    "edge_similarity_percent": 92.222,
+    "equal_weight_region_similarity_percent": 93.906
+  },
+  "regions": {
+    "title_bar": {
+      "mae": 0.03748,
+      "similarity_percent": 96.252
+    },
+    "navigation": {
+      "mae": 0.047807,
+      "similarity_percent": 95.219
+    },
+    "hero": {
+      "mae": 0.068688,
+      "similarity_percent": 93.131
+    },
+    "primary_action": {
+      "mae": 0.086266,
+      "similarity_percent": 91.373
+    },
+    "operation_cards": {
+      "mae": 0.066541,
+      "similarity_percent": 93.346
+    },
+    "upcoming_modes": {
+      "mae": 0.06979,
+      "similarity_percent": 93.021
+    },
+    "activity": {
+      "mae": 0.049965,
+      "similarity_percent": 95.003
+    }
+  },
+  "review_scope": [
+    "geometry",
+    "text",
+    "cropping",
+    "alignment",
+    "background",
+    "iconography"
+  ]
+}

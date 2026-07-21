@@ -1,0 +1,17 @@
+{
+  "status": "NATIVE_RENDER_CAPTURED",
+  "capture": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\artifacts\\build-week\\dpi\\final-scale-100\\final_capture.png",
+  "capture_method": "WPF RenderTargetBitmap of the native canonical dashboard composition",
+  "capture_sha256": "75f1007e1eb9e41efa526fc3247a8ef4ce2914469147353cebc65a1a5741d0b8",
+  "captured_dashboard_dimensions": {
+    "width": 1448,
+    "height": 1086
+  },
+  "logical_dashboard_dimensions": {
+    "width": 1448,
+    "height": 1086
+  },
+  "requested_dpi": 96,
+  "scale_percent": 100,
+  "dpi_strategy": "PerMonitorV2 WPF layout; the same native visual tree is rendered at the requested device-pixel density without rasterized controls"
+}

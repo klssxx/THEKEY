@@ -58,7 +58,7 @@ No confía en el resumen impreso.
 
 La aplicación portable incluye `SAMPLE-PYTHON-APP` para verificar el recorrido
 saludable. Para demostrar una reparación real, usa un proyecto Python o Node.js
-de confianza con el adaptador de tests detectado y un fallo compatible, pulsa **Escanear y reparar**
+de confianza con el adaptador de tests detectado y un fallo compatible, pulsa **Reparar / Repair**
 y acepta el consentimiento mostrado. La evidencia debe terminar en
 `NO_CHANGES_NEEDED`, `REPAIRED_AND_VERIFIED` o un `BLOCKED_*` explícito.
 

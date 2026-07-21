@@ -41,3 +41,10 @@ Thumbs.db
 
 # Local node / package caches
 node_modules/
+
+# Local Build Week runs are reproducible but can contain large extracted
+# packages and machine-specific runtime paths. Curated baseline/final evidence
+# is force-added explicitly to Git.
+/artifacts/
+/evidence/ui/native-dashboard/
+/evidence/ui/pixel-perfect/window_capture_probe.png
