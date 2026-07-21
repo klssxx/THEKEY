@@ -12,6 +12,7 @@ $zipPath = Join-Path $repoRoot 'dist\THEKEY-Portable-Windows-x64.zip'
 $sourceVideo = Join-Path $repoRoot 'portable\windows\assets\THEKEY_cinematic_loop_5s.mp4'
 $sourceHero = Join-Path $repoRoot 'portable\windows\assets\THEKEY_hero_chess.png'
 $sourceIcon = Join-Path $repoRoot 'portable\windows\assets\THEKEY_app_icon.png'
+$sourceUiReference = Join-Path $repoRoot 'assets\reference\THEKEY_UI_REFERENCE.png'
 $launcherSource = Join-Path $repoRoot 'portable\windows\TheKeyLauncher.cs'
 $quickGuide = Join-Path $repoRoot 'portable\windows\README-FIRST.txt'
 
@@ -53,7 +54,7 @@ if ($LASTEXITCODE -ne 0 -or $version[-1] -ne '64') {
     throw "The portable build requires 64-bit Python 3.11+. Observed: $($version -join ', ')"
 }
 
-foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $launcherSource, $quickGuide)) {
+foreach ($required in @($sourceVideo, $sourceHero, $sourceIcon, $sourceUiReference, $launcherSource, $quickGuide)) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Required portable source is missing: $required"
     }
@@ -169,6 +170,7 @@ if ($LASTEXITCODE -ne 0) {
 Copy-Item -LiteralPath $sourceVideo -Destination $packageRoot
 Copy-Item -LiteralPath $sourceHero -Destination $packageRoot
 Copy-Item -LiteralPath $sourceIcon -Destination $packageRoot
+Copy-Item -LiteralPath $sourceUiReference -Destination $packageRoot
 Copy-Item -LiteralPath $quickGuide -Destination $packageRoot
 
 $manifestPath = Join-Path $packageRoot 'BUILD_MANIFEST.json'

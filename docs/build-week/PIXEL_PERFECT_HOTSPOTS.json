@@ -1,0 +1,33 @@
+{
+  "schema_version": "v1",
+  "reference": "assets/reference/THEKEY_UI_REFERENCE.png",
+  "reference_sha256": "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2",
+  "canvas": {
+    "width": 1448,
+    "height": 1086
+  },
+  "coordinate_system": "origin top-left; x, y, width, height in canonical pixels",
+  "regions": [
+    { "id": "home", "label": "Inicio / Home", "x": 0, "y": 244, "width": 235, "height": 65, "action": "ShowHome" },
+    { "id": "analyze", "label": "Analizar / Analyze", "x": 17, "y": 310, "width": 214, "height": 69, "action": "SelectApplication" },
+    { "id": "tools", "label": "Herramientas / Tools", "x": 17, "y": 380, "width": 214, "height": 69, "action": "ShowHelp" },
+    { "id": "results", "label": "Resultados / Results", "x": 17, "y": 450, "width": 214, "height": 69, "action": "OpenResults" },
+    { "id": "modes", "label": "Modos / Modes", "x": 17, "y": 520, "width": 214, "height": 69, "action": "ShowUpcomingMode" },
+    { "id": "logs", "label": "Registros / Logs", "x": 17, "y": 590, "width": 214, "height": 69, "action": "OpenResults" },
+    { "id": "settings", "label": "Ajustes / Settings", "x": 17, "y": 660, "width": 214, "height": 69, "action": "OpenGuide" },
+    { "id": "select_analyze", "label": "Seleccionar y analizar / Select & Analyze", "x": 300, "y": 284, "width": 692, "height": 111, "action": "SelectApplication" },
+    { "id": "verify", "label": "Verificar / Verify", "x": 265, "y": 417, "width": 219, "height": 253, "action": "VerifySelectedApplication" },
+    { "id": "repair", "label": "Reparar / Repair", "x": 496, "y": 417, "width": 211, "height": 253, "action": "RepairSelectedApplication" },
+    { "id": "judge_demo", "label": "Demo para jueces / Judge demo", "x": 719, "y": 417, "width": 210, "height": 253, "action": "RunDemo" },
+    { "id": "view_results", "label": "Ver resultados / View results", "x": 942, "y": 417, "width": 208, "height": 253, "action": "OpenResults" },
+    { "id": "the_king", "label": "THE KING", "x": 264, "y": 716, "width": 438, "height": 103, "action": "ShowUpcomingMode" },
+    { "id": "checkmate", "label": "CHECKMATE", "x": 712, "y": 716, "width": 438, "height": 103, "action": "ShowUpcomingMode" },
+    { "id": "view_all", "label": "Ver todos / View all", "x": 1215, "y": 832, "width": 210, "height": 37, "action": "OpenResults" }
+  ],
+  "window_regions": [
+    { "id": "drag", "x": 0, "y": 0, "width": 1274, "height": 48 },
+    { "id": "minimize", "x": 1274, "y": 0, "width": 54, "height": 48 },
+    { "id": "maximize", "x": 1328, "y": 0, "width": 55, "height": 48 },
+    { "id": "close", "x": 1383, "y": 0, "width": 65, "height": 48 }
+  ]
+}

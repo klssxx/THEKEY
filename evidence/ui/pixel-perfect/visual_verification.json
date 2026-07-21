@@ -1,0 +1,21 @@
+{
+  "status": "PIXEL_EXACT",
+  "reference": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\assets\\reference\\THEKEY_UI_REFERENCE.png",
+  "capture": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\evidence\\ui\\pixel-perfect\\final_capture.png",
+  "difference": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\evidence\\ui\\pixel-perfect\\final_diff.png",
+  "reference_sha256": "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2",
+  "capture_sha256": "460112b14afecdae6f5a4ffbf0ed47dc480e3b216db08dff47f63ec68396f74c",
+  "reference_dimensions": {
+    "width": 1448,
+    "height": 1086
+  },
+  "captured_window_dimensions": {
+    "width": 1448,
+    "height": 1086
+  },
+  "differing_pixels": 0,
+  "maximum_channel_difference": 0,
+  "mean_absolute_error": 0.0,
+  "root_mean_square_error": 0.0,
+  "ssim": 1.0
+}

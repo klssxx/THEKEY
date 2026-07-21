@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
+import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -10,6 +12,8 @@ LAUNCHER_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.cs"
 PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
 HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
 ICON_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_app_icon.png"
+UI_REFERENCE_PATH = ROOT / "assets" / "reference" / "THEKEY_UI_REFERENCE.png"
+HOTSPOT_MAP_PATH = ROOT / "docs" / "build-week" / "PIXEL_PERFECT_HOTSPOTS.json"
 
 
 def _load_entry():
@@ -109,3 +113,51 @@ def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
     assert "SystemParameters.WorkArea" in launcher
     assert "WindowStartupLocation.Manual" in launcher
     assert "100%" not in launcher
+
+
+def test_pixel_perfect_reference_is_exact_and_packaged_without_transformation():
+    source = UI_REFERENCE_PATH.read_bytes()
+    assert source[:8] == b"\x89PNG\r\n\x1a\n"
+    width, height = struct.unpack(">II", source[16:24])
+    assert (width, height) == (1448, 1086)
+    assert hashlib.sha256(source).hexdigest() == (
+        "a46361efa99c51a8b5c20948d48206d672e5d8889938db96cfaf67b92f059be2"
+    )
+
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+    build = PORTABLE_BUILD_PATH.read_text(encoding="utf-8")
+    assert 'Path.Combine(root, "THEKEY_UI_REFERENCE.png")' in launcher
+    assert "reference.PixelWidth" in launcher
+    assert "reference.PixelHeight" in launcher
+    assert "BitmapCreateOptions.PreservePixelFormat" in launcher
+    assert "scaler.Stretch = Stretch.Uniform" in launcher
+    assert "Copy-Item -LiteralPath $sourceUiReference -Destination $packageRoot" in build
+
+
+def test_pixel_perfect_hotspots_cover_every_visible_action():
+    mapping = json.loads(HOTSPOT_MAP_PATH.read_text(encoding="utf-8"))
+    assert mapping["canvas"] == {"width": 1448, "height": 1086}
+    expected = {
+        "home",
+        "analyze",
+        "tools",
+        "results",
+        "modes",
+        "logs",
+        "settings",
+        "select_analyze",
+        "verify",
+        "repair",
+        "judge_demo",
+        "view_results",
+        "the_king",
+        "checkmate",
+    }
+    regions = {region["id"]: region for region in mapping["regions"]}
+    assert expected <= regions.keys()
+    for region in mapping["regions"] + mapping["window_regions"]:
+        assert region["width"] > 0 and region["height"] > 0
+        assert 0 <= region["x"] < 1448
+        assert 0 <= region["y"] < 1086
+        assert region["x"] + region["width"] <= 1448
+        assert region["y"] + region["height"] <= 1086

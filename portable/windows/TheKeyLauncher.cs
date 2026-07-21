@@ -25,7 +25,11 @@ namespace TheKeyPortable
 
             string root = AppDomain.CurrentDomain.BaseDirectory;
             string cinematic = Path.Combine(root, "THEKEY_cinematic_loop_5s.mp4");
-            if (File.Exists(cinematic))
+            bool skipSplash = String.Equals(
+                Environment.GetEnvironmentVariable("THEKEY_SKIP_SPLASH"),
+                "1",
+                StringComparison.Ordinal);
+            if (File.Exists(cinematic) && !skipSplash)
             {
                 SplashWindow splash = new SplashWindow(cinematic);
                 splash.ShowDialog();
@@ -134,162 +138,262 @@ namespace TheKeyPortable
         {
             root = applicationRoot;
             backend = Path.Combine(root, "core", "THEKEY-Core", "THEKEY-Core.exe");
+            string referencePath = Path.Combine(root, "THEKEY_UI_REFERENCE.png");
+            if (!File.Exists(referencePath))
+            {
+                throw new FileNotFoundException("Missing canonical UI reference", referencePath);
+            }
+
+            BitmapImage reference = new BitmapImage();
+            reference.BeginInit();
+            reference.CacheOption = BitmapCacheOption.OnLoad;
+            reference.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+            reference.UriSource = new Uri(referencePath, UriKind.Absolute);
+            reference.EndInit();
+            reference.Freeze();
+
+            double referenceWidth = reference.PixelWidth;
+            double referenceHeight = reference.PixelHeight;
+            Rect workAreaBounds = SystemParameters.WorkArea;
+            bool forceNative = String.Equals(
+                Environment.GetEnvironmentVariable("THEKEY_NATIVE_UI"),
+                "1",
+                StringComparison.Ordinal);
+            double fitScale = Math.Min(
+                1.0,
+                Math.Min(
+                    Math.Max(1.0, workAreaBounds.Width - 24.0) / referenceWidth,
+                    Math.Max(1.0, workAreaBounds.Height - 24.0) / referenceHeight));
+            double initialScale = forceNative ? 1.0 : fitScale;
 
             Title = "THEKEY — THE KING OF CHECKMATE";
-            Rect workAreaBounds = SystemParameters.WorkArea;
-            Width = Math.Min(1440, Math.Max(980, workAreaBounds.Width - 40));
-            Height = Math.Min(900, Math.Max(600, workAreaBounds.Height - 40));
-            MinWidth = 980;
-            MinHeight = 600;
-            MaxWidth = workAreaBounds.Width;
-            MaxHeight = workAreaBounds.Height;
+            Width = Math.Round(referenceWidth * initialScale);
+            Height = Math.Round(referenceHeight * initialScale);
+            MinWidth = Math.Min(724, Width);
+            MinHeight = Math.Min(543, Height);
             WindowStartupLocation = WindowStartupLocation.Manual;
             Left = workAreaBounds.Left + Math.Max(0, (workAreaBounds.Width - Width) / 2);
             Top = workAreaBounds.Top + Math.Max(0, (workAreaBounds.Height - Height) / 2);
             WindowStyle = WindowStyle.None;
-            ResizeMode = ResizeMode.CanResizeWithGrip;
-            FontFamily = new FontFamily("Segoe UI Variable Text, Segoe UI");
+            ResizeMode = ResizeMode.CanResize;
             UseLayoutRounding = true;
             SnapsToDevicePixels = true;
-            Background = new LinearGradientBrush(
-                Color.FromRgb(6, 14, 26), Color.FromRgb(2, 8, 17), 90);
-            Foreground = Brushes.White;
+            Background = new SolidColorBrush(Color.FromRgb(4, 7, 12));
+
             string appIconPath = Path.Combine(root, "THEKEY_app_icon.png");
             if (File.Exists(appIconPath))
             {
                 Icon = BitmapFrame.Create(new Uri(appIconPath, UriKind.Absolute));
             }
 
-            Grid shell = new Grid();
-            shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
-            shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            Content = shell;
-            Border titleBar = BuildTitleBar();
-            shell.Children.Add(titleBar);
+            Grid letterbox = new Grid();
+            letterbox.Background = new SolidColorBrush(Color.FromRgb(4, 7, 12));
+            Content = letterbox;
 
-            Grid body = new Grid();
-            body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(246) });
-            body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            Grid.SetRow(body, 1);
-            shell.Children.Add(body);
-            Border sidebar = BuildSidebar();
-            body.Children.Add(sidebar);
+            Viewbox scaler = new Viewbox();
+            scaler.Stretch = Stretch.Uniform;
+            scaler.StretchDirection = StretchDirection.Both;
+            scaler.HorizontalAlignment = HorizontalAlignment.Stretch;
+            scaler.VerticalAlignment = VerticalAlignment.Stretch;
+            letterbox.Children.Add(scaler);
 
-            ScrollViewer scroll = new ScrollViewer();
-            scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-            scroll.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            scroll.Background = Brushes.Transparent;
-            Grid.SetColumn(scroll, 1);
-            body.Children.Add(scroll);
-            StackPanel page = new StackPanel();
-            page.Margin = new Thickness(18, 16, 18, 18);
-            scroll.Content = page;
-            page.Children.Add(BuildHero());
+            Canvas composition = new Canvas();
+            composition.Width = referenceWidth;
+            composition.Height = referenceHeight;
+            composition.SnapsToDevicePixels = true;
+            scaler.Child = composition;
 
-            Grid workArea = new Grid();
-            workArea.Margin = new Thickness(0, 14, 0, 0);
-            workArea.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            workArea.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(248) });
-            page.Children.Add(workArea);
+            Image background = new Image();
+            background.Source = reference;
+            background.Width = referenceWidth;
+            background.Height = referenceHeight;
+            background.Stretch = Stretch.Fill;
+            background.SnapsToDevicePixels = true;
+            RenderOptions.SetEdgeMode(background, EdgeMode.Aliased);
+            Canvas.SetLeft(background, 0);
+            Canvas.SetTop(background, 0);
+            composition.Children.Add(background);
 
-            actions = new StackPanel();
-            actions.Margin = new Thickness(0, 0, 14, 0);
-            workArea.Children.Add(actions);
-            actions.Children.Add(CreatePrimaryAction());
-
-            Grid essentials = new Grid();
-            essentials.Margin = new Thickness(0, 12, 0, 0);
-            for (int i = 0; i < 4; i++)
+            actions = new Canvas
             {
-                essentials.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            }
-            verifyProjectButton = CreateCard("\u2713", "Verificar / Verify", "Aplicación en copia aislada / Isolated copy", VerifySelectedApplication);
+                Width = referenceWidth,
+                Height = referenceHeight,
+                Background = Brushes.Transparent
+            };
+            Panel.SetZIndex(actions, 10);
+            composition.Children.Add(actions);
+
+            AddHotspot(actions, "Inicio / Home", 0, 244, 235, 65, ShowHome);
+            AddHotspot(actions, "Analizar / Analyze", 17, 310, 214, 69, SelectApplication);
+            AddHotspot(actions, "Herramientas / Tools", 17, 380, 214, 69, ShowHelp);
+            AddHotspot(actions, "Resultados / Results", 17, 450, 214, 69, OpenResults);
+            AddHotspot(actions, "Modos / Modes", 17, 520, 214, 69, ShowUpcomingMode);
+            AddHotspot(actions, "Registros / Logs", 17, 590, 214, 69, OpenResults);
+            AddHotspot(actions, "Ajustes / Settings", 17, 660, 214, 69, OpenGuide);
+
+            AddHotspot(actions, "Seleccionar y analizar / Select & Analyze", 300, 284, 692, 111, SelectApplication);
+            verifyProjectButton = AddHotspot(actions, "Verificar / Verify", 265, 417, 219, 253, VerifySelectedApplication);
+            repairProjectButton = AddHotspot(actions, "Reparar / Repair", 496, 417, 211, 253, RepairSelectedApplication);
+            AddHotspot(actions, "Demo para jueces / Judge demo", 719, 417, 210, 253, RunDemo);
+            AddHotspot(actions, "Ver resultados / View results", 942, 417, 208, 253, OpenResults);
+            AddHotspot(actions, "THE KING", 264, 716, 438, 103, ShowUpcomingMode);
+            AddHotspot(actions, "CHECKMATE", 712, 716, 438, 103, ShowUpcomingMode);
+            AddHotspot(actions, "Ver todos / View all", 1215, 832, 210, 37, OpenResults);
             verifyProjectButton.IsEnabled = false;
-            essentials.Children.Add(verifyProjectButton);
-            repairProjectButton = CreateCard("\u2692", "Reparar / Repair", "Escaneo, reparación y re-test / Scan & re-test", RepairSelectedApplication);
             repairProjectButton.IsEnabled = false;
-            essentials.Children.Add(repairProjectButton);
-            Grid.SetColumn(repairProjectButton, 1);
-            Button demoButton = CreateCard("\u25B6", "Demo para jueces / Judge demo", "Demostración gobernada reproducible / Reproducible governed demo", RunDemo);
-            Grid.SetColumn(demoButton, 2);
-            essentials.Children.Add(demoButton);
-            Button resultsButton = CreateCard("\u25A3", "Ver resultados / View results", "Recibos, evidencia y decisiones / Receipts, evidence & decisions", OpenResults);
-            Grid.SetColumn(resultsButton, 3);
-            essentials.Children.Add(resultsButton);
-            actions.Children.Add(essentials);
 
-            Grid futureHeader = new Grid();
-            futureHeader.Margin = new Thickness(4, 15, 4, 6);
-            futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            TextBlock futureTitle = new TextBlock();
-            futureTitle.Text = "PRÓXIMOS MODOS / UPCOMING MODES";
-            futureTitle.FontSize = 11;
-            futureTitle.FontWeight = FontWeights.SemiBold;
-            futureTitle.Foreground = new SolidColorBrush(Color.FromRgb(139, 158, 190));
-            futureHeader.Children.Add(futureTitle);
-            TextBlock futureHint = new TextBlock();
-            futureHint.Text = "HOJA DE RUTA / ROADMAP";
-            futureHint.FontSize = 10;
-            futureHint.Foreground = new SolidColorBrush(Color.FromRgb(101, 121, 154));
-            Grid.SetColumn(futureHint, 1);
-            futureHeader.Children.Add(futureHint);
-            actions.Children.Add(futureHeader);
+            Border dragRegion = new Border();
+            dragRegion.Width = 1274;
+            dragRegion.Height = 48;
+            dragRegion.Background = Brushes.Transparent;
+            dragRegion.Cursor = Cursors.SizeAll;
+            dragRegion.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e)
+            {
+                if (e.ClickCount == 2)
+                {
+                    ToggleMaximize();
+                }
+                else
+                {
+                    DragMove();
+                }
+            };
+            Panel.SetZIndex(dragRegion, 20);
+            composition.Children.Add(dragRegion);
 
-            Grid futureModes = new Grid();
-            futureModes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            futureModes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            Button kingMode = CreateFutureCard("\u265A", "THE KING", "Construcción orquestada / Orchestrated build");
-            futureModes.Children.Add(kingMode);
-            Button checkmateMode = CreateFutureCard("\u25C8", "CHECKMATE", "Revisión adversarial / Adversarial review");
-            Grid.SetColumn(checkmateMode, 1);
-            futureModes.Children.Add(checkmateMode);
-            actions.Children.Add(futureModes);
-
-            Border systemPanel = BuildSystemPanel();
-            Grid.SetColumn(systemPanel, 1);
-            workArea.Children.Add(systemPanel);
-
-            Border activityPanel = BuildActivityPanel();
-            activityPanel.Margin = new Thickness(0, 14, 0, 0);
-            page.Children.Add(activityPanel);
+            AddWindowHotspot(composition, "Minimizar / Minimize", 1274, 0, 54, 48, delegate { WindowState = WindowState.Minimized; });
+            AddWindowHotspot(composition, "Maximizar / Maximize", 1328, 0, 55, 48, ToggleMaximize);
+            AddWindowHotspot(composition, "Cerrar / Close", 1383, 0, 65, 48, Close);
 
             output = new TextBox();
             output.IsReadOnly = true;
-            output.AcceptsReturn = true;
-            output.TextWrapping = TextWrapping.Wrap;
-            output.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-            output.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            output.Background = new SolidColorBrush(Color.FromRgb(3, 9, 18));
-            output.Foreground = new SolidColorBrush(Color.FromRgb(205, 216, 235));
-            output.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 61, 87));
-            output.BorderThickness = new Thickness(1);
-            output.FontFamily = new FontFamily("Consolas");
-            output.FontSize = 12;
-            output.MinHeight = 112;
-            output.Margin = new Thickness(0, 12, 0, 0);
-            output.Padding = new Thickness(14, 10, 14, 10);
-            output.SelectionBrush = new SolidColorBrush(Color.FromRgb(67, 91, 136));
             output.Text = "THEKEY listo / ready. Selecciona una aplicación para comenzar / Select an application to begin.\r\n";
-            page.Children.Add(output);
-
-            Grid footer = new Grid();
-            footer.Margin = new Thickness(4, 11, 4, 0);
-            footer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             status = new TextBlock();
-            status.Text = File.Exists(backend) ? "●  LISTO / READY · Windows 10/11" : "FALTA EL MOTOR / BACKEND MISSING";
-            status.Foreground = new SolidColorBrush(Color.FromRgb(91, 231, 132));
-            status.FontWeight = FontWeights.SemiBold;
-            status.FontSize = 11;
-            footer.Children.Add(status);
-            TextBlock boundary = new TextBlock();
-            boundary.Text = "Aislamiento de workflow · consentimiento explícito · backup / Workflow isolation · explicit consent · backup";
-            boundary.Foreground = new SolidColorBrush(Color.FromRgb(125, 143, 171));
-            boundary.FontSize = 10;
-            Grid.SetColumn(boundary, 1);
-            footer.Children.Add(boundary);
-            page.Children.Add(footer);
+            status.Text = File.Exists(backend) ? "LISTO / READY" : "FALTA EL MOTOR / BACKEND MISSING";
+
+            string verificationCapture = Environment.GetEnvironmentVariable("THEKEY_CAPTURE_PATH");
+            if (!String.IsNullOrWhiteSpace(verificationCapture))
+            {
+                Loaded += delegate
+                {
+                    Dispatcher.BeginInvoke(
+                        DispatcherPriority.ApplicationIdle,
+                        new Action(delegate
+                        {
+                            CaptureComposition(
+                                composition,
+                                (int)referenceWidth,
+                                (int)referenceHeight,
+                                verificationCapture);
+                            Close();
+                        }));
+                };
+            }
+        }
+
+        private static void CaptureComposition(
+            FrameworkElement composition,
+            int width,
+            int height,
+            string outputPath)
+        {
+            string directory = Path.GetDirectoryName(outputPath);
+            if (!String.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            composition.UpdateLayout();
+            RenderTargetBitmap rendered = new RenderTargetBitmap(
+                width,
+                height,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            rendered.Render(composition);
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rendered));
+            using (FileStream stream = File.Create(outputPath))
+            {
+                encoder.Save(stream);
+            }
+        }
+
+        private static Button AddHotspot(
+            Panel host,
+            string accessibleName,
+            double x,
+            double y,
+            double width,
+            double height,
+            RoutedEventHandler action)
+        {
+            Button button = CreateTransparentButton(accessibleName, width, height);
+            button.Click += action;
+            Canvas.SetLeft(button, x);
+            Canvas.SetTop(button, y);
+            host.Children.Add(button);
+            return button;
+        }
+
+        private static void AddWindowHotspot(
+            Canvas host,
+            string accessibleName,
+            double x,
+            double y,
+            double width,
+            double height,
+            Action action)
+        {
+            Button button = CreateTransparentButton(accessibleName, width, height);
+            button.Click += delegate { action(); };
+            Canvas.SetLeft(button, x);
+            Canvas.SetTop(button, y);
+            Panel.SetZIndex(button, 30);
+            host.Children.Add(button);
+        }
+
+        private static Button CreateTransparentButton(string accessibleName, double width, double height)
+        {
+            Button button = new Button();
+            button.Width = width;
+            button.Height = height;
+            button.Background = Brushes.Transparent;
+            button.BorderThickness = new Thickness(0);
+            button.FocusVisualStyle = null;
+            button.Cursor = Cursors.Hand;
+            button.Template = CreateTransparentTemplate();
+            AutomationProperties.SetName(button, accessibleName);
+            return button;
+        }
+
+        private static ControlTemplate CreateTransparentTemplate()
+        {
+            ControlTemplate template = new ControlTemplate(typeof(Button));
+            FrameworkElementFactory hitSurface = new FrameworkElementFactory(typeof(Border));
+            hitSurface.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+            template.VisualTree = hitSurface;
+            return template;
+        }
+
+        private void ToggleMaximize()
+        {
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+        }
+
+        private void ShowHome(object sender, RoutedEventArgs e)
+        {
+            SetStatus("INICIO / HOME", true);
+        }
+
+        private void ShowUpcomingMode(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(
+                "PRÓXIMAMENTE / SOON",
+                "THEKEY",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private Border BuildTitleBar()
