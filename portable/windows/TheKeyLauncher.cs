@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace TheKeyPortable
@@ -119,6 +120,8 @@ namespace TheKeyPortable
         private readonly string backend;
         private readonly TextBox output;
         private readonly TextBlock status;
+        private TextBlock sourceState;
+        private TextBlock recentActivity;
         private readonly Panel actions;
         private readonly Button verifyProjectButton;
         private readonly Button repairProjectButton;
@@ -130,51 +133,80 @@ namespace TheKeyPortable
             backend = Path.Combine(root, "core", "THEKEY-Core", "THEKEY-Core.exe");
 
             Title = "THEKEY — THE KING OF CHECKMATE";
-            Width = 1120;
-            Height = 760;
-            MinWidth = 900;
-            MinHeight = 650;
+            Width = 1440;
+            Height = 900;
+            MinWidth = 1180;
+            MinHeight = 720;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.CanResizeWithGrip;
             FontFamily = new FontFamily("Segoe UI Variable Text, Segoe UI");
             UseLayoutRounding = true;
             SnapsToDevicePixels = true;
             Background = new LinearGradientBrush(
-                Color.FromRgb(10, 16, 31), Color.FromRgb(5, 9, 19), 90);
+                Color.FromRgb(6, 14, 26), Color.FromRgb(2, 8, 17), 90);
             Foreground = Brushes.White;
 
-            Grid layout = new Grid();
-            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            Content = layout;
+            Grid shell = new Grid();
+            shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
+            shell.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            Content = shell;
+            Border titleBar = BuildTitleBar();
+            shell.Children.Add(titleBar);
 
-            Border header = BuildHeader();
-            Grid.SetRow(header, 0);
-            layout.Children.Add(header);
+            Grid body = new Grid();
+            body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(246) });
+            body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetRow(body, 1);
+            shell.Children.Add(body);
+            Border sidebar = BuildSidebar();
+            body.Children.Add(sidebar);
+
+            ScrollViewer scroll = new ScrollViewer();
+            scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            scroll.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            scroll.Background = Brushes.Transparent;
+            Grid.SetColumn(scroll, 1);
+            body.Children.Add(scroll);
+            StackPanel page = new StackPanel();
+            page.Margin = new Thickness(18, 16, 18, 18);
+            scroll.Content = page;
+            page.Children.Add(BuildHero());
+
+            Grid workArea = new Grid();
+            workArea.Margin = new Thickness(0, 14, 0, 0);
+            workArea.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            workArea.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(248) });
+            page.Children.Add(workArea);
 
             actions = new StackPanel();
-            actions.Margin = new Thickness(24, 16, 24, 6);
-            actions.HorizontalAlignment = HorizontalAlignment.Center;
+            actions.Margin = new Thickness(0, 0, 14, 0);
+            workArea.Children.Add(actions);
             actions.Children.Add(CreatePrimaryAction());
 
-            WrapPanel essentials = new WrapPanel();
-            essentials.Width = 810;
-            essentials.HorizontalAlignment = HorizontalAlignment.Center;
-            essentials.Margin = new Thickness(0, 7, 0, 0);
+            Grid essentials = new Grid();
+            essentials.Margin = new Thickness(0, 12, 0, 0);
+            for (int i = 0; i < 4; i++)
+            {
+                essentials.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
             verifyProjectButton = CreateCard("\u2713", "Verificar / Verify", "Aplicación en copia aislada / Isolated copy", VerifySelectedApplication);
             verifyProjectButton.IsEnabled = false;
             essentials.Children.Add(verifyProjectButton);
             repairProjectButton = CreateCard("\u2692", "Reparar / Repair", "Escaneo, reparación y re-test / Scan & re-test", RepairSelectedApplication);
             repairProjectButton.IsEnabled = false;
             essentials.Children.Add(repairProjectButton);
-            essentials.Children.Add(CreateCard("\u25B6", "Demo para jueces / Judge demo", "Ejemplo gobernado / Governed example", RunDemo));
-            essentials.Children.Add(CreateCard("\u25A3", "Ver resultados / View results", "Recibos y decisiones / Receipts & decisions", OpenResults));
+            Grid.SetColumn(repairProjectButton, 1);
+            Button demoButton = CreateCard("\u25B6", "Demo para jueces / Judge demo", "Demostración gobernada reproducible / Reproducible governed demo", RunDemo);
+            Grid.SetColumn(demoButton, 2);
+            essentials.Children.Add(demoButton);
+            Button resultsButton = CreateCard("\u25A3", "Ver resultados / View results", "Recibos, evidencia y decisiones / Receipts, evidence & decisions", OpenResults);
+            Grid.SetColumn(resultsButton, 3);
+            essentials.Children.Add(resultsButton);
             actions.Children.Add(essentials);
 
             Grid futureHeader = new Grid();
-            futureHeader.Width = 798;
-            futureHeader.Margin = new Thickness(6, 7, 6, 3);
+            futureHeader.Margin = new Thickness(4, 15, 4, 6);
             futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             futureHeader.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             TextBlock futureTitle = new TextBlock();
@@ -191,68 +223,23 @@ namespace TheKeyPortable
             futureHeader.Children.Add(futureHint);
             actions.Children.Add(futureHeader);
 
-            WrapPanel futureModes = new WrapPanel();
-            futureModes.HorizontalAlignment = HorizontalAlignment.Center;
-            futureModes.Children.Add(CreateFutureCard("\u265A", "THE KING", "Construcción orquestada / Orchestrated build"));
-            futureModes.Children.Add(CreateFutureCard("\u25C8", "CHECKMATE", "Revisión adversarial / Adversarial review"));
+            Grid futureModes = new Grid();
+            futureModes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            futureModes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Button kingMode = CreateFutureCard("\u265A", "THE KING", "Construcción orquestada / Orchestrated build");
+            futureModes.Children.Add(kingMode);
+            Button checkmateMode = CreateFutureCard("\u25C8", "CHECKMATE", "Revisión adversarial / Adversarial review");
+            Grid.SetColumn(checkmateMode, 1);
+            futureModes.Children.Add(checkmateMode);
             actions.Children.Add(futureModes);
 
-            Expander advanced = new Expander();
-            advanced.Header = "Opciones avanzadas / Advanced options";
-            advanced.Foreground = new SolidColorBrush(Color.FromRgb(151, 168, 198));
-            advanced.Margin = new Thickness(12, 7, 12, 0);
-            advanced.HorizontalAlignment = HorizontalAlignment.Center;
-            WrapPanel advancedCards = new WrapPanel();
-            advancedCards.HorizontalAlignment = HorizontalAlignment.Center;
-            advancedCards.Children.Add(CreateCard("\u2713", "Verificar evidencia / Verify evidence", "Revisar demo / Review latest demo", VerifyEvidence));
-            advancedCards.Children.Add(CreateCard("\u2605", "Ayuda / Help", "Guía rápida bilingüe / Bilingual guide", OpenGuide));
-            advancedCards.Children.Add(CreateCard("\u265A", "Acceso / Shortcut", "Crear acceso de escritorio / Desktop shortcut", CreateShortcut));
-            advancedCards.Children.Add(CreateCard("?", "Ayuda CLI / CLI help", "Comandos técnicos / Technical commands", ShowHelp));
-            advanced.Content = advancedCards;
-            actions.Children.Add(advanced);
-            Grid.SetRow(actions, 1);
-            layout.Children.Add(actions);
+            Border systemPanel = BuildSystemPanel();
+            Grid.SetColumn(systemPanel, 1);
+            workArea.Children.Add(systemPanel);
 
-            Border consoleBorder = new Border();
-            consoleBorder.Margin = new Thickness(24, 7, 24, 12);
-            consoleBorder.Padding = new Thickness(1);
-            consoleBorder.CornerRadius = new CornerRadius(10);
-            consoleBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 61, 91));
-            consoleBorder.BorderThickness = new Thickness(1);
-            consoleBorder.Background = new SolidColorBrush(Color.FromRgb(5, 10, 20));
-            consoleBorder.Effect = new DropShadowEffect
-            {
-                Color = Color.FromRgb(0, 0, 0),
-                BlurRadius = 18,
-                ShadowDepth = 5,
-                Opacity = 0.28
-            };
-
-            Grid consoleLayout = new Grid();
-            consoleLayout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            consoleLayout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            Border consoleHeader = new Border();
-            consoleHeader.Padding = new Thickness(15, 8, 15, 8);
-            consoleHeader.Background = new SolidColorBrush(Color.FromRgb(12, 20, 36));
-            consoleHeader.BorderBrush = new SolidColorBrush(Color.FromRgb(39, 54, 82));
-            consoleHeader.BorderThickness = new Thickness(0, 0, 0, 1);
-            Grid consoleHeaderGrid = new Grid();
-            consoleHeaderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            consoleHeaderGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            TextBlock activityTitle = new TextBlock();
-            activityTitle.Text = "ACTIVIDAD / ACTIVITY";
-            activityTitle.FontSize = 11;
-            activityTitle.FontWeight = FontWeights.SemiBold;
-            activityTitle.Foreground = new SolidColorBrush(Color.FromRgb(188, 202, 226));
-            consoleHeaderGrid.Children.Add(activityTitle);
-            TextBlock localBadge = new TextBlock();
-            localBadge.Text = "●  LOCAL";
-            localBadge.FontSize = 10;
-            localBadge.Foreground = new SolidColorBrush(Color.FromRgb(105, 211, 162));
-            Grid.SetColumn(localBadge, 1);
-            consoleHeaderGrid.Children.Add(localBadge);
-            consoleHeader.Child = consoleHeaderGrid;
-            consoleLayout.Children.Add(consoleHeader);
+            Border activityPanel = BuildActivityPanel();
+            activityPanel.Margin = new Thickness(0, 14, 0, 0);
+            page.Children.Add(activityPanel);
 
             output = new TextBox();
             output.IsReadOnly = true;
@@ -260,39 +247,463 @@ namespace TheKeyPortable
             output.TextWrapping = TextWrapping.Wrap;
             output.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             output.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            output.Background = Brushes.Transparent;
-            output.Foreground = new SolidColorBrush(Color.FromRgb(214, 224, 241));
-            output.BorderThickness = new Thickness(0);
+            output.Background = new SolidColorBrush(Color.FromRgb(3, 9, 18));
+            output.Foreground = new SolidColorBrush(Color.FromRgb(205, 216, 235));
+            output.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 61, 87));
+            output.BorderThickness = new Thickness(1);
             output.FontFamily = new FontFamily("Consolas");
-            output.FontSize = 13;
-            output.Padding = new Thickness(16, 12, 16, 12);
+            output.FontSize = 12;
+            output.MinHeight = 112;
+            output.Margin = new Thickness(0, 12, 0, 0);
+            output.Padding = new Thickness(14, 10, 14, 10);
             output.SelectionBrush = new SolidColorBrush(Color.FromRgb(67, 91, 136));
-            output.Text = "1. Selecciona una aplicación compatible.\r\n2. THEKEY la analiza sin ejecutar código.\r\n3. Verifica o escanea fallos en una copia aislada.\r\n4. Autoriza solo reparaciones que hayan pasado todos los gates.\r\n";
-            Grid.SetRow(output, 1);
-            consoleLayout.Children.Add(output);
-            consoleBorder.Child = consoleLayout;
-            Grid.SetRow(consoleBorder, 2);
-            layout.Children.Add(consoleBorder);
+            output.Text = "THEKEY listo / ready. Selecciona una aplicación para comenzar / Select an application to begin.\r\n";
+            page.Children.Add(output);
 
             Grid footer = new Grid();
-            footer.Margin = new Thickness(28, 0, 28, 15);
+            footer.Margin = new Thickness(4, 11, 4, 0);
             footer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             status = new TextBlock();
-            status.Text = File.Exists(backend) ? "LISTO / READY · SELECCIONA UNA APLICACIÓN · Windows 10/11" : "FALTA EL MOTOR / BACKEND MISSING";
-            status.Foreground = new SolidColorBrush(Color.FromRgb(123, 220, 172));
+            status.Text = File.Exists(backend) ? "●  LISTO / READY · Windows 10/11" : "FALTA EL MOTOR / BACKEND MISSING";
+            status.Foreground = new SolidColorBrush(Color.FromRgb(91, 231, 132));
             status.FontWeight = FontWeights.SemiBold;
             status.FontSize = 11;
-            status.VerticalAlignment = VerticalAlignment.Center;
             footer.Children.Add(status);
             TextBlock boundary = new TextBlock();
-            boundary.Text = "Reparación verificada · consentimiento explícito · backup";
-            boundary.Foreground = new SolidColorBrush(Color.FromRgb(139, 153, 181));
-            boundary.FontSize = 11;
+            boundary.Text = "Aislamiento de workflow · consentimiento explícito · backup / Workflow isolation · explicit consent · backup";
+            boundary.Foreground = new SolidColorBrush(Color.FromRgb(125, 143, 171));
+            boundary.FontSize = 10;
             Grid.SetColumn(boundary, 1);
             footer.Children.Add(boundary);
-            Grid.SetRow(footer, 3);
-            layout.Children.Add(footer);
+            page.Children.Add(footer);
+        }
+
+        private Border BuildTitleBar()
+        {
+            Border bar = new Border();
+            bar.Background = new SolidColorBrush(Color.FromRgb(5, 12, 23));
+            bar.BorderBrush = new SolidColorBrush(Color.FromRgb(125, 91, 30));
+            bar.BorderThickness = new Thickness(0, 0, 0, 1);
+            bar.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e)
+            {
+                if (e.ClickCount == 2)
+                {
+                    WindowState = WindowState == WindowState.Maximized
+                        ? WindowState.Normal : WindowState.Maximized;
+                }
+                else
+                {
+                    DragMove();
+                }
+            };
+            Grid grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            StackPanel brand = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(18, 0, 0, 0) };
+            TextBlock crown = new TextBlock
+            {
+                Text = "\u265A",
+                FontSize = 23,
+                Foreground = new SolidColorBrush(Color.FromRgb(230, 179, 69)),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            brand.Children.Add(crown);
+            TextBlock title = new TextBlock
+            {
+                Text = "THEKEY  —  THE KING OF CHECKMATE",
+                Margin = new Thickness(10, 0, 0, 0),
+                FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(221, 225, 234)),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            brand.Children.Add(title);
+            grid.Children.Add(brand);
+            StackPanel controls = new StackPanel { Orientation = Orientation.Horizontal };
+            controls.Children.Add(CreateWindowButton("—", delegate { WindowState = WindowState.Minimized; }));
+            controls.Children.Add(CreateWindowButton("□", delegate
+            {
+                WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            }));
+            controls.Children.Add(CreateWindowButton("×", delegate { Close(); }));
+            Grid.SetColumn(controls, 1);
+            grid.Children.Add(controls);
+            bar.Child = grid;
+            return bar;
+        }
+
+        private Button CreateWindowButton(string label, Action action)
+        {
+            Button button = new Button
+            {
+                Content = label,
+                Width = 48,
+                Height = 47,
+                Foreground = new SolidColorBrush(Color.FromRgb(198, 205, 218)),
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                FontSize = 18,
+                Cursor = Cursors.Hand
+            };
+            button.Click += delegate(object sender, RoutedEventArgs e)
+            {
+                e.Handled = true;
+                action();
+            };
+            return button;
+        }
+
+        private Border BuildSidebar()
+        {
+            Border sidebar = new Border();
+            sidebar.Background = new LinearGradientBrush(
+                Color.FromRgb(8, 19, 34), Color.FromRgb(4, 13, 25), 90);
+            sidebar.BorderBrush = new SolidColorBrush(Color.FromRgb(107, 78, 29));
+            sidebar.BorderThickness = new Thickness(0, 0, 1, 0);
+            Grid layout = new Grid();
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            StackPanel identity = new StackPanel { Margin = new Thickness(20, 22, 20, 20) };
+            Border seal = new Border
+            {
+                Width = 76,
+                Height = 76,
+                CornerRadius = new CornerRadius(38),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(151, 110, 38)),
+                BorderThickness = new Thickness(1),
+                Background = new SolidColorBrush(Color.FromArgb(80, 32, 24, 11)),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            seal.Child = new TextBlock
+            {
+                Text = "\u265A",
+                FontSize = 50,
+                Foreground = new SolidColorBrush(Color.FromRgb(231, 180, 70)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            identity.Children.Add(seal);
+            identity.Children.Add(new TextBlock
+            {
+                Text = "THEKEY",
+                FontFamily = new FontFamily("Georgia"),
+                FontSize = 24,
+                Foreground = new SolidColorBrush(Color.FromRgb(239, 200, 112)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 9, 0, 0)
+            });
+            identity.Children.Add(new TextBlock
+            {
+                Text = "THE KING OF CHECKMATE",
+                FontSize = 9,
+                Foreground = new SolidColorBrush(Color.FromRgb(190, 159, 99)),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+            layout.Children.Add(identity);
+
+            StackPanel navigation = new StackPanel { Margin = new Thickness(12, 0, 12, 0) };
+            navigation.Children.Add(CreateNavButton("⌂", "Inicio / Home", true, delegate { SetStatus("INICIO / HOME", true); }));
+            navigation.Children.Add(CreateNavButton("⌕", "Analizar / Analyze", false, SelectApplication));
+            Expander tools = new Expander
+            {
+                Header = "⚒   Herramientas / Tools",
+                Foreground = new SolidColorBrush(Color.FromRgb(190, 199, 215)),
+                FontSize = 13,
+                Margin = new Thickness(10, 5, 10, 5)
+            };
+            StackPanel toolItems = new StackPanel { Margin = new Thickness(14, 5, 0, 5) };
+            toolItems.Children.Add(CreateSideUtility("Verificar evidencia / Verify evidence", VerifyEvidence));
+            toolItems.Children.Add(CreateSideUtility("Crear acceso / Create shortcut", CreateShortcut));
+            toolItems.Children.Add(CreateSideUtility("Ayuda CLI / CLI help", ShowHelp));
+            tools.Content = toolItems;
+            navigation.Children.Add(tools);
+            navigation.Children.Add(CreateNavButton("▥", "Resultados / Results", false, OpenResults));
+            navigation.Children.Add(CreateNavButton("♛", "Modos / Modes", false, delegate { SetStatus("THE KING Y CHECKMATE · PRÓXIMAMENTE / COMING SOON", true); }));
+            navigation.Children.Add(CreateNavButton("▤", "Registros / Logs", false, OpenResults));
+            navigation.Children.Add(CreateNavButton("⚙", "Ajustes / Settings", false, OpenGuide));
+            Grid.SetRow(navigation, 1);
+            layout.Children.Add(navigation);
+
+            Border health = new Border
+            {
+                Margin = new Thickness(16, 12, 16, 18),
+                Padding = new Thickness(15, 12, 15, 12),
+                CornerRadius = new CornerRadius(10),
+                Background = new SolidColorBrush(Color.FromRgb(8, 20, 32)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(86, 70, 40)),
+                BorderThickness = new Thickness(1)
+            };
+            StackPanel healthCopy = new StackPanel();
+            healthCopy.Children.Add(new TextBlock
+            {
+                Text = File.Exists(backend) ? "✓  LISTO / READY" : "!  MOTOR NO DISPONIBLE",
+                Foreground = File.Exists(backend) ? new SolidColorBrush(Color.FromRgb(82, 231, 125)) : new SolidColorBrush(Color.FromRgb(255, 126, 126)),
+                FontSize = 13,
+                FontWeight = FontWeights.SemiBold
+            });
+            healthCopy.Children.Add(new TextBlock
+            {
+                Text = "Motor local / Local engine",
+                Foreground = new SolidColorBrush(Color.FromRgb(142, 158, 184)),
+                FontSize = 10,
+                Margin = new Thickness(23, 4, 0, 0)
+            });
+            health.Child = healthCopy;
+            Grid.SetRow(health, 2);
+            layout.Children.Add(health);
+            sidebar.Child = layout;
+            return sidebar;
+        }
+
+        private Button CreateNavButton(string symbol, string label, bool selected, RoutedEventHandler action)
+        {
+            Button button = new Button
+            {
+                Height = 55,
+                Margin = new Thickness(0, 2, 0, 2),
+                Padding = new Thickness(12, 0, 12, 0),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Background = selected ? new SolidColorBrush(Color.FromRgb(16, 29, 47)) : Brushes.Transparent,
+                BorderBrush = selected ? new SolidColorBrush(Color.FromRgb(103, 77, 35)) : new SolidColorBrush(Color.FromRgb(27, 40, 59)),
+                BorderThickness = selected ? new Thickness(1) : new Thickness(0, 0, 0, 1),
+                Foreground = selected ? new SolidColorBrush(Color.FromRgb(235, 191, 92)) : new SolidColorBrush(Color.FromRgb(175, 186, 204)),
+                Cursor = Cursors.Hand
+            };
+            StackPanel content = new StackPanel { Orientation = Orientation.Horizontal };
+            content.Children.Add(new TextBlock { Text = symbol, FontSize = 22, Width = 37, VerticalAlignment = VerticalAlignment.Center });
+            content.Children.Add(new TextBlock { Text = label, FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+            button.Content = content;
+            button.Click += action;
+            AutomationProperties.SetName(button, label);
+            return button;
+        }
+
+        private Button CreateSideUtility(string label, RoutedEventHandler action)
+        {
+            Button button = new Button
+            {
+                Content = label,
+                Height = 31,
+                Margin = new Thickness(0, 2, 0, 2),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Foreground = new SolidColorBrush(Color.FromRgb(151, 168, 194)),
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                FontSize = 10,
+                Cursor = Cursors.Hand
+            };
+            button.Click += action;
+            return button;
+        }
+
+        private Border BuildHero()
+        {
+            Border hero = new Border
+            {
+                Height = 222,
+                CornerRadius = new CornerRadius(12),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(87, 65, 31)),
+                BorderThickness = new Thickness(1),
+                ClipToBounds = true
+            };
+            hero.Background = new LinearGradientBrush(Color.FromRgb(8, 20, 37), Color.FromRgb(4, 9, 18), 0);
+            Grid overlay = new Grid();
+            string heroPath = Path.Combine(root, "THEKEY_hero_chess.png");
+            if (File.Exists(heroPath))
+            {
+                Image art = new Image
+                {
+                    Source = new BitmapImage(new Uri(heroPath, UriKind.Absolute)),
+                    Stretch = Stretch.Uniform,
+                    Width = 560,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                overlay.Children.Add(art);
+            }
+            Border shade = new Border
+            {
+                Background = new LinearGradientBrush(
+                    Color.FromArgb(245, 3, 11, 23),
+                    Color.FromArgb(32, 3, 11, 23), 0)
+            };
+            overlay.Children.Add(shade);
+            StackPanel copy = new StackPanel
+            {
+                Margin = new Thickness(34, 25, 0, 0),
+                Width = 610,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+            copy.Children.Add(new TextBlock
+            {
+                Text = "Bienvenido / Welcome",
+                FontSize = 16,
+                Foreground = new SolidColorBrush(Color.FromRgb(229, 181, 76))
+            });
+            copy.Children.Add(new TextBlock
+            {
+                Text = "THEKEY",
+                FontFamily = new FontFamily("Georgia"),
+                FontSize = 46,
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 3, 0, 0)
+            });
+            copy.Children.Add(new TextBlock
+            {
+                Text = "THE KING OF CHECKMATE",
+                FontFamily = new FontFamily("Georgia"),
+                FontSize = 17,
+                Foreground = new SolidColorBrush(Color.FromRgb(230, 179, 69)),
+                Margin = new Thickness(2, 1, 0, 0)
+            });
+            copy.Children.Add(new TextBlock
+            {
+                Text = "Análisis, verificación y reparación gobernada de aplicaciones.\nGoverned application analysis, verification and repair.",
+                FontSize = 13,
+                FontStyle = FontStyles.Italic,
+                Foreground = new SolidColorBrush(Color.FromRgb(196, 204, 218)),
+                Margin = new Thickness(0, 14, 0, 0),
+                LineHeight = 20
+            });
+            overlay.Children.Add(copy);
+            Border local = new Border
+            {
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 22, 22, 0),
+                Padding = new Thickness(13, 8, 13, 8),
+                CornerRadius = new CornerRadius(18),
+                Background = new SolidColorBrush(Color.FromArgb(215, 5, 20, 31)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(55, 91, 102)),
+                BorderThickness = new Thickness(1)
+            };
+            local.Child = new TextBlock
+            {
+                Text = "♢  Modo local / Local mode   ●",
+                Foreground = new SolidColorBrush(Color.FromRgb(92, 232, 132)),
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold
+            };
+            overlay.Children.Add(local);
+            hero.Child = overlay;
+            return hero;
+        }
+
+        private Border BuildSystemPanel()
+        {
+            Border panel = new Border
+            {
+                Padding = new Thickness(18),
+                CornerRadius = new CornerRadius(12),
+                Background = new LinearGradientBrush(Color.FromRgb(10, 25, 41), Color.FromRgb(5, 15, 28), 90),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(111, 82, 35)),
+                BorderThickness = new Thickness(1)
+            };
+            StackPanel content = new StackPanel();
+            content.Children.Add(new TextBlock
+            {
+                Text = "ESTADO DEL SISTEMA\nSYSTEM STATUS",
+                FontSize = 12,
+                Foreground = new SolidColorBrush(Color.FromRgb(226, 182, 84)),
+                LineHeight = 18
+            });
+            Border ring = new Border
+            {
+                Width = 106,
+                Height = 106,
+                CornerRadius = new CornerRadius(53),
+                BorderBrush = File.Exists(backend) ? new SolidColorBrush(Color.FromRgb(101, 220, 112)) : new SolidColorBrush(Color.FromRgb(255, 126, 126)),
+                BorderThickness = new Thickness(3),
+                Background = new SolidColorBrush(Color.FromArgb(55, 61, 150, 85)),
+                Margin = new Thickness(0, 22, 0, 12),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Effect = new DropShadowEffect { Color = Color.FromRgb(99, 220, 111), BlurRadius = 22, ShadowDepth = 0, Opacity = 0.3 }
+            };
+            ring.Child = new TextBlock
+            {
+                Text = File.Exists(backend) ? "✓" : "!",
+                FontSize = 46,
+                Foreground = File.Exists(backend) ? new SolidColorBrush(Color.FromRgb(119, 236, 130)) : new SolidColorBrush(Color.FromRgb(255, 126, 126)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            content.Children.Add(ring);
+            content.Children.Add(new TextBlock
+            {
+                Text = File.Exists(backend) ? "LISTO / READY" : "BLOQUEADO / BLOCKED",
+                FontSize = 17,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = File.Exists(backend) ? new SolidColorBrush(Color.FromRgb(83, 231, 126)) : new SolidColorBrush(Color.FromRgb(255, 126, 126)),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+            content.Children.Add(new TextBlock
+            {
+                Text = File.Exists(backend) ? "Motor local disponible\nLocal engine available" : "Falta el motor local\nLocal engine missing",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(161, 174, 195)),
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 7, 0, 18)
+            });
+            content.Children.Add(CreateStatusLine("✓", "Integridad / Integrity", "Verificada / Verified"));
+            content.Children.Add(CreateStatusLine("✓", "Red / Network", "No requerida / Not required"));
+            sourceState = CreateStatusLine("○", "Aplicación / Application", "Sin seleccionar / Not selected");
+            content.Children.Add(sourceState);
+            panel.Child = content;
+            return panel;
+        }
+
+        private TextBlock CreateStatusLine(string mark, string label, string value)
+        {
+            return new TextBlock
+            {
+                Text = mark + "  " + label + "\n     " + value,
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromRgb(153, 169, 194)),
+                Margin = new Thickness(0, 6, 0, 6),
+                LineHeight = 15
+            };
+        }
+
+        private Border BuildActivityPanel()
+        {
+            Border panel = new Border
+            {
+                CornerRadius = new CornerRadius(10),
+                Background = new SolidColorBrush(Color.FromRgb(7, 19, 33)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(44, 62, 88)),
+                BorderThickness = new Thickness(1)
+            };
+            Grid layout = new Grid();
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Border header = new Border
+            {
+                Padding = new Thickness(16, 9, 16, 9),
+                Background = new SolidColorBrush(Color.FromRgb(13, 29, 49)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(43, 60, 86)),
+                BorderThickness = new Thickness(0, 0, 0, 1)
+            };
+            header.Child = new TextBlock
+            {
+                Text = "ACTIVIDAD RECIENTE / RECENT ACTIVITY",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(191, 202, 220))
+            };
+            layout.Children.Add(header);
+            recentActivity = new TextBlock
+            {
+                Text = "—   Sin actividad todavía / No activity yet. Selecciona una aplicación o ejecuta la demo.",
+                Padding = new Thickness(16, 13, 16, 13),
+                Foreground = new SolidColorBrush(Color.FromRgb(142, 158, 184)),
+                FontSize = 11
+            };
+            Grid.SetRow(recentActivity, 1);
+            layout.Children.Add(recentActivity);
+            panel.Child = layout;
+            return panel;
         }
 
         private Border BuildHeader()
@@ -377,12 +788,12 @@ namespace TheKeyPortable
         private Button CreateCard(string symbol, string title, string detail, RoutedEventHandler action)
         {
             Button button = new Button();
-            button.Width = 393;
-            button.Height = 66;
+            button.Height = 180;
             button.Margin = new Thickness(6);
-            button.Padding = new Thickness(13, 8, 13, 8);
-            button.Background = new SolidColorBrush(Color.FromRgb(20, 31, 54));
-            button.BorderBrush = new SolidColorBrush(Color.FromRgb(61, 79, 113));
+            button.Padding = new Thickness(18, 14, 18, 13);
+            button.Background = new LinearGradientBrush(
+                Color.FromRgb(13, 29, 48), Color.FromRgb(6, 17, 31), 90);
+            button.BorderBrush = new SolidColorBrush(Color.FromRgb(68, 69, 70));
             button.BorderThickness = new Thickness(1);
             button.Foreground = Brushes.White;
             button.Cursor = Cursors.Hand;
@@ -402,32 +813,68 @@ namespace TheKeyPortable
             button.Click += action;
 
             Grid content = new Grid();
-            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            Border iconRing = new Border();
+            iconRing.Width = 56;
+            iconRing.Height = 56;
+            iconRing.CornerRadius = new CornerRadius(28);
+            iconRing.HorizontalAlignment = HorizontalAlignment.Left;
+            iconRing.Background = new SolidColorBrush(Color.FromArgb(50, 210, 159, 50));
+            iconRing.BorderBrush = new SolidColorBrush(Color.FromRgb(151, 111, 42));
+            iconRing.BorderThickness = new Thickness(1);
             TextBlock icon = new TextBlock();
             icon.Text = symbol;
             icon.FontFamily = new FontFamily("Segoe UI Symbol");
-            icon.FontSize = 25;
+            icon.FontSize = 28;
             icon.Foreground = new SolidColorBrush(Color.FromRgb(232, 190, 82));
+            icon.HorizontalAlignment = HorizontalAlignment.Center;
             icon.VerticalAlignment = VerticalAlignment.Center;
-            content.Children.Add(icon);
-            StackPanel copy = new StackPanel();
-            copy.VerticalAlignment = VerticalAlignment.Center;
+            iconRing.Child = icon;
+            content.Children.Add(iconRing);
             TextBlock heading = new TextBlock();
             heading.Text = title;
-            heading.FontSize = 14;
+            heading.FontSize = 15;
             heading.FontWeight = FontWeights.SemiBold;
             heading.Foreground = Brushes.White;
             heading.TextWrapping = TextWrapping.Wrap;
-            copy.Children.Add(heading);
+            heading.Margin = new Thickness(0, 10, 0, 0);
+            Grid.SetRow(heading, 1);
+            content.Children.Add(heading);
+            Border accent = new Border
+            {
+                Width = 18,
+                Height = 2,
+                Background = new SolidColorBrush(Color.FromRgb(224, 171, 60)),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0, 8, 0, 8)
+            };
+            Grid.SetRow(accent, 2);
+            content.Children.Add(accent);
+            Grid cardFooter = new Grid();
+            cardFooter.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            cardFooter.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             TextBlock description = new TextBlock();
             description.Text = detail;
-            description.FontSize = 12;
-            description.Margin = new Thickness(0, 4, 0, 0);
+            description.FontSize = 10;
             description.Foreground = new SolidColorBrush(Color.FromRgb(161, 176, 204));
-            copy.Children.Add(description);
-            Grid.SetColumn(copy, 1);
-            content.Children.Add(copy);
+            description.TextWrapping = TextWrapping.Wrap;
+            cardFooter.Children.Add(description);
+            TextBlock arrow = new TextBlock
+            {
+                Text = "→",
+                FontSize = 22,
+                Foreground = new SolidColorBrush(Color.FromRgb(224, 228, 236)),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(8, 0, 0, 0)
+            };
+            Grid.SetColumn(arrow, 1);
+            cardFooter.Children.Add(arrow);
+            Grid.SetRow(cardFooter, 3);
+            content.Children.Add(cardFooter);
             button.Content = content;
             return button;
         }
@@ -435,10 +882,9 @@ namespace TheKeyPortable
         private Button CreateFutureCard(string symbol, string title, string detail)
         {
             Button button = new Button();
-            button.Width = 393;
-            button.Height = 58;
+            button.Height = 92;
             button.Margin = new Thickness(6, 2, 6, 2);
-            button.Padding = new Thickness(14, 7, 14, 7);
+            button.Padding = new Thickness(16, 9, 16, 9);
             button.Background = new SolidColorBrush(Color.FromRgb(14, 23, 40));
             button.BorderBrush = new SolidColorBrush(Color.FromRgb(46, 61, 87));
             button.BorderThickness = new Thickness(1);
@@ -583,8 +1029,7 @@ namespace TheKeyPortable
         private Button CreatePrimaryAction()
         {
             Button button = new Button();
-            button.Width = 798;
-            button.Height = 92;
+            button.Height = 104;
             button.Margin = new Thickness(6, 0, 6, 2);
             button.Padding = new Thickness(24, 12, 24, 12);
             button.Background = new LinearGradientBrush(
@@ -605,7 +1050,7 @@ namespace TheKeyPortable
             content.VerticalAlignment = VerticalAlignment.Center;
             TextBlock heading = new TextBlock();
             heading.Text = "\u25A3  SELECCIONAR Y ANALIZAR / SELECT & ANALYZE";
-            heading.FontSize = 22;
+            heading.FontSize = 21;
             heading.FontWeight = FontWeights.Bold;
             heading.HorizontalAlignment = HorizontalAlignment.Center;
             content.Children.Add(heading);
@@ -688,6 +1133,17 @@ namespace TheKeyPortable
                 selectedProject = dialog.SelectedPath;
             }
             output.Text = "Aplicación seleccionada / Selected application:\r\n" + selectedProject + "\r\n\r\n";
+            if (sourceState != null)
+            {
+                sourceState.Text = "✓  Aplicación / Application\n     " + Path.GetFileName(selectedProject);
+                sourceState.Foreground = new SolidColorBrush(Color.FromRgb(91, 213, 126));
+            }
+            if (recentActivity != null)
+            {
+                recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
+                    "   ANÁLISIS / ANALYSIS   " + Path.GetFileName(selectedProject) +
+                    "   En curso / Running";
+            }
             RunBackend(
                 "project inspect --source " + QuoteArgument(selectedProject),
                 "ANALIZANDO SIN EJECUTAR CÓDIGO / READ-ONLY ANALYSIS",
@@ -872,6 +1328,11 @@ namespace TheKeyPortable
             }
             SetActionsEnabled(false);
             SetStatus(runningStatus, true);
+            if (recentActivity != null)
+            {
+                recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
+                    "   " + runningStatus + "   En curso / Running";
+            }
             output.Text = "> THEKEY-Core.exe " + arguments + "\r\n\r\n";
 
             Task.Factory.StartNew(delegate
@@ -909,6 +1370,15 @@ namespace TheKeyPortable
                     output.AppendText(combined.Trim() + "\r\n\r\nExit code: " + exitCode + "\r\n");
                     output.ScrollToEnd();
                     SetStatus(exitCode == 0 ? "PASS · VERIFICADO / VERIFIED" : "FALLO / FAILED", exitCode == 0);
+                    if (recentActivity != null)
+                    {
+                        recentActivity.Text = DateTime.Now.ToString("HH:mm:ss") +
+                            "   " + arguments.Split(' ')[0].ToUpperInvariant() +
+                            "   " + (exitCode == 0 ? "Éxito / Success" : "Bloqueado / Blocked") +
+                            "   Exit " + exitCode;
+                        recentActivity.Foreground = new SolidColorBrush(
+                            exitCode == 0 ? Color.FromRgb(91, 221, 126) : Color.FromRgb(255, 126, 126));
+                    }
                     SetActionsEnabled(true);
                     if (completed != null)
                     {

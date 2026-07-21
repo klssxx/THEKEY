@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ENTRY_PATH = ROOT / "scripts" / "portable_entry.py"
 LAUNCHER_PATH = ROOT / "portable" / "windows" / "TheKeyLauncher.cs"
+PORTABLE_BUILD_PATH = ROOT / "scripts" / "build-portable.ps1"
+HERO_PATH = ROOT / "portable" / "windows" / "assets" / "THEKEY_hero_chess.png"
 
 
 def _load_entry():
@@ -78,10 +80,25 @@ def test_launcher_buttons_are_bilingual():
         "Demo para jueces / Judge demo",
         "Ver resultados / View results",
         "Verificar evidencia / Verify evidence",
-        "Ayuda / Help",
-        "Acceso / Shortcut",
+        "Ajustes / Settings",
+        "Crear acceso / Create shortcut",
         "Ayuda CLI / CLI help",
         "PRÓXIMAMENTE / SOON",
     )
     for label in labels:
         assert label in source
+
+
+def test_premium_launcher_uses_packaged_hero_and_real_activity_state():
+    launcher = LAUNCHER_PATH.read_text(encoding="utf-8")
+    build = PORTABLE_BUILD_PATH.read_text(encoding="utf-8")
+
+    assert HERO_PATH.is_file()
+    assert HERO_PATH.stat().st_size > 100_000
+    assert "BuildSidebar()" in launcher
+    assert "BuildHero()" in launcher
+    assert "BuildSystemPanel()" in launcher
+    assert "Sin actividad todavía / No activity yet" in launcher
+    assert 'sourceHero = Join-Path $repoRoot' in build
+    assert "Copy-Item -LiteralPath $sourceHero -Destination $packageRoot" in build
+    assert "100%" not in launcher
