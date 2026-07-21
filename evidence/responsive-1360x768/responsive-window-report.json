@@ -1,0 +1,152 @@
+{
+  "requested_screen_size": {
+    "height": 768,
+    "width": 1360
+  },
+  "actual_work_area_window_size": {
+    "height": 720,
+    "width": 1360
+  },
+  "dpi": 96,
+  "capture": "E:\\PROYECTS\\.worktrees\\TheKey-PhaseB-v2\\THEKEY\\evidence\\responsive-1360x768\\window-1360x768-dpi96.png",
+  "visible_vertical_scrollbars": 1,
+  "visible_horizontal_scrollbars": 0,
+  "scrollbars": [
+    {
+      "name": "",
+      "automation_id": "VerticalScrollBar",
+      "orientation": "Vertical",
+      "is_offscreen": false,
+      "width": 17.0,
+      "height": 658.0
+    },
+    {
+      "name": "",
+      "automation_id": "HorizontalScrollBar",
+      "orientation": "Horizontal",
+      "is_offscreen": true,
+      "width": "-Infinity",
+      "height": "-Infinity"
+    }
+  ],
+  "controls": [
+    {
+      "name": "Modo local / Local mode",
+      "found": true,
+      "within_window": true,
+      "left": 1125.0,
+      "top": 89.0,
+      "width": 161.0,
+      "height": 17.0
+    },
+    {
+      "name": "Inicio / Home",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 244.0,
+      "width": 235.0,
+      "height": 63.0
+    },
+    {
+      "name": "Analizar / Analyze",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 309.0,
+      "width": 235.0,
+      "height": 64.0
+    },
+    {
+      "name": "Herramientas / Tools",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 375.0,
+      "width": 235.0,
+      "height": 63.0
+    },
+    {
+      "name": "Resultados / Results",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 440.0,
+      "width": 235.0,
+      "height": 64.0
+    },
+    {
+      "name": "Modos / Modes",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 506.0,
+      "width": 235.0,
+      "height": 63.0
+    },
+    {
+      "name": "Registros / Logs",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 571.0,
+      "width": 235.0,
+      "height": 64.0
+    },
+    {
+      "name": "Ajustes / Settings",
+      "found": true,
+      "within_window": true,
+      "left": 11.0,
+      "top": 637.0,
+      "width": 235.0,
+      "height": 63.0
+    },
+    {
+      "name": "Seleccionar y analizar / Select and analyze",
+      "found": true,
+      "within_window": true,
+      "left": 302.0,
+      "top": 287.0,
+      "width": 688.0,
+      "height": 112.0
+    },
+    {
+      "name": "Verificar / Verify",
+      "found": true,
+      "within_window": true,
+      "left": 279.0,
+      "top": 417.0,
+      "width": 251.0,
+      "height": 252.0
+    },
+    {
+      "name": "Reparar / Repair",
+      "found": true,
+      "within_window": true,
+      "left": 544.0,
+      "top": 417.0,
+      "width": 245.0,
+      "height": 252.0
+    },
+    {
+      "name": "Demo para jueces / Judge demo",
+      "found": true,
+      "within_window": true,
+      "left": 803.0,
+      "top": 417.0,
+      "width": 244.0,
+      "height": 252.0
+    },
+    {
+      "name": "Ver resultados / View results",
+      "found": true,
+      "within_window": true,
+      "left": 1064.0,
+      "top": 417.0,
+      "width": 248.0,
+      "height": 252.0
+    }
+  ],
+  "all_required_controls_within_window": true
+}

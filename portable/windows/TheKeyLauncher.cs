@@ -114,6 +114,7 @@ namespace TheKeyPortable
         private readonly Dictionary<string, Button> navigation = new Dictionary<string, Button>();
         private readonly List<ActivityRecord> activities = new List<ActivityRecord>();
         private Grid contentHost;
+        private ScrollViewer mainContentViewport;
         private TextBlock status;
         private TextBlock selectedSource;
         private TextBox operationOutput;
@@ -124,6 +125,10 @@ namespace TheKeyPortable
         private bool operationRunning;
         private readonly object backendProcessSync = new object();
         private Process activeBackendProcess;
+        // The canonical 1448 x 1086 composition is intentionally isolated from
+        // the live window.  It remains an off-screen visual-gate artifact; the
+        // interactive dashboard uses a fluid layout below.
+        private bool renderingCanonicalComposition;
 
         internal MainWindow(string applicationRoot)
         {
@@ -131,13 +136,12 @@ namespace TheKeyPortable
             backend = Path.Combine(root, "core", "THEKEY-Core", "THEKEY-Core.exe");
             Rect workArea = SystemParameters.WorkArea;
 
-            double availableWidth = Math.Max(720, workArea.Width - 16);
-            double availableHeight = Math.Max(540, workArea.Height - 16);
-            double initialScale = Math.Min(1.0, Math.Min(availableWidth / 1448.0, availableHeight / 1086.0));
+            double availableWidth = Math.Max(720, workArea.Width);
+            double availableHeight = Math.Max(540, workArea.Height);
 
             Title = "THEKEY — THE KING OF CHECKMATE";
-            Width = Math.Round(1448 * initialScale);
-            Height = Math.Round(1086 * initialScale);
+            Width = Math.Min(1448, availableWidth);
+            Height = Math.Min(1086, availableHeight);
             MinWidth = Math.Min(760, workArea.Width);
             MinHeight = Math.Min(570, workArea.Height);
             MaxWidth = Math.Max(640, workArea.Width);
@@ -157,7 +161,7 @@ namespace TheKeyPortable
             }
 
             LoadPersistedActivities();
-            FrameworkElement shell = BuildShell();
+            FrameworkElement shell = BuildResponsiveShell();
             Content = shell;
             ShowHome(null, null);
 
@@ -178,6 +182,7 @@ namespace TheKeyPortable
                         // render the canonical size without a bitmap mock-up.
                         Content = null;
                         navigation.Clear();
+                        renderingCanonicalComposition = true;
                         FrameworkElement canonicalShell = BuildShell();
                         ShowHome(null, null);
                         double captureDpi = 96;
@@ -232,6 +237,52 @@ namespace TheKeyPortable
             };
             Grid.SetColumn(contentViewport, 1);
             workspace.Children.Add(contentViewport);
+            Grid.SetRow(workspace, 1);
+            rootGrid.Children.Add(workspace);
+            rootGrid.Children.Add(new Border
+            {
+                BorderBrush = Theme.Brush(Theme.GoldBorder),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(13),
+                IsHitTestVisible = false
+            });
+
+            return rootGrid;
+        }
+
+        private FrameworkElement BuildResponsiveShell()
+        {
+            Grid rootGrid = new Grid
+            {
+                Background = Theme.Brush(Theme.Canvas),
+                ClipToBounds = true
+            };
+            rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(48) });
+            rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            rootGrid.Children.Add(BuildTitleBar());
+
+            Grid workspace = new Grid { ClipToBounds = true };
+            // Keep the navigation comfortably usable without reserving the
+            // fixed 270 px canonical column from the desktop capture.
+            workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(248) });
+            workspace.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            workspace.Children.Add(BuildResponsiveSidebar());
+
+            contentHost = new Grid
+            {
+                Background = Theme.Brush(Theme.CanvasBlue),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            mainContentViewport = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                CanContentScroll = false,
+                Background = Theme.Brush(Theme.CanvasBlue),
+                Content = contentHost
+            };
+            Grid.SetColumn(mainContentViewport, 1);
+            workspace.Children.Add(mainContentViewport);
             Grid.SetRow(workspace, 1);
             rootGrid.Children.Add(workspace);
             rootGrid.Children.Add(new Border
@@ -419,6 +470,127 @@ namespace TheKeyPortable
             return sidebar;
         }
 
+        private Border BuildResponsiveSidebar()
+        {
+            Border sidebar = new Border
+            {
+                Background = new LinearGradientBrush(
+                    Color.FromRgb(5, 17, 29), Color.FromRgb(2, 10, 19), 90),
+                BorderBrush = Theme.Brush(Theme.GoldBorder),
+                BorderThickness = new Thickness(0, 0, 1, 0),
+                ClipToBounds = true
+            };
+            Grid layout = new Grid { ClipToBounds = true };
+            layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(188) });
+            layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            string canonicalDecorPath = Path.Combine(root, "THEKEY_sidebar_canonical_decor.png");
+            if (File.Exists(canonicalDecorPath))
+            {
+                Image canonicalDecor = new Image
+                {
+                    Source = new BitmapImage(new Uri(canonicalDecorPath, UriKind.Absolute)),
+                    Stretch = Stretch.Fill,
+                    SnapsToDevicePixels = true,
+                    IsHitTestVisible = false
+                };
+                Grid.SetRowSpan(canonicalDecor, 2);
+                layout.Children.Add(canonicalDecor);
+            }
+
+            StackPanel identity = new StackPanel { Margin = new Thickness(20, 18, 20, 0) };
+            Border emblem = new Border
+            {
+                Width = 96,
+                Height = 96,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            identity.Children.Add(emblem);
+            identity.Children.Add(new TextBlock
+            {
+                Text = "THEKEY",
+                FontFamily = new FontFamily("Georgia"),
+                FontSize = 38,
+                Foreground = Theme.Brush(Theme.GoldLight),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 5, 0, 0)
+            });
+            identity.Children.Add(new TextBlock
+            {
+                Text = "THE KING OF CHECKMATE",
+                FontFamily = new FontFamily("Georgia"),
+                FontWeight = FontWeights.SemiBold,
+                FontSize = 10,
+                Foreground = Theme.Brush(Theme.Gold),
+                HorizontalAlignment = HorizontalAlignment.Center
+            });
+            layout.Children.Add(identity);
+
+            Grid nav = new Grid
+            {
+                Margin = new Thickness(4, 0, 8, 12),
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
+            for (int index = 0; index < 7; index++)
+            {
+                nav.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            }
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("home", "Inicio / Home", "home", ShowHome), 0);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("analyze", "Analizar / Analyze", "analyze", ShowAnalyze), 1);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("tools", "Herramientas / Tools", "tools", ShowTools), 2);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("results", "Resultados / Results", "results", ShowResults), 3);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("modes", "Modos / Modes", "modes", ShowModes), 4);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("logs", "Registros / Logs", "logs", ShowLogs), 5);
+            AddResponsiveNavigationButton(nav, CreateResponsiveNavButton("settings", "Ajustes / Settings", "settings", ShowSettings), 6);
+            Grid.SetRow(nav, 1);
+            layout.Children.Add(nav);
+
+            sidebar.Child = layout;
+            return sidebar;
+        }
+
+        private static void AddResponsiveNavigationButton(Grid navigationGrid, Button button, int row)
+        {
+            Grid.SetRow(button, row);
+            navigationGrid.Children.Add(button);
+        }
+
+        private Button CreateResponsiveNavButton(string key, string label, string icon, RoutedEventHandler action)
+        {
+            Button button = new Button
+            {
+                Margin = new Thickness(0, 1, 0, 1),
+                Padding = new Thickness(21, 0, 12, 0),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Background = Brushes.Transparent,
+                BorderBrush = Brushes.Transparent,
+                BorderThickness = new Thickness(1),
+                Foreground = Theme.Brush(Theme.MutedText),
+                Cursor = Cursors.Hand,
+                Template = CreateNavTemplate()
+            };
+            Grid content = new Grid();
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(56) });
+            content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            content.Children.Add(CreateIcon(icon, 27, Theme.Brush(Theme.MutedText)));
+            TextBlock text = new TextBlock
+            {
+                Text = label,
+                FontSize = 15,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Theme.Brush(Theme.MutedText),
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+            Grid.SetColumn(text, 1);
+            content.Children.Add(text);
+            button.Content = content;
+            button.Click += action;
+            AutomationProperties.SetName(button, label);
+            navigation.Add(key, button);
+            return button;
+        }
+
         private Grid CreateSidebarLandscape()
         {
             Grid scene = new Grid
@@ -569,6 +741,36 @@ namespace TheKeyPortable
             return home;
         }
 
+        private FrameworkElement BuildResponsiveHome()
+        {
+            StackPanel home = new StackPanel
+            {
+                Background = Theme.Brush(Theme.CanvasBlue),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            FrameworkElement hero = BuildHero();
+            // The live work area on a 1360 x 768 Windows desktop is 720 px
+            // high once the taskbar is reserved.  This keeps the complete
+            // upcoming-modes heading in the first viewport without altering
+            // the 372 px canonical hero used by the off-screen capture.
+            hero.Height = 350;
+            hero.HorizontalAlignment = HorizontalAlignment.Stretch;
+            home.Children.Add(hero);
+
+            FrameworkElement cards = BuildResponsiveOperationCards();
+            cards.Margin = new Thickness(24, 12, 24, 0);
+            home.Children.Add(cards);
+
+            FrameworkElement modes = BuildUpcomingModes();
+            modes.Margin = new Thickness(24, 12, 24, 0);
+            home.Children.Add(modes);
+
+            FrameworkElement activity = BuildActivityPanel();
+            activity.Margin = new Thickness(18, 15, 18, 27);
+            home.Children.Add(activity);
+            return home;
+        }
+
         private FrameworkElement BuildHero()
         {
             Grid hero = new Grid { Height = 372, ClipToBounds = true, Background = Theme.Brush(Theme.Canvas) };
@@ -683,6 +885,7 @@ namespace TheKeyPortable
             Grid.SetColumn(live, 2);
             localContent.Children.Add(live);
             local.Child = localContent;
+            AutomationProperties.SetName(local, "Modo local / Local mode");
             hero.Children.Add(local);
 
             Button primary = CreatePrimaryAction();
@@ -705,6 +908,20 @@ namespace TheKeyPortable
             cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(263) });
             cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(274) });
             cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(281) });
+            cards.Children.Add(CreateCard("shield", "Verificar / Verify", "Verifica archivos, firmas\ny copias aisladas.\nVerify files, signatures\nand isolated copies.", VerifySelectedApplication, 0, new Thickness(0, 0, 7, 0), !operationRunning));
+            cards.Children.Add(CreateCard("repair", "Reparar / Repair", "Escanea, repara y\nrestaura archivos.\nScan, repair and\nrestore files.", RepairSelectedApplication, 1, new Thickness(7, 0, 7, 0), !operationRunning));
+            cards.Children.Add(CreateCard("demo", "Demo para jueces /\nJudge demo", "Genera demostraciones\ngubernamentales.\nGenerate government\ndemonstrations.", RunDemo, 2, new Thickness(7, 0, 7, 0), !operationRunning));
+            cards.Children.Add(CreateCard("results", "Ver resultados /\nView results", "Revisa resultados, recibos\ny decisiones.\nReview results, receipts\nand decisions.", ShowResults, 3, new Thickness(10, 0, 0, 0), true));
+            return cards;
+        }
+
+        private FrameworkElement BuildResponsiveOperationCards()
+        {
+            Grid cards = new Grid { Height = 252, HorizontalAlignment = HorizontalAlignment.Stretch };
+            for (int index = 0; index < 4; index++)
+            {
+                cards.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
             cards.Children.Add(CreateCard("shield", "Verificar / Verify", "Verifica archivos, firmas\ny copias aisladas.\nVerify files, signatures\nand isolated copies.", VerifySelectedApplication, 0, new Thickness(0, 0, 7, 0), !operationRunning));
             cards.Children.Add(CreateCard("repair", "Reparar / Repair", "Escanea, repara y\nrestaura archivos.\nScan, repair and\nrestore files.", RepairSelectedApplication, 1, new Thickness(7, 0, 7, 0), !operationRunning));
             cards.Children.Add(CreateCard("demo", "Demo para jueces /\nJudge demo", "Genera demostraciones\ngubernamentales.\nGenerate government\ndemonstrations.", RunDemo, 2, new Thickness(7, 0, 7, 0), !operationRunning));
@@ -1104,17 +1321,16 @@ namespace TheKeyPortable
 
         private void ShowHome(object sender, RoutedEventArgs eventArgs)
         {
-            SetView(BuildHome(), "home");
+            SetView(renderingCanonicalComposition ? BuildHome() : BuildResponsiveHome(), "home");
         }
 
         private void ShowAnalyze(object sender, RoutedEventArgs eventArgs)
         {
-            ScrollViewer page = (ScrollViewer)BuildInformationPage(
+            StackPanel pageBody = (StackPanel)BuildInformationPage(
                 "Analizar / Analyze",
                 "Inspección inicial de solo lectura para proyectos compatibles.",
                 "Selecciona una carpeta existente. THEKEY identifica el perfil, entrypoints, tests y riesgos sin ejecutar código del proyecto.\n\n" +
                 "Estado / Status: " + (String.IsNullOrWhiteSpace(selectedProject) ? "Pendiente / Pending" : "Proyecto seleccionado / Selected project\n" + selectedProject));
-            StackPanel pageBody = (StackPanel)page.Content;
             Button select = new Button
             {
                 Content = "Seleccionar proyecto / Select project",
@@ -1131,7 +1347,7 @@ namespace TheKeyPortable
             select.Click += SelectApplication;
             AutomationProperties.SetName(select, "Seleccionar una carpeta de proyecto para inspección / Select a project folder for inspection");
             pageBody.Children.Add(select);
-            SetView(page, "analyze");
+            SetView(pageBody, "analyze");
         }
 
         private void ShowTools(object sender, RoutedEventArgs eventArgs)
@@ -1196,12 +1412,6 @@ namespace TheKeyPortable
         private void ShowResults(object sender, RoutedEventArgs eventArgs)
         {
             List<string> evidence = FindEvidenceFiles();
-            ScrollViewer scroll = new ScrollViewer
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                Background = Theme.Brush(Theme.CanvasBlue)
-            };
             StackPanel page = new StackPanel { MaxWidth = 1060, Margin = new Thickness(48, 46, 48, 48) };
             page.Children.Add(new TextBlock
             {
@@ -1267,8 +1477,7 @@ namespace TheKeyPortable
             restart.Click += RunDemo;
             AutomationProperties.SetName(restart, "Reiniciar la demo para jueces / Restart the judge demo");
             page.Children.Add(restart);
-            scroll.Content = page;
-            SetView(scroll, "results");
+            SetView(page, "results");
         }
 
         private FrameworkElement BuildEvidenceResultCard(string path)
@@ -1385,12 +1594,6 @@ namespace TheKeyPortable
 
         private FrameworkElement BuildInformationPage(string title, string subtitle, string text)
         {
-            ScrollViewer scroll = new ScrollViewer
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                Background = Theme.Brush(Theme.CanvasBlue)
-            };
             StackPanel page = new StackPanel { MaxWidth = 1060, Margin = new Thickness(48, 46, 48, 48) };
             page.Children.Add(new TextBlock
             {
@@ -1433,8 +1636,7 @@ namespace TheKeyPortable
             AutomationProperties.SetName(output, title + " content");
             panel.Child = output;
             page.Children.Add(panel);
-            scroll.Content = page;
-            return scroll;
+            return page;
         }
 
         private void SetView(FrameworkElement view, string navigationKey)
@@ -1447,6 +1649,10 @@ namespace TheKeyPortable
                 entry.Value.Background = active ? Theme.Brush(Color.FromRgb(12, 30, 49)) : Brushes.Transparent;
                 entry.Value.BorderBrush = active ? Theme.Brush(Theme.GoldBorder) : Brushes.Transparent;
                 entry.Value.Foreground = active ? Theme.Brush(Theme.GoldLight) : Theme.Brush(Theme.MutedText);
+            }
+            if (!renderingCanonicalComposition && mainContentViewport != null)
+            {
+                mainContentViewport.ScrollToTop();
             }
         }
 
@@ -1617,12 +1823,6 @@ namespace TheKeyPortable
 
         private void ShowOperationPage(string title, string initialOutput)
         {
-            ScrollViewer scroll = new ScrollViewer
-            {
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                Background = Theme.Brush(Theme.CanvasBlue)
-            };
             StackPanel page = new StackPanel { MaxWidth = 1060, Margin = new Thickness(48, 46, 48, 48) };
             operationHeading = new TextBlock
             {
@@ -1709,8 +1909,7 @@ namespace TheKeyPortable
             applyRepairButton.Click += ApplyReviewedRepair;
             AutomationProperties.SetName(applyRepairButton, "Aplicar la reparación verificada tras revisar la evidencia / Apply verified repair after reviewing evidence");
             page.Children.Add(applyRepairButton);
-            scroll.Content = page;
-            SetView(scroll, "");
+            SetView(page, "");
         }
 
         private void RequestCancellation(object sender, RoutedEventArgs eventArgs)
