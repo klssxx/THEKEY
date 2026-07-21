@@ -27,15 +27,17 @@
     "smoke_test": "Not re-executed in this finalization; retained owner-verified Windows WPF smoke is documented in artifacts/build-week/FINAL_REPORT.md"
   },
   "submission_freeze_tag": "openai-build-week-2026-submission",
-  "release_url": "PENDING_GITHUB_AUTHENTICATION",
-  "asset_url": "PENDING_GITHUB_AUTHENTICATION",
+  "freeze_tag_object": "3f101f5d87eb7f5fba1a99f61587e8be505293e9",
+  "freeze_commit": "917b546772a3a919d2030bc61bd924f09921e04d",
+  "release_url": "https://github.com/klssxx/THEKEY/releases/tag/openai-build-week-2026-submission",
+  "asset_url": "https://github.com/klssxx/THEKEY/releases/download/openai-build-week-2026-submission/THEKEY-Portable-Windows-x64.zip",
+  "release_asset_bytes": 22846085,
+  "release_asset_sha256": "589cdb85a7c478148b72d0337cfdb8b8454acc4e4c7c782b6e9a05b3969e2f0f",
   "tag_pinned_artifact_fallback": "releases/openai-build-week-2026/THEKEY-Portable-Windows-x64.zip",
   "chat_evidence": "PENDING_OWNER_SUPPLIED_AUTHENTIC_EXPORTS",
   "manual_steps": [
-    "Authenticate GitHub CLI or use an authenticated GitHub session.",
-    "Commit, push, tag, and publish the GitHub Release with ZIP and checksum.",
     "Publish the YouTube video and paste its URL into Devpost.",
-    "Select Developer Tools and verify Devpost shows Submitted.",
+    "Select Developer Tools, paste the session/repository/release/video details, and verify Devpost shows Submitted.",
     "Optionally add only authentic sanitized pre-period chat exports."
   ]
 }
