@@ -179,8 +179,8 @@ $result = [ordered]@{
     difference = $diffPath
     reference_sha256 = (Get-FileHash -LiteralPath $referencePath -Algorithm SHA256).Hash.ToLowerInvariant()
     capture_sha256 = (Get-FileHash -LiteralPath $capturePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    reference_dimensions = @{ width = $referenceWidth; height = $referenceHeight }
-    captured_window_dimensions = @{ width = $captureWidth; height = $captureHeight }
+    reference_dimensions = [ordered]@{ width = $referenceWidth; height = $referenceHeight }
+    captured_window_dimensions = [ordered]@{ width = $captureWidth; height = $captureHeight }
     differing_pixels = [long]$metrics[0]
     maximum_channel_difference = [int]$metrics[1]
     mean_absolute_error = $metrics[2]
