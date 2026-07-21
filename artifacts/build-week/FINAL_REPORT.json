@@ -1,0 +1,90 @@
+{
+  "schema_version": "v2",
+  "status": "PARTIAL",
+  "status_reason": "Product and repository ready; owner-only video, new Codex feedback, judge-access and Devpost actions remain.",
+  "branch": "implementation/portable-windows-app",
+  "baseline_commit": "d1c37b9ec2d43289fd9db123e1450dc625e4b305",
+  "verified_implementation_commit": "3038bd82c6cc1916f93c74d96b7c26a88d094274",
+  "implementation_identity": "klssxx",
+  "package": {
+    "path": "dist/THEKEY-Portable-Windows-x64.zip",
+    "size_bytes": 22133899,
+    "sha256": "c1df620d024b3ef05219af014ccdf0fd8b9cea05d8d3dbca266cfcc36086c423",
+    "source_tree_state": "CLEAN",
+    "source_commit_exact": true,
+    "manifest_file_count": 120,
+    "manifest_failures": 0,
+    "platform": "Windows 10/11 x64",
+    "verified_os": "Windows 11"
+  },
+  "tests": {
+    "command": ".\\.thekey\\portable-build-venv\\Scripts\\python.exe -m pytest -q",
+    "passed": 192,
+    "failed": 0,
+    "duration_seconds": 46.4
+  },
+  "functional": {
+    "startup": "PASS",
+    "selection_and_read_only_inspection": "PASS",
+    "selection_cancel": "PASS",
+    "missing_path_rejected": "PASS",
+    "unsupported_input_blocked": "PASS",
+    "isolated_verification": "PASS",
+    "safe_repair_preview": "PASS",
+    "repair_apply_backup_retest": "PASS",
+    "structured_real_results": "PASS",
+    "operation_cancellation": "PASS",
+    "clean_close": "PASS",
+    "portable_demo_repeatable": "PASS",
+    "portable_demo_exit": 0,
+    "portable_demo_gates": "4/4 PASS",
+    "portable_demo_source_unchanged": true,
+    "portable_demo_receipts_bound": true
+  },
+  "dpi": {
+    "100_percent": "1448x1086 PASS",
+    "125_percent": "1810x1358 PASS",
+    "150_percent": "2172x1629 PASS",
+    "200_percent": "2896x2172 PASS"
+  },
+  "visual": {
+    "iteration": 12,
+    "reference": "design/reference/THEKEY_BUILD_WEEK_CANONICAL.png",
+    "capture": "artifacts/build-week/visual/iteration-12/actual.png",
+    "diff": "artifacts/build-week/visual/iteration-12/diff.png",
+    "report": "artifacts/build-week/visual/iteration-12/report.json",
+    "similarity_percent": 94.336,
+    "mae": 0.056639,
+    "equal_weight_region_similarity_percent": 93.906,
+    "foreground_similarity_percent": 85.571,
+    "edge_similarity_percent": 92.222,
+    "changed_pixel_ratio_percent": 26.026,
+    "mathematical_identity_claimed": false,
+    "residuals": [
+      "Project-owned king and board art differs from the exact reference artwork.",
+      "WPF and system-font antialiasing differs from the reference raster.",
+      "Activity contains real current evidence rather than illustrative historical rows."
+    ]
+  },
+  "security": {
+    "original_source_protection": "PASS",
+    "entropy_secret_scan": "PASS",
+    "ci_equivalent_regex_scan": "PASS",
+    "embedded_api_key_required": false
+  },
+  "build_week_artifacts": [
+    "artifacts/build-week/baseline",
+    "artifacts/build-week/dpi/final-scale-100",
+    "artifacts/build-week/dpi/final-scale-125",
+    "artifacts/build-week/dpi/final-scale-150",
+    "artifacts/build-week/dpi/final-scale-200",
+    "artifacts/build-week/visual/iteration-12",
+    "artifacts/build-week/FINAL_REPORT.md",
+    "artifacts/build-week/FINAL_REPORT.json"
+  ],
+  "remaining_blockers": [
+    "Owner must create and upload the under-three-minute video.",
+    "Owner must invoke a new /feedback in the signed-in Codex UI if a new session ID is required.",
+    "Owner must confirm judge access, artifact hosting and Devpost submission."
+  ]
+}
